@@ -1,22 +1,26 @@
 # ADR-002: SCN-001 System-Under-Test Boundary
 
-Status: `Proposed`
+Status: `Accepted`
 
 Date: 2026-07-07
 
-Draft revision: `R2`
+Accepted: 2026-07-07
+
+Record revision: `R2`
 
 Decision authority: project owner
 
 Related open question: `EVAL-006`
 
-Baselines:
+Decision-Time Baselines:
 
 - `SYSTEM_THESIS.md` `V0.3.1`
 - `CANONICAL_SCENARIOS.md` `V0.2.2`
 - `STATE_AND_CONTROL_MODEL.md` `V0.4.1`
 - `OPEN_QUESTIONS.md` `V0.2.6`
 - `decisions/ADR-001-first-vertical-slice.md` `R1`
+
+Post-decision register state: `OPEN_QUESTIONS.md` `V0.2.7` records `EVAL-006` as resolved by this ADR and activates selected-slice `GROW-001` and `TIME-001`.
 
 ## Decision
 
@@ -56,7 +60,7 @@ The harness may bound the fixture and supply raw or fixture-authoritative facts.
 
 This ADR answers only the system-under-test boundary for `EVAL-006`. It does not define implementation architecture, repository boundaries, storage engines, model/runtime choices, real personal-history custody, voice/avatar behavior, external operations, Japanese pedagogy, final state schemas, oracle fixtures, nondeterministic acceptance policy, or acceptance gates.
 
-Until this ADR is accepted by the project owner, `EVAL-006` remains `Active`.
+Acceptance of this ADR resolves `EVAL-006` for the first `SCN-001` milestone boundary.
 
 ## Relationship To ADR-001 And EVAL-006
 
@@ -64,7 +68,7 @@ Until this ADR is accepted by the project owner, `EVAL-006` remains `Active`.
 
 `EVAL-006` asks which semantic inputs, control facts, time events, external behavior, and cognitive candidates are inside the selected first-slice system under test versus supplied by the harness or simulated dependencies.
 
-This ADR proposes that split. If accepted, it resolves `EVAL-006` for the first milestone only and enables re-triage of the next evaluation, growth, time, and state questions. It does not claim that the first milestone passes full `SCN-001`.
+This ADR defines that split. Its acceptance resolves `EVAL-006` for the first milestone only and enables re-triage of the next evaluation, growth, time, and state questions. It does not claim that the first milestone passes full `SCN-001`.
 
 ## Thin SCN-001 Transition Map
 
@@ -266,19 +270,19 @@ The boundary is designed to prevent these narrative-only successes:
 
 ## Re-Triage Notes
 
-Acceptance of this ADR should not automatically activate every selected-slice trigger check. The register remains authoritative.
+Acceptance of this ADR does not automatically activate every selected-slice trigger check. The register remains authoritative.
 
-`GROW-001` should become `Active` after acceptance of this ADR. The selected boundary depends on a minimum criterion for when behavior is a scoped cross-interaction behavioral trial rather than situational posture or durable developmental adaptation. The active scope should remain selected-slice narrow; it does not need to solve general developmental adaptation theory.
+`GROW-001` is active in the post-decision register state. The selected boundary depends on a minimum criterion for when behavior is a scoped cross-interaction behavioral trial rather than situational posture or durable developmental adaptation. The active scope remains selected-slice narrow; it does not need to solve general developmental adaptation theory.
 
-`TIME-001` should be re-triaged as blocking after acceptance of this ADR unless the project owner weakens the boundary by making stale-history classification a harness-supplied control fact. This ADR chooses SUT-owned stale-history handling from supplied chronology, so a minimal selected-slice time/staleness contract is needed before oracle and state decisions. The register should decide whether this is a narrowed `TIME-001` answer or requires a new linked evaluation-time question under the ID rules.
+`TIME-001` is active in the post-decision register state. This ADR chooses SUT-owned stale-history handling from supplied chronology, so a minimal selected-slice time/staleness contract is needed before oracle and state decisions. The register will decide whether this is a narrowed `TIME-001` answer or requires a new linked evaluation-time question under the ID rules.
 
 `MEM-001` need not become active from this ADR alone because the retained state is synthetic fixture state under an evaluation-only retention basis, not real personal state or durable Zoey continuity. Real personal retention still requires register re-triage before non-throwaway use.
 
-`EVAL-001`, `EVAL-002`, `EVAL-003`, `SLICE-002`, and `SLICE-005` remain blocked until `EVAL-006` is accepted, but their eventual answers must respect this boundary if accepted.
+`EVAL-001` and `EVAL-003` are open but not the current active frontier. `EVAL-002`, `SLICE-002`, and `SLICE-005` remain blocked by intervening questions. Their eventual answers must respect this accepted boundary unless it is amended or superseded.
 
 ## Follow-On Questions After Acceptance
 
-If the project owner accepts this ADR, likely next questions are:
+Following acceptance of this ADR, likely next questions are:
 
 - `GROW-001`: define the selected-slice minimum criteria for trial candidate, active scoped trial, situational correction, and unsupported durable adaptation.
 - `TIME-001` or a linked selected-slice time question: define the minimal chronology/staleness contract needed for stale-history handling and later-interaction ordering.
