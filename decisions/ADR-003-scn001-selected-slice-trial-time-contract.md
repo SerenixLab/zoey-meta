@@ -4,43 +4,43 @@ Status: `Proposed`
 
 Date: 2026-07-07
 
-Record revision: `R0`
+Record revision: `R1`
 
 Decision authority: project owner
 
-Related open questions: `GROW-001`, `TIME-001`
+Related open questions: `GROW-001`, `TIME-002`
 
 Decision-Time Baselines:
 
 - `SYSTEM_THESIS.md` `V0.3.1`
 - `CANONICAL_SCENARIOS.md` `V0.2.2`
 - `STATE_AND_CONTROL_MODEL.md` `V0.4.1`
-- `OPEN_QUESTIONS.md` `V0.2.7`
+- `OPEN_QUESTIONS.md` `V0.2.8`
 - `decisions/ADR-001-first-vertical-slice.md` `R1`
 - `decisions/ADR-002-scn001-system-under-test-boundary.md` `R2`
 
 ## Decision
 
-Adopt one selected-slice contract for `GROW-001` and `TIME-001` under accepted `ADR-002`.
+Adopt one selected-slice contract for `GROW-001` and `TIME-002` under accepted `ADR-002`.
 
 For the first `SCN-001` milestone, the system under test may support scoped, reversible behavioral trials that cross the synthetic interaction boundary. It must not claim durable developmental adaptation, a full growth architecture, general time machinery, scheduler behavior, reminders, due-state handling, or expiry machinery.
 
 The harness supplies bounded events, observations, user responses, context labels, and chronology facts. The SUT owns the selected semantic transitions: stale-history classification, trial-candidate formation, candidate-bound proposal where applicable, activation-basis validation, active-trial transition, current-session correction disposition, later behavior disposition, and intervention-conditioned outcome update.
 
-If accepted, this ADR resolves `GROW-001` and `TIME-001` for the first `SCN-001` milestone only. It does not amend the `ADR-002` SUT boundary.
+If accepted, this ADR resolves `GROW-001` and `TIME-002` for the first `SCN-001` milestone only. It does not amend the `ADR-002` SUT boundary or resolve the broader deferred governed-clock question in `TIME-001`.
 
 ## Critical Analysis Of The Current Gap
 
 The current documents are directionally consistent, but several constraints are not yet tight enough for `EVAL-002`, `SLICE-002`, or `SLICE-005`.
 
-1. `ADR-002` requires trial candidates, accepted candidates, active trials, narrowed/retired state, and unsupported durable adaptation boundaries, but it does not define the minimum status map. Without this, a fixture could pass by storing one generic preference or one generic adaptation record.
+1. `ADR-002` requires trial candidates, candidate-bound proposal where applicable, active trials, narrowing/retirement, and unsupported durable adaptation boundaries, but it does not define the minimum semantic distinctions. Without this, a fixture could pass by storing one generic preference or one generic adaptation record.
 2. `ADR-002` requires activation checks for both the production-focused trial and the delayed-correction trial, but only the production-focused path clearly includes a candidate-bound proposal and user acceptance. The delayed-correction path needs a selected-slice activation basis that remains weaker than a durable preference and stronger than mere current-session posture.
-3. The docs say old history is relevant but stale, while also requiring the SUT to own stale-history handling. `TIME-001` must prevent the harness from smuggling in the stale judgment while still giving the SUT reproducible chronology.
+3. The docs say old history is relevant but stale, while also requiring the SUT to own stale-history handling. `TIME-002` must prevent the harness from smuggling in the stale judgment while still giving the SUT reproducible chronology.
 4. `SCN-001` allows evaluator inspection of adaptation candidates or active adaptations, while `ADR-002` forbids first-milestone durable adaptation claims. The selected slice must reconcile this by allowing no active durable adaptation and, at most, an unsupported or withheld adaptation boundary.
 5. The phrase "trial crosses an interaction boundary" can be mistaken for scheduler, reminder, due, expiry, or autonomous background-maintenance scope. The selected slice needs only retained trial state plus supplied session ordering.
 6. The State and Control Model requires stale-basis checks, user-governed constraints, scope, consequence, and reversibility, but the first milestone has not named the minimum inspection fields needed to show those checks occurred without prescribing a final schema.
 
-The smallest fix is one joint selected-slice contract. Splitting `GROW-001` and `TIME-001` would create an unnecessary dependency cycle because stale-basis validity is one of the activation checks for trial state.
+The smallest fix is one joint selected-slice contract with independently inspectable trial and time decisions. Stale-basis validity is one of the activation and later-use checks for trial state, so the two decisions are coupled, but they remain distinct. `TIME-001` retains the broader deferred governed-clock question; this ADR addresses the narrower selected-slice time question as `TIME-002`.
 
 ## Selected-Slice State Meanings
 
@@ -60,11 +60,15 @@ In the selected path, "Don't stop me mid-sentence like that here. Let me finish 
 
 ### Trial Candidate
 
-A trial candidate is proposed behavior-affecting state that is not yet active. It may be generated from bounded observations, attributed history, explicit user request, current correction, or governed exploration.
+A trial candidate is a possible provisional behavior transition that is not yet active. It may be generated from bounded observations, attributed history, explicit user request, current correction, or governed exploration.
+
+A selected-slice behavioral trial must have an attributable provisional or evaluative purpose. It changes behavior under bounded uncertainty so that observed outcomes may inform whether the behavior should be preserved, narrowed, changed, or retired. Scope and reversibility alone do not make a preference, direct instruction, situational posture, or procedure a trial.
 
 Minimum requirements:
 
 - material trial intent is identifiable;
+- provisional or evaluative purpose is identifiable;
+- outcome relevance is identifiable without claiming that the trial's causal theory is proven;
 - basis and evidence lineage are retained;
 - candidate source is distinguishable, such as Zoey inference, explicit user request, user correction, or exploration;
 - proposed scope is declared across relevant dimensions such as subject, activity, task mode, surface/context label, audience where relevant, temporal relation, and consequence ceiling;
@@ -77,7 +81,7 @@ The SUT may withhold trial formation, ask for more evidence, defer, or record in
 
 ### Active Scoped Trial
 
-An active scoped trial is a retained, provisional, reversible behavior change that may influence later behavior disposition inside its declared scope.
+An active scoped trial is a retained, provisional, reversible behavior change with an attributable trial purpose that may influence later behavior disposition inside its declared scope.
 
 Minimum requirements:
 
@@ -106,22 +110,20 @@ The SUT must not activate or claim a durable developmental adaptation when a pro
 
 Valid selected-slice outcomes are: withhold the adaptation, narrow it into a scoped trial candidate, keep it as unsupported for inspection, or retire it. An unsupported durable adaptation must not drive later behavior as active state.
 
-## Minimal Status Map
+## Minimum Semantic Distinctions
 
-The first milestone does not require a final schema, but it must preserve these lifecycle distinctions:
+The first milestone does not require a final schema and must not collapse all meanings into one exclusive `TrialStatus`. It must preserve these orthogonal distinctions:
 
-| Status | Meaning | May drive later behavior? |
-| --- | --- | --- |
-| `withheld` | Support is insufficient, no trial candidate is formed. | No. |
-| `candidate` | Trial-like state is proposed but activation basis is incomplete. | No. |
-| `proposed` | The SUT has surfaced or recorded a proposal bound to the candidate's material intent. | No. |
-| `accepted` | The selected activation basis is satisfied, but activation checks have not yet all passed. | No. |
-| `active` | Activation basis and checks passed; the trial may influence behavior in scope. | Yes, only in scope. |
-| `narrowed` | Scope or applicability has been reduced by correction, conflict, outcome, or stale-basis review. | Yes, only in narrowed scope if still active. |
-| `retired` | The trial no longer influences behavior. | No. |
-| `unsupported_durable_adaptation` | Proposed durable adaptation exceeds first-milestone support or scope. | No. |
+| Distinction | Required selected-slice meanings |
+| --- | --- |
+| Trial lifecycle phase | Candidate, proposed where surfaced or explicitly formed for control, active, and retired. Not every selected trial must pass through every phase. |
+| Activation-basis condition | Incomplete, satisfied, invalid, stale, conflicted, or insufficient. A satisfied basis is not the same as active state. |
+| User response, where applicable | Accepted, rejected, ambiguous, unavailable, or not required. User acceptance attaches to the surfaced proposal or control event, not to every trial lifecycle. |
+| Effective conditions | Narrowed, stale, conflicted, superseded, inapplicable, or currently applicable. These may coexist with historical active state. |
+| Non-activation disposition | Withhold, defer, ask for clarification, request more evidence, retire, or keep unsupported for inspection. |
+| Durable-adaptation boundary | Unsupported in this milestone, narrowed into scoped trial candidate, withheld, or retired. This is a claim boundary, not a behavior-driving lifecycle phase. |
 
-`accepted` is not the same as `active`. User acceptance or correction can satisfy the selected activation basis, but the SUT must still check scope, stale-basis validity, user-governed constraints, reversibility, consequence, and current applicability.
+`Accepted` is not a generic trial phase. In the production-focused path, the user may accept a proposal and that response becomes part of the activation basis. In the delayed-correction path, a user correction may support the selected activation basis without being an acceptance of a future Zoey-derived trial. In both paths, the SUT must still check scope, stale-basis validity, user-governed constraints, reversibility, consequence, and current applicability before activation.
 
 ## Selected Activation Basis
 
@@ -135,7 +137,7 @@ For the calibration-derived production-focused trial:
 2. The SUT surfaces an inspectable proposal or offer bound to the candidate's material trial intent.
 3. The harness supplies a user response semantically bound to the actual surfaced proposal.
 4. An unbound, ambiguous, fixed, or silently corrective response cannot satisfy activation basis.
-5. After bound acceptance, the candidate still becomes active only if all activation checks pass.
+5. After bound proposal acceptance, the candidate still becomes active only if all activation checks pass.
 
 ### Delayed-Correction Trial
 
@@ -147,6 +149,8 @@ For the later spontaneous-production delayed-correction trial:
 4. If the correction basis is ambiguous, materially broader than the user's wording, consequential, conflicting, or not reversible, the SUT must ask, defer, narrow, or withhold activation.
 5. The active trial must remain labelled as Zoey-derived trial state, not as a direct user preference or global correction policy.
 
+For this selected path, "materially close" means the future trial changes the same behavior dimension named by the correction, correction timing, within the same activity class, spontaneous production. It must not introduce a new causal interpretation, target domain, audience, consequence class, cross-surface policy, or global learning-style claim.
+
 This selected basis is narrower than a general rule for all future trials. Later milestones may require explicit approval for broader, higher-consequence, less reversible, or more durable behavior changes.
 
 ## Activation Checks
@@ -155,8 +159,8 @@ Before any trial candidate becomes active, the SUT must inspectably satisfy thes
 
 1. `scope`: the active scope is declared and does not exceed the evidence, request, correction, or proposal basis.
 2. `basis_lineage`: supporting events, observations, assertions, corrections, and proposal/response binding where applicable are retained with provenance.
-3. `current_stale_basis`: old history is not treated as current skill authority; the active basis includes current or currently applicable evidence sufficient for the selected trial.
-4. `user_governed_constraints`: explicit preferences, corrections, rules, opt-ins, opt-outs, revocations, and scope conflicts are preserved and resolved by applicability and specificity, not silent last-write-wins.
+3. `current_stale_basis`: old history is not treated as current skill authority; the active basis includes current or currently applicable evidence sufficient for the selected trial under the `TIME-002` staleness contract.
+4. `user_governed_constraints`: explicit preferences, corrections, rules, opt-ins, opt-outs, revocations, and scope conflicts are preserved and evaluated by authority class, applicability scope, current context, specificity, and revocation or supersession. An unresolved material conflict remains inspectable and prevents unsupported activation until clarified, narrowed, or otherwise validly resolved.
 5. `reversibility`: the trial can be corrected, narrowed, retired, or superseded without requiring a broad migration or identity change.
 6. `consequence`: the trial is low consequence within the fixture and does not affect external operations, disclosure rights, commitments, reminders, or real personal history.
 7. `current_applicability`: the current context matches the declared scope, and material context changes or co-interventions do not invalidate the basis.
@@ -164,6 +168,12 @@ Before any trial candidate becomes active, the SUT must inspectably satisfy thes
 9. `non_adaptation_boundary`: activation would not constitute an unsupported durable developmental adaptation.
 
 Failing any check prevents activation. The SUT may narrow the candidate and re-check, ask for clarification, defer, retire the candidate, or keep an unsupported state for inspection.
+
+## Later-Use Applicability Check
+
+Before an active trial influences a later behavior disposition, the SUT must re-evaluate current applicability and any material basis dependency affected by supplied chronology, user-governed state, scope, context, or fixture-declared material change.
+
+`Active` means the trial passed activation at some point. It does not mean indefinitely applicable. At later use, the SUT may apply the trial in scope, narrow it, mark it stale or conflicted, defer, ask for clarification, or retire it. This check may happen synchronously when selecting the later behavior disposition; it does not require background maintenance, scheduler behavior, reminders, due state, or expiry machinery.
 
 ## Minimal Harness Chronology Contract
 
@@ -191,7 +201,7 @@ For the stale-history and later-interaction path, the harness must supply enough
 - later spontaneous outcome session;
 - outcome evidence occurring after the later behavior disposition.
 
-The harness may supply the practice-gap duration or raw timestamps from which the gap is derivable. It must not supply the conclusion "stale for current skill authority", "fresh enough for activation", "currently valid", or any equivalent temporal-applicability verdict.
+The harness may supply practice-gap duration or raw timestamps from which the gap is derivable. It must not supply qualitative gap labels such as "long", the conclusion "stale for current skill authority", "fresh enough for activation", "currently valid", or any equivalent temporal-applicability verdict.
 
 Exact wall-clock dates, time zones, calendar recurrence, and real clock synchronization are unnecessary unless a later fixture chooses to express scenario time through wall-clock values.
 
@@ -199,16 +209,16 @@ Exact wall-clock dates, time zones, calendar recurrence, and real clock synchron
 
 Under this selected contract, the SUT owns these temporal judgments:
 
-- old practice history is relevant historical evidence but stale for current-skill authority when it predates the supplied long practice gap and lacks current corroborating observations;
+- old practice history is relevant historical evidence but stale for current-skill authority when the latest prior beginner-practice evidence is more than 90 scenario days before the current resume decision point and lacks current corroborating observations in the same skill dimension;
 - old history may guide context, calibration choice, or weak hypothesis formation, but cannot by itself establish current proficiency or activate the production-focused trial;
 - current calibration observations are temporally applicable to the production-focused trial only if no material supersession or context invalidation occurs before proposal and activation;
 - the current-session correction is immediately applicable to current spontaneous-production behavior in that session;
 - a delayed-correction future trial can use the current correction as basis only in materially similar later spontaneous-production contexts, excluding focused drill or explicit immediate-correction opt-in;
-- later behavior disposition must be selected from retained active trial state before the harness supplies later outcome evidence;
+- later behavior disposition must be selected from retained active trial state after current-applicability review and before the harness supplies later outcome evidence;
 - outcome updates must preserve the active intervention context, behavior disposition, chronology, material context lineage, and fixture-declared co-interventions;
 - temporal uncertainty, insufficient chronology, material gap, or material context change may require narrowing, deferral, clarification, or withholding activation.
 
-The selected stale-history rule is qualitative but fixture-reproducible: pre-gap beginner history is stale for current skill authority until refreshed by current observations in the selected path. User self-assessment remains an attributed assertion, not a current-skill authority source by itself. The old history remains relevant historical evidence.
+The 90-day threshold is a synthetic selected-slice control rule, not a real Japanese-pedagogy claim. Current corroborating observations can refresh only the dimensions they actually observe. User self-assessment remains an attributed assertion, not a current-skill authority source by itself. The old history remains relevant historical evidence.
 
 ## Minimum Inspection Fields
 
@@ -216,12 +226,13 @@ The first milestone remains schema-neutral, but inspection output must expose en
 
 - event chronology and session ordering used by the SUT;
 - stale-history judgment and basis;
-- trial candidate material intent, source, scope, support lineage, and status;
+- trial candidate material intent, provisional/evaluative purpose, source, scope, support lineage, lifecycle phase, activation-basis condition, and effective conditions;
 - proposal binding and bound user response for the production-focused trial;
 - activation-basis type and activation-check results for every active trial;
+- later-use applicability review before a retained active trial influences later behavior disposition;
 - current-session correction disposition and its current-scope basis;
 - distinction between explicit drill preference, production-focused trial, direct correction, delayed-correction trial, and outcome evidence;
-- active trial state used by later behavior disposition before outcome evidence;
+- active trial state and later-use applicability basis used by later behavior disposition before outcome evidence;
 - outcome record with intervention-conditioned lineage, material context lineage, and co-interventions;
 - unsupported durable adaptation boundary where a broader adaptation would otherwise be implied;
 - narrowing, retirement, supersession, or conflict history where applicable.
@@ -230,9 +241,9 @@ Inspection evidence must come from the effective state and transition basis that
 
 ## Downstream Contract For Blocked Questions
 
-`EVAL-002` must define fixture and oracle data that exercise this contract without handing the SUT the semantic answers. In particular, it must include raw chronology, stable affordance sets, proposal-response binding, counterfactual evidence for hardcoding checks, and oracle checks for activation status and stale-basis handling.
+`EVAL-002` must define fixture and oracle data that exercise this contract without handing the SUT the semantic answers. In particular, it must include raw chronology, stable affordance sets, proposal-response binding, counterfactual evidence for hardcoding checks, and oracle checks for activation status and stale-basis handling. It must include a temporal counterfactual where comparable retained history is recent enough, or current observations corroborate it enough, that the SUT cannot pass by marking every retained history item stale.
 
-`SLICE-002` must preserve at least the selected-slice state needed by this contract: event chronology, attributed assertions, observations, trial candidate and active trial lifecycle state, current-session dispositions, activation-check basis, and outcome lineage. It need not define a final memory architecture.
+`SLICE-002` must preserve at least the selected-slice state needed by this contract: event chronology, attributed assertions, observations, trial candidate and active trial semantic distinctions, current-session dispositions, activation-check basis, later-use applicability basis, and outcome lineage. It need not define a final memory architecture.
 
 `SLICE-005` must phrase the first milestone claim as scoped-trial and selected-slice time/staleness evidence only. It must reject claims of durable developmental adaptation, full growth architecture, scheduler behavior, real personal continuity, or full `SCN-001` pass.
 
@@ -240,11 +251,11 @@ Inspection evidence must come from the effective state and transition basis that
 
 If later artifacts provide sufficient fixture and acceptance semantics, this contract may support a claim that the tested configuration:
 
-- marks old practice history relevant but stale for current skill authority from supplied chronology;
+- marks old practice history relevant but stale for current skill authority from supplied chronology under the selected synthetic staleness rule;
 - forms, proposes, activates, and applies selected scoped trials without collapsing them into preferences or durable adaptations;
 - distinguishes direct situational correction from future trial state;
 - carries active scoped trial state across a synthetic interaction boundary under an evaluation-only retention basis;
-- selects later behavior from retained active trial state before later outcome evidence;
+- selects later behavior from retained active trial state after later-use applicability review and before later outcome evidence;
 - records intervention-conditioned outcomes without proving the causal theory.
 
 This contract does not support claims that:
@@ -278,18 +289,20 @@ This ADR does not decide:
 If accepted by the project owner, update `OPEN_QUESTIONS.md` to:
 
 - move `GROW-001` to `Resolved` with outcome `Decision`, resolved by this ADR for the first `SCN-001` milestone;
-- move `TIME-001` to `Resolved` with outcome `Decision`, resolved by this ADR for the first `SCN-001` milestone;
+- move `TIME-002` to `Resolved` with outcome `Decision`, resolved by this ADR for the first `SCN-001` milestone;
+- keep `TIME-001` deferred for scheduler, reminders, due state, expiry, background temporal maintenance, and full longitudinal governed-clock semantics;
 - preserve the bounded non-support of durable developmental adaptation as part of the first milestone claim boundary;
 - preserve the explicit non-scope for scheduler, reminders, due state, expiry machinery, full governed-clock architecture, and full growth architecture;
 - re-triage the active frontier before `EVAL-002`, `SLICE-002`, or `SLICE-005`.
 
-Until accepted, this proposed ADR is evidence and a resolution candidate only. It does not close `GROW-001` or `TIME-001`.
+Until accepted, this proposed ADR is evidence and a resolution candidate only. It does not close `GROW-001` or `TIME-002`.
 
 ## Reconsideration Triggers
 
 Reconsider this contract if:
 
 - `EVAL-002` cannot build fixture data without supplying the stale judgment, trial candidate, activation decision, or later behavior disposition;
+- `EVAL-002` cannot counterpressure the selected staleness rule without turning the fixture into a hidden answer key;
 - the selected delayed-correction trial requires broader user authorization than the low-consequence, reversible selected basis allows;
 - oracle inspection cannot show that later behavior used retained active trial state rather than post-hoc explanation;
 - stale-history handling requires background time advancement, expiry, reminders, due state, or general scheduler semantics;
