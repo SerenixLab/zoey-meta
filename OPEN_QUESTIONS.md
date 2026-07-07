@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.5`
+Document version: `V0.2.6`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -203,7 +203,9 @@ Decision Criteria:
 
 - at least one evidence-responsive, cross-interaction behavioral-trial transition remains inside the system under test;
 - for the first `SCN-001` growth-milestone claim, the system under test remains causally responsible for forming or selecting at least one materially evidence-responsive scoped behavioral trial from Zoey-available observations; harness-supplied trial candidates may be used only for narrower transition-control tests unless the selected boundary explicitly weakens the milestone claim;
-- trial-candidate formation, user acceptance where applicable, and active-trial activation remain semantically separate;
+- trial-candidate formation, candidate-bound proposal, user response where applicable, and active-trial activation remain semantically separate;
+- bounded trial-affordance availability is independently declared before the evidence under comparison and does not force trial formation when evidence is insufficient;
+- current-session correction produces inspectable behavior disposition, not merely a status flag;
 - later behavior evidence requires an inspectable behavior disposition selected by the system under test from retained active trial state before outcome events are supplied by the harness;
 - every harness-supplied semantic fact, time fact, control fact, and candidate interpretation is explicit;
 - state and provenance are inspectable enough to reject plausible retrospective storytelling as success;
@@ -218,8 +220,12 @@ Evidence Needed:
 - boundary table classifying each material transition as inside the system under test, harness-supplied, simulated dependency, excluded, or deferred;
 - harness supply limits showing that the harness does not pre-label the central trial candidate, intervention-conditioned evidence, or other semantic transition being claimed as inside the system under test;
 - scorer-authority and trial-affordance limits showing how the fixture avoids supplying proficiency, causal, or trial-selection conclusions while keeping Japanese pedagogy out of scope;
-- candidate-to-active trial control split, including acceptance and activation basis where applicable;
+- candidate-to-active trial control split, including candidate-bound proposal, bound user response, acceptance, user-governed constraints, basis validity, and activation basis where applicable;
+- affordance-set independence and abstention/defer/more-evidence behavior for insufficient support;
+- immediate current-session behavior-disposition boundary after user correction;
 - behavior-disposition boundary showing how retained active trial state affects later behavior before outcome evidence is supplied;
+- outcome-context lineage for material concurrent changes or co-interventions;
+- explicit exclusion of context discovery/retrieval/relevance-selection claims unless `EVAL-001` later places them inside the tested boundary;
 - oracle-source rule distinguishing effective state exposure from SUT self-attestation, generated explanations, or hidden chain-of-thought;
 - fixture-state persistence rule distinguishing scenario-internal retained state from real durable Zoey continuity;
 - maximum claim envelope subject to later `EVAL-002`, `EVAL-003`, and `SLICE-005` decisions;
