@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.3`
+Document version: `V0.2.5`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -195,15 +195,19 @@ Applies When / Decision Trigger: `ADR-001` is accepted and `SCN-001` is selected
 
 Known Options:
 
-- Transition-inside boundary: the harness supplies synthetic sessions, governed time, and feedback events; the system under test performs stale-history handling, scoped interpretation, behavioral-trial activation, outcome update, and provenance reporting.
-- Candidate-supplied boundary: the harness supplies interpreted observations or candidate trial updates; the system under test adjudicates, records lineage, updates selected state, and reports why the transition was or was not accepted.
+- Transition-inside boundary: the harness supplies synthetic sessions, governed time, and feedback events; the system under test performs stale-history handling, scoped interpretation, behavioral-trial formation or selection, behavioral-trial activation, outcome update, and provenance reporting.
+- Candidate-supplied boundary: the harness supplies interpreted observations or candidate trial updates; the system under test adjudicates, records lineage, updates selected state, and reports why the transition was or was not accepted. This may support narrower transition-control tests, but it does not satisfy the first `SCN-001` growth-milestone claim if the harness supplies the materially correct central trial candidate.
 - Replay-only boundary: the harness supplies the material semantic transitions and the system under test only records or replays them. This is likely too weak for the first falsifiable `SCN-001` claim unless accepted as a deliberately narrower inspection-only milestone.
 
 Decision Criteria:
 
 - at least one evidence-responsive, cross-interaction behavioral-trial transition remains inside the system under test;
+- for the first `SCN-001` growth-milestone claim, the system under test remains causally responsible for forming or selecting at least one materially evidence-responsive scoped behavioral trial from Zoey-available observations; harness-supplied trial candidates may be used only for narrower transition-control tests unless the selected boundary explicitly weakens the milestone claim;
+- trial-candidate formation, user acceptance where applicable, and active-trial activation remain semantically separate;
+- later behavior evidence requires an inspectable behavior disposition selected by the system under test from retained active trial state before outcome events are supplied by the harness;
 - every harness-supplied semantic fact, time fact, control fact, and candidate interpretation is explicit;
 - state and provenance are inspectable enough to reject plausible retrospective storytelling as success;
+- inspection evidence comes from effective state and transition basis used by the system under test, not merely from a generated explanation or self-described state report;
 - the boundary stays within `ADR-001` scope exclusions: no real personal history, durable continuity, voice/avatar behavior, external operations, final storage/runtime choice, or Japanese-pedagogy claim;
 - the resulting boundary can activate only the next necessary questions rather than the full register;
 - the accepted boundary is narrow enough to implement as a first milestone but strong enough to inform `EVAL-001`, `EVAL-002`, `EVAL-003`, `SLICE-002`, and later acceptance-gate work.
@@ -212,12 +216,20 @@ Evidence Needed:
 
 - thin `SCN-001` transition map from synthetic interaction inputs through state-inspection outputs;
 - boundary table classifying each material transition as inside the system under test, harness-supplied, simulated dependency, excluded, or deferred;
+- harness supply limits showing that the harness does not pre-label the central trial candidate, intervention-conditioned evidence, or other semantic transition being claimed as inside the system under test;
+- scorer-authority and trial-affordance limits showing how the fixture avoids supplying proficiency, causal, or trial-selection conclusions while keeping Japanese pedagogy out of scope;
+- candidate-to-active trial control split, including acceptance and activation basis where applicable;
+- behavior-disposition boundary showing how retained active trial state affects later behavior before outcome evidence is supplied;
+- oracle-source rule distinguishing effective state exposure from SUT self-attestation, generated explanations, or hidden chain-of-thought;
+- fixture-state persistence rule distinguishing scenario-internal retained state from real durable Zoey continuity;
+- maximum claim envelope subject to later `EVAL-002`, `EVAL-003`, and `SLICE-005` decisions;
+- minimum paired counterfactual pressure needed before any narrow evidence-responsive or scope-responsive claim can be made;
 - list of claims the first milestone may and may not make under that boundary;
 - minimal state-inspection output sketch showing provenance, trial status, correction handling, and outcome lineage;
 - demo-gaming failure modes created by any transition left outside the system under test;
 - re-triage notes for `TIME-001` and `GROW-001` explaining whether each blocks this boundary decision, stays open, or needs a narrower follow-up question.
 
-Working Assumptions / Fixtures: `SCN-001` is selected by accepted `ADR-001`; first-slice state is synthetic or explicitly disposable fixture state; no full `SCN-001` pass claim is allowed from this boundary decision alone.
+Working Assumptions / Fixtures: `SCN-001` is selected by accepted `ADR-001`; first-slice state is synthetic or explicitly disposable fixture state; disposable fixture state may still need to persist across the evaluated trajectory when cross-interaction state is inside the system under test; no full `SCN-001` pass claim is allowed from this boundary decision alone.
 
 Decision Authority: project owner.
 

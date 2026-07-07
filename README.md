@@ -60,6 +60,8 @@ open question
 
 A draft ADR can recommend a direction, but it does not close an open question until accepted by the project owner.
 
+Accepted ADRs should identify the accepted record revision. Editorial clarifications may preserve the same decision when they do not change the selected option, scope, closure condition, or decision basis. Material changes require an explicit amendment or superseding ADR and must trigger re-triage of dependent questions and claims.
+
 ## Repository Rules
 
 - Keep documents practical and concise.
