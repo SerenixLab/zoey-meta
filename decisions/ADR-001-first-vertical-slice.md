@@ -1,6 +1,6 @@
 # ADR-001: First Vertical Slice Pressure Path
 
-Status: `Proposed`
+Status: `Accepted`
 
 Date: 2026-07-07
 

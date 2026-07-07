@@ -71,7 +71,7 @@ A draft ADR can recommend a direction, but it does not close an open question un
 
 ## Current Direction
 
-The current proposed first vertical slice is recorded in:
+The current accepted first vertical slice is recorded in:
 
 `decisions/ADR-001-first-vertical-slice.md`
 

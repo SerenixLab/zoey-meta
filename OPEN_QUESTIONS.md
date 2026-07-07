@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.2`
+Document version: `V0.2.3`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -155,84 +155,81 @@ Do not include:
 
 ## Active Decision Frontier
 
-Current milestone: choose and define the first vertical slice.
+Current milestone: define the selected first-slice system-under-test boundary for `SCN-001`.
 
 Active questions:
 
-- `SLICE-001`
-
-Directly dependent on `SLICE-001` and requiring re-triage after it resolves:
-
 - `EVAL-006`
+
+Re-triage queue after `SLICE-001` acceptance:
+
 - `EVAL-001`
 - `EVAL-003`
 - `TIME-001`
+- `GROW-001`
 - selected-slice trigger checks for `MEM`, `DEP`, `GROW`, `AUTH`, `SURF`, `INIT`, `PROD`, `LEG`, `TRUST`, and `CONT`.
 
-No other open question currently blocks progress. Legacy reading, non-committing experiments, document review, and rough implementation exploration may continue as long as they do not claim final architecture compatibility.
+`TIME-001` and `GROW-001` are not automatically active. They must be re-triaged after `EVAL-006` clarifies whether governed-clock or behavior-trial criteria block the first boundary decision.
+
+No other open question currently blocks progress. Legacy reading, non-committing experiments, document review, fixture sketching, and rough implementation exploration may continue as long as they do not claim final architecture compatibility or selected-slice pass evidence.
 
 ## Active Questions
 
-### SLICE-001
+### EVAL-006
 
 Status: `Active`
 
-Question: Which canonical pressure path should become the first vertical slice: `SCN-001` Japanese longitudinal development, or `SCN-002` voice-originated calendar mutation?
+Question: What is inside the system-under-test boundary for the selected `SCN-001` first slice, and which semantic inputs, control facts, time events, external behavior, or cognitive candidates are supplied by the harness or simulated dependencies?
 
-Why It Matters: The first slice determines which open questions become active, what state must exist first, what evaluation harness is needed, and which legacy material is worth extracting now.
+Why It Matters: The first slice can only claim evidence for responsibilities inside the declared boundary. This decision prevents narrative-only success by making every harness-supplied transition explicit before state contracts, oracle data, or acceptance gates are defined.
 
-Source / Pressure: `CANONICAL_SCENARIOS.md`; `STATE_AND_CONTROL_MODEL.md`.
+Source / Pressure: `ADR-001`; `CANONICAL_SCENARIOS.md` `SCN-001`; `STATE_AND_CONTROL_MODEL.md`.
 
-Blocks: first-slice scope, first acceptance gate, first eval fixture, first state contract, and first migration blocker list.
+Blocks: first-slice system-under-test boundary, first fixture responsibility split, first state-inspection claim, and re-triage of `EVAL-001`, `EVAL-003`, `TIME-001`, `GROW-001`, `SLICE-002`, and selected-slice trigger checks.
 
-Does Not Block: thesis/scenario/state-model review, legacy inventory, non-committing prototypes, or explicitly throwaway experiments.
+Does Not Block: thesis/scenario/state-model review, legacy inventory, fixture sketching, non-committing prototypes, document review, or explicitly throwaway experiments.
 
-Depends On: none.
+Depends On: `SLICE-001`, resolved by `ADR-001`.
 
-Applies When / Decision Trigger: now.
+Applies When / Decision Trigger: `ADR-001` is accepted and `SCN-001` is selected as the first vertical-slice pressure path.
 
 Known Options:
 
-- `SCN-001`: pressures controlled path-dependent growth, scoped adaptation, user correction, and trajectory control.
-- `SCN-002`: pressures governed operation, authority, actor assurance, external state, reconciliation, and auditability.
+- Transition-inside boundary: the harness supplies synthetic sessions, governed time, and feedback events; the system under test performs stale-history handling, scoped interpretation, behavioral-trial activation, outcome update, and provenance reporting.
+- Candidate-supplied boundary: the harness supplies interpreted observations or candidate trial updates; the system under test adjudicates, records lineage, updates selected state, and reports why the transition was or was not accepted.
+- Replay-only boundary: the harness supplies the material semantic transitions and the system under test only records or replays them. This is likely too weak for the first falsifiable `SCN-001` claim unless accepted as a deliberately narrower inspection-only milestone.
 
 Decision Criteria:
 
-- falsification value against Zoey's central thesis;
-- number and depth of foundational unknowns exposed;
-- end-to-end observability;
-- legacy leverage without legacy conceptual capture;
-- minimum infrastructure breadth;
-- risk of scripted or demo-shaped success;
-- number of prerequisite decisions activated before first falsifiable run;
-- cross-scenario transfer value and ability for the second canonical scenario to challenge the first slice's abstractions;
-- risk of first-slice overfitting toward Iris-like operational control or Yuki-like developmental continuity as the system's conceptual center.
+- at least one evidence-responsive, cross-interaction behavioral-trial transition remains inside the system under test;
+- every harness-supplied semantic fact, time fact, control fact, and candidate interpretation is explicit;
+- state and provenance are inspectable enough to reject plausible retrospective storytelling as success;
+- the boundary stays within `ADR-001` scope exclusions: no real personal history, durable continuity, voice/avatar behavior, external operations, final storage/runtime choice, or Japanese-pedagogy claim;
+- the resulting boundary can activate only the next necessary questions rather than the full register;
+- the accepted boundary is narrow enough to implement as a first milestone but strong enough to inform `EVAL-001`, `EVAL-002`, `EVAL-003`, `SLICE-002`, and later acceptance-gate work.
 
 Evidence Needed:
 
-- compact `SCN-001` versus `SCN-002` comparison matrix;
-- transition-pressure map for each scenario;
-- state domains each path minimally requires;
-- external/runtime dependencies each path minimally requires;
-- candidate legacy material for each path;
-- questions each selection would trigger from this register;
-- minimum evaluator checkpoints required for the first falsifiable run;
-- demo-gaming risk and architecture-overbuild pressure for each path;
-- cross-scenario transfer value and first-slice architecture-capture risk for each path.
+- thin `SCN-001` transition map from synthetic interaction inputs through state-inspection outputs;
+- boundary table classifying each material transition as inside the system under test, harness-supplied, simulated dependency, excluded, or deferred;
+- list of claims the first milestone may and may not make under that boundary;
+- minimal state-inspection output sketch showing provenance, trial status, correction handling, and outcome lineage;
+- demo-gaming failure modes created by any transition left outside the system under test;
+- re-triage notes for `TIME-001` and `GROW-001` explaining whether each blocks this boundary decision, stays open, or needs a narrower follow-up question.
 
-Working Assumptions / Fixtures: none yet.
+Working Assumptions / Fixtures: `SCN-001` is selected by accepted `ADR-001`; first-slice state is synthetic or explicitly disposable fixture state; no full `SCN-001` pass claim is allowed from this boundary decision alone.
 
 Decision Authority: project owner.
 
-Needed By: before first vertical slice.
+Needed By: before first selected-slice implementation milestone, fixture oracle definition, persistent-state decision, or acceptance-gate decision.
 
-Resolution Shape: first-slice ADR.
+Resolution Shape: accepted system-under-test boundary and fixture-responsibility artifact, likely an ADR or compact boundary contract, followed by register re-triage.
 
 ## Open Question Index
 
 | ID | Status | Trigger | Depends On | Source | Question |
 | --- | --- | --- | --- | --- | --- |
-| `SLICE-001` | Active | Now | - | S1, S2, SCM | Choose first vertical slice: `SCN-001` or `SCN-002`. |
+| `SLICE-001` | Resolved | Accepted by `ADR-001` | - | S1, S2, SCM | Choose first vertical slice: `SCN-001` or `SCN-002`. |
 | `SLICE-002` | Blocked | After `SLICE-001`, `EVAL-006`, and `EVAL-001` | `SLICE-001`, `EVAL-006`, `EVAL-001` | SCM, S1, S2 | What minimum persistent state is required for the selected slice? |
 | `SLICE-003` | Blocked | After selected-slice state/eval pressure is known | `SLICE-002`, `DEP-001`, `EVAL-002`, `EVAL-006` | SCM | What minimum internal boundary is forced by selected-slice behavior? |
 | `SLICE-005` | Blocked | After selected-slice oracle, system-under-test boundary, and acceptance semantics are known | `EVAL-002`, `EVAL-003`, `EVAL-006` | S1, S2 | What acceptance gate says the first slice is done? |
@@ -245,8 +242,8 @@ Resolution Shape: first-slice ADR.
 | `DEP-002` | Deferred | Selected slice can produce insufficient non-circular support or non-convergence | `DEP-001` | SCM | What minimum V0 detection condition identifies insufficient non-circular support or control non-convergence, and how does the affected domain select lifecycle state? |
 | `DEP-003` | Blocked | After selected state/dependency types are known | `DEP-001` | SCM | Which runtime maintenance triggers are required: expiry, revocation, capability degradation, external refresh, or manual review? |
 | `DEP-004` | Deferred | Selected slice has component operations or grouped state | `SLICE-002` | S2, SCM | What component/group status model is required without building a full workflow engine? |
-| `TIME-001` | Blocked | After `SLICE-001` selects scenario time pressure | `SLICE-001` | S1, S2, SCM | What governed-clock contract is needed for reproducible expiry, freshness, due state, and longitudinal time? |
-| `GROW-001` | Deferred | `SCN-001` selected or behavior adaptation enters milestone scope | `SLICE-001` | S1, SCM | What V0 criteria distinguish when behavior remains situational posture, is activated as a scoped behavioral trial, or becomes a durable developmental adaptation in the selected slice? |
+| `TIME-001` | Open | Scenario time pressure selected; pending re-triage after `EVAL-006` | `SLICE-001` | S1, S2, SCM | What governed-clock contract is needed for reproducible expiry, freshness, due state, and longitudinal time? |
+| `GROW-001` | Open | `SCN-001` selected; pending re-triage after `EVAL-006` | `SLICE-001` | S1, SCM | What V0 criteria distinguish when behavior remains situational posture, is activated as a scoped behavioral trial, or becomes a durable developmental adaptation in the selected slice? |
 | `GROW-002` | Deferred | `SCN-001` longitudinal eval enters milestone scope | `GROW-001`, `EVAL-002` | S1, T | What trajectory signals detect anti-correction or agreement drift without a full personality model? |
 | `GROW-003` | Deferred | Behavior-affecting replacement is proposed | - | T, SCM | What continuity reference must exist before evaluating model, runtime, prompt, specialist, or context-policy change? |
 | `GROW-004` | Deferred | Continuity evaluation work begins | `GROW-003` | T, SCM | What evidence lets valid developmental behavior enter established Zoey continuity? |
@@ -268,7 +265,7 @@ Resolution Shape: first-slice ADR.
 | `EVAL-003` | Blocked | After `SLICE-001` and `EVAL-006` | `SLICE-001`, `EVAL-006` | S1, S2 | How are nondeterministic runs accepted, and which invariant failures are hard failures? |
 | `EVAL-004` | Deferred | The selected slice is preparing its first evaluation record, comparison, or compatibility claim | `EVAL-002`, `EVAL-003`, `EVAL-006` | S1, S2, SCM | What behavior-configuration metadata must each evaluation record include? |
 | `EVAL-005` | Deferred | The selected slice is preparing to define scoring or claim scenario scoreability | `EVAL-002`, `EVAL-003`, `EVAL-006` | S1, S2 | For the selected slice and declared system-under-test boundary, which unresolved questions affect specific pass criteria, and which may be carried as identified fixture assumptions without strengthening the evaluation claim? |
-| `EVAL-006` | Blocked | After `SLICE-001` | `SLICE-001` | S1, S2, SCM | What is inside the system-under-test boundary for the selected slice, and which semantic inputs, control facts, time events, actor-assurance facts, external-system behavior, or cognitive candidates are supplied by the harness or simulated dependencies? |
+| `EVAL-006` | Active | `SLICE-001` accepted by `ADR-001` | `SLICE-001` | S1, S2, SCM | What is inside the system-under-test boundary for the selected slice, and which semantic inputs, control facts, time events, actor-assurance facts, external-system behavior, or cognitive candidates are supplied by the harness or simulated dependencies? |
 | `LEG-001` | Deferred | Migration inventory starts | `SLICE-001` | T, LEG | Which legacy directories are migration candidates, reference-only, archive-only, or out of scope? |
 | `LEG-002` | Deferred | Legacy component reuse is considered | `LEG-001` | T, LEG | What criteria reject or rewrite legacy material that encodes Iris/Yuki identity or authority assumptions? |
 | `LEG-003` | Deferred | Selected slice needs legacy help | `SLICE-001`, `LEG-002` | T, LEG | For the selected slice's required responsibilities, which concrete legacy components or patterns may be reused or adapted under Zoey rules, and which remain reference-only? |
@@ -321,6 +318,22 @@ Date:
 ```
 
 ## Resolved Question Index
+
+### SLICE-001
+
+Outcome: `Decision`
+
+Decision Authority / Accepted By: project owner by accepting `ADR-001`.
+
+Resolution Artifact: `decisions/ADR-001-first-vertical-slice.md`.
+
+Resolved Against / Scope: first vertical-slice pressure path selects `SCN-001 V0.2.2: Japanese Longitudinal Development` as the canonical pressure path for Zoey's first vertical-slice implementation sequence.
+
+Supersedes / Split From: none.
+
+Future Trigger: materially new first-slice selection pressure or accepted supersession of `ADR-001`; second-slice sequencing remains a separate future decision.
+
+Date: 2026-07-07
 
 ### INIT-003
 
@@ -416,6 +429,6 @@ The register is acceptable only if:
 
 ## Next Decision Step
 
-Prepare the evidence for `SLICE-001`: one compact `SCN-001` versus `SCN-002` comparison matrix using the listed decision criteria, including cross-scenario transfer and first-slice architecture-capture risk. Do not design either slice's architecture.
+Prepare the evidence for `EVAL-006`: a compact `SCN-001` system-under-test boundary artifact that maps each material transition to one of: inside the system under test, harness-supplied, simulated dependency, excluded, or deferred.
 
-Then write a short first-slice ADR for project-owner acceptance. After `SLICE-001` is accepted, activate `EVAL-006` first and re-triage the remaining dependency frontier rather than activating every question whose trigger mentions `SLICE-001`.
+The artifact should identify the narrowest first milestone that still leaves at least one evidence-responsive, cross-interaction behavioral-trial transition inside the system under test. After that boundary is accepted, re-triage `TIME-001`, `GROW-001`, `EVAL-001`, `EVAL-003`, and the selected-slice trigger checks before defining state contracts or acceptance gates.
