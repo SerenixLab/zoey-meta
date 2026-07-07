@@ -1,14 +1,16 @@
 # ADR-003: SCN-001 Selected-Slice Trial And Time Contract
 
-Status: `Proposed`
+Status: `Accepted`
 
 Date: 2026-07-07
+
+Accepted: 2026-07-07
 
 Record revision: `R2`
 
 Decision authority: project owner
 
-Related open questions: `GROW-001`, `TIME-002`
+Resolved question IDs: `GROW-001`, `TIME-002`
 
 Decision-Time Baselines:
 
@@ -18,6 +20,8 @@ Decision-Time Baselines:
 - `OPEN_QUESTIONS.md` `V0.2.9`
 - `decisions/ADR-001-first-vertical-slice.md` `R1`
 - `decisions/ADR-002-scn001-system-under-test-boundary.md` `R2`
+
+Post-decision register state: `OPEN_QUESTIONS.md` `V0.2.10` records `GROW-001` and `TIME-002` as resolved by this ADR, keeps `TIME-001` deferred, and activates `EVAL-001` and `EVAL-003`.
 
 ## Decision
 
@@ -30,7 +34,7 @@ For the first `SCN-001` milestone, the system under test may support scoped, rev
 
 The harness supplies bounded events, observations, user responses, context labels, and chronology facts. The SUT owns the selected semantic transitions: stale-history classification, trial-candidate formation, candidate-bound proposal where applicable, activation-basis validation, active-trial transition, current-session correction disposition, later behavior disposition, and intervention-conditioned outcome update.
 
-If accepted, Decision A resolves `GROW-001` and Decision B resolves `TIME-002` for the first `SCN-001` milestone only. This ADR does not amend the `ADR-002` SUT boundary or resolve the broader deferred governed-clock question in `TIME-001`.
+Acceptance of this ADR resolves `GROW-001` through Decision A and `TIME-002` through Decision B for the first `SCN-001` milestone only. This ADR does not amend the `ADR-002` SUT boundary or resolve the broader deferred governed-clock question in `TIME-001`.
 
 ## Critical Analysis Of The Current Gap
 
@@ -321,18 +325,16 @@ This ADR does not decide:
 - nondeterministic acceptance policy;
 - fixture content, oracle scoring, or paired-counterfactual details beyond the contract constraints above.
 
-## Post-Acceptance Register Effect
+## Accepted Register Effect
 
-If accepted by the project owner, update `OPEN_QUESTIONS.md` to:
+Acceptance by the project owner updates `OPEN_QUESTIONS.md` to:
 
 - move `GROW-001` to `Resolved` with outcome `Decision`, resolved by this ADR's Decision A for the first `SCN-001` milestone;
 - move `TIME-002` to `Resolved` with outcome `Decision`, resolved by this ADR's Decision B for the first `SCN-001` milestone;
 - keep `TIME-001` deferred for scheduler, reminders, due state, expiry, background temporal maintenance, and full longitudinal governed-clock semantics;
 - preserve the bounded non-support of durable developmental adaptation as part of the first milestone claim boundary;
 - preserve the explicit non-scope for scheduler, reminders, due state, expiry machinery, full governed-clock architecture, and full growth architecture;
-- re-triage the active frontier before `EVAL-002`, `SLICE-002`, or `SLICE-005`.
-
-Until accepted, this proposed ADR is evidence and a resolution candidate only. It does not close `GROW-001` or `TIME-002`.
+- activate the next decision frontier before `EVAL-002`, `SLICE-002`, or `SLICE-005`.
 
 ## Reconsideration Triggers
 

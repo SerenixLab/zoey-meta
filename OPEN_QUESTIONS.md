@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.9`
+Document version: `V0.2.10`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -155,135 +155,131 @@ Do not include:
 
 ## Active Decision Frontier
 
-Current milestone: define selected-slice trial semantics and time/staleness controls for the accepted `SCN-001` system-under-test boundary.
+Current milestone: define context-boundary and nondeterministic acceptance policy for the accepted `SCN-001` first-milestone boundary before fixture/oracle, state-contract, or acceptance-gate work.
 
 Active questions:
 
-- `GROW-001`
-- `TIME-002`
+- `EVAL-001`
+- `EVAL-003`
 
 Pending re-triage queue after the current active frontier is resolved:
 
-- `EVAL-001`
-- `EVAL-003`
+- `EVAL-002`
+- `SLICE-002`
+- `SLICE-005`
 - selected-slice trigger checks for `MEM`, `DEP`, `GROW`, `AUTH`, `SURF`, `INIT`, `PROD`, `LEG`, `TRUST`, and `CONT`.
 
-`GROW-001` is active because accepted `ADR-002` depends on selected-slice criteria for trial candidate, active scoped trial, situational correction, and unsupported durable adaptation.
+`EVAL-001` is active because accepted `ADR-002` and `ADR-003` define the SUT-owned semantic transitions, but the first evaluation still must decide whether context discovery/relevance selection is inside the tested boundary or whether the harness injects curated context.
 
-`TIME-002` is active because accepted `ADR-002` keeps stale-history classification inside the system under test from supplied chronology. This active scope is limited to the selected-slice chronology and staleness contract; it does not resolve the broader governed-clock question in `TIME-001`.
+`EVAL-003` is active because fixture/oracle data and acceptance gates cannot be finalized until nondeterministic run acceptance and hard invariant failures are defined for the selected milestone.
 
-`TIME-001` remains deferred for scheduler, reminder, due-state, expiry, background temporal-maintenance, and full longitudinal-clock semantics. The selected-slice chronology question is split into `TIME-002` to preserve stable ID meaning.
+`GROW-001` and `TIME-002` are resolved by accepted `ADR-003`. `TIME-001` remains deferred for scheduler, reminder, due-state, expiry, background temporal-maintenance, and full longitudinal-clock semantics.
 
-No other open question currently blocks progress. Legacy reading, non-committing experiments, document review, fixture sketching, and rough implementation exploration may continue as long as they do not claim final architecture compatibility or selected-slice pass evidence.
+No other open question currently blocks progress. Legacy reading, non-committing experiments, document review, fixture sketching, and rough implementation exploration may continue as long as they do not claim final architecture compatibility, selected-slice pass evidence, or final fixture/oracle sufficiency.
 
 ## Active Questions
 
-### GROW-001
+### EVAL-001
 
 Status: `Active`
 
-Question: What selected-slice minimum criteria distinguish situational behavior, trial candidate, active scoped behavioral trial, and unsupported durable developmental adaptation for the accepted `SCN-001` boundary?
+Question: Does the first slice test context discovery, or does the harness inject curated context?
 
-Why It Matters: `ADR-002` requires trial candidates, active scoped trials, current-session behavior dispositions, and explicit non-claims about durable adaptations. The next oracle, state, and acceptance decisions need a narrow criterion for what counts as a selected-slice behavioral trial rather than posture, direct correction, stored preference, or durable adaptation.
+Why It Matters: `ADR-002` and `ADR-003` put stale-history handling, attributed assertions, trial formation, trial activation, later behavior disposition, and selected staleness semantics inside the SUT. The first fixture/oracle decision must now say whether the SUT is also responsible for discovering and selecting relevant context from available retained state, or whether the harness provides a curated effective context bundle.
 
-Source / Pressure: `ADR-002`; `CANONICAL_SCENARIOS.md` `SCN-001`; `STATE_AND_CONTROL_MODEL.md`.
+Source / Pressure: `ADR-002`; `ADR-003`; `CANONICAL_SCENARIOS.md` `SCN-001`; `STATE_AND_CONTROL_MODEL.md`.
 
-Blocks: `EVAL-002` fixture/oracle design, `SLICE-002` minimum selected-slice state, `SLICE-005` first acceptance gate, and any milestone claim that depends on trial semantics.
+Blocks: `EVAL-002` fixture/oracle design, `SLICE-002` minimum selected-slice state, and any milestone claim that includes context discovery, retrieval, relevance selection, or context-assembly behavior.
 
-Does Not Block: `EVAL-001` context-boundary discussion, thesis/scenario/state-model review, legacy inventory, fixture sketching, non-committing prototypes, document review, or explicitly throwaway experiments.
+Does Not Block: nondeterminism policy discussion, thesis/scenario/state-model review, legacy inventory, fixture sketching, non-committing prototypes, document review, or explicitly throwaway experiments that do not claim final context-boundary evidence.
 
-Depends On: `EVAL-006`, resolved by `ADR-002`.
+Depends On: `SLICE-001`, resolved by `ADR-001`; `EVAL-006`, resolved by `ADR-002`; `GROW-001` and `TIME-002`, resolved by `ADR-003`.
 
-Applies When / Decision Trigger: accepted `ADR-002` puts trial-candidate formation, candidate-bound proposal, active-trial activation, current-session correction disposition, and later trial-driven behavior disposition inside the first `SCN-001` boundary.
+Applies When / Decision Trigger: `ADR-003` is accepted and the next artifact would define fixture/oracle data, state contracts, or acceptance claims that depend on what context the SUT receives versus discovers.
 
 Known Options:
 
-- Selected-slice trial contract: define only the minimum criteria needed for `ADR-002` trial candidates, active trials, behavior dispositions, reversibility, scope, user-governed constraints, and outcome handling.
-- Bounded exclusion of durable adaptation: explicitly state that the first milestone supports scoped reversible trials only, and that durable developmental adaptations remain unsupported.
-- Full growth/adaptation theory: rejected for this milestone because it would exceed the first-slice boundary and prematurely define general Zoey development.
+- Harness-curated context: the harness supplies a bounded, relevant effective context bundle while the SUT owns the semantic transitions over that context. This avoids testing retrieval/context discovery in the first milestone.
+- SUT context discovery: the harness supplies available retained state and events, and the SUT must retrieve/select relevant context before semantic transitions. This broadens the first milestone substantially.
+- Hybrid bounded discovery: the harness supplies a small available-context set with distractors, and the SUT owns a limited relevance-selection step without claiming general memory retrieval.
 
 Decision Criteria:
 
-- distinguishes a direct current-session correction from a future trial candidate;
-- distinguishes a trial candidate from an active scoped trial;
-- preserves user response/proposal binding where acceptance is part of the activation basis;
-- requires scope, current/stale-basis validity, applicable user-governed constraints, reversibility, consequence, and current applicability checks before active-trial transition;
-- permits no-trial, deferral, or more-evidence outcomes when support is insufficient;
-- prevents any durable developmental adaptation claim in this first milestone;
-- remains schema-neutral and does not define a general growth architecture.
+- preserves `ADR-002` and `ADR-003` central SUT responsibilities without allowing the harness to supply semantic answers;
+- prevents a context-curation choice from becoming an unclaimed hidden dependency in fixture/oracle evidence;
+- is narrow enough for the first milestone and explicit about any claim it excludes;
+- distinguishes available context, discovered candidate context, active cognitive frame, and semantic transition basis where the selected boundary needs those distinctions;
+- avoids claiming general retrieval, memory search, or context-assembly capability unless that work is actually inside the tested boundary.
 
 Evidence Needed:
 
-- orthogonal semantic distinctions for trial phase, activation basis, user response where applicable, effective conditions, non-activation disposition, and unsupported durable adaptation boundary;
-- minimum inspection fields for trial candidate and active trial status/effective conditions without prescribing final schema;
-- examples for direct correction, selected-slice trial, no-trial/defer, and unsupported durable adaptation;
-- activation-basis checklist aligned to the State and Control Model;
-- claim boundary showing what the first milestone may say about trials and what it may not say about durable adaptation or general growth.
+- fixture responsibility table for available retained state, curated context, distractors if any, and active context supplied to the SUT;
+- examples showing whether stale old history, current calibration, explicit drill preference, later correction, and outcome evidence are supplied as curated context or discovered from available state;
+- claim boundary for what the milestone may and may not say about context discovery, retrieval, relevance selection, and context assembly;
+- oracle inspection fields needed to show the chosen context boundary without requiring hidden chain-of-thought.
 
-Working Assumptions / Fixtures: `ADR-002` is accepted; first-slice state is synthetic fixture state; durable developmental adaptation is not supported in the first milestone unless this question resolves otherwise.
+Working Assumptions / Fixtures: `ADR-001`, `ADR-002`, and `ADR-003` are accepted; first-slice state is synthetic fixture state; no real memory retrieval or production context-assembly claim is made unless this question puts it inside the selected boundary.
 
 Decision Authority: project owner.
 
 Needed By: before `EVAL-002`, `SLICE-002`, and `SLICE-005`.
 
-Resolution Shape: selected-slice growth/trial criteria contract or short ADR.
+Resolution Shape: selected-slice context-boundary decision or short ADR.
 
-### TIME-002
+### EVAL-003
 
 Status: `Active`
 
-Question: What minimal selected-slice chronology and staleness contract lets the SUT mark old Japanese practice history relevant but stale, validate trial basis freshness, and order later interactions without designing a general governed-clock system?
+Question: How are nondeterministic runs accepted, and which invariant failures are hard failures?
 
-Why It Matters: `ADR-002` keeps stale-history classification inside the SUT from supplied chronology. The first oracle and state decisions need to know which time facts the harness supplies, which staleness judgment the SUT owns, and which broader time mechanisms remain out of scope.
+Why It Matters: `ADR-002` and `ADR-003` define semantic transitions that may be produced by nondeterministic model or orchestration behavior. Before fixture/oracle data or acceptance gates can be final, the milestone needs a policy for which variation is acceptable, which invariants are hard failures, and what run evidence is sufficient for a bounded claim.
 
-Source / Pressure: `ADR-002`; `CANONICAL_SCENARIOS.md` `SCN-001`; `STATE_AND_CONTROL_MODEL.md` time and stale-basis requirements.
+Source / Pressure: `CANONICAL_SCENARIOS.md` evaluation semantics; `ADR-002`; `ADR-003`; `STATE_AND_CONTROL_MODEL.md`.
 
-Blocks: stale-history oracle data, trial stale-basis checks, `EVAL-002`, `SLICE-002`, and the first acceptance gate.
+Blocks: `EVAL-002` fixture/oracle design, `SLICE-005` acceptance gate, and any scenario-run or milestone evidence claim.
 
-Does Not Block: `EVAL-001` context-boundary discussion, thesis/scenario/state-model review, legacy inventory, fixture sketching, non-committing prototypes, document review, or explicitly throwaway experiments.
+Does Not Block: context-boundary discussion, thesis/scenario/state-model review, legacy inventory, fixture sketching, non-committing prototypes, document review, or explicitly throwaway experiments that do not claim accepted run evidence.
 
-Depends On: `EVAL-006`, resolved by `ADR-002`.
+Depends On: `SLICE-001`, resolved by `ADR-001`; `EVAL-006`, resolved by `ADR-002`; `GROW-001` and `TIME-002`, resolved by `ADR-003`.
 
-Split From: `TIME-001`, whose broader governed-clock scope remains deferred.
-
-Applies When / Decision Trigger: accepted `ADR-002` keeps stale-history classification and trial basis freshness inside the SUT using supplied chronology.
+Applies When / Decision Trigger: `ADR-003` is accepted and the next artifact would define fixture/oracle data, acceptance gates, or run-level pass/fail evidence for the first `SCN-001` milestone.
 
 Known Options:
 
-- Minimal selected-slice chronology contract: harness supplies occurrence/order times, current scenario time, session ordering, and practice-gap duration or raw timestamps; the SUT owns the selected-slice stale-for-current-skill judgment.
-- Harness-supplied stale control fact: the harness directly labels old history stale; this would weaken `ADR-002` and should require explicit boundary amendment.
-- Full governed-clock contract: rejected for the first milestone unless narrower chronology cannot support the accepted boundary.
+- Hard-invariant gate plus bounded variance: define non-negotiable state/control failures and allow natural-language or benign path variance when effective state satisfies the oracle.
+- Repeated-run acceptance: require multiple successful runs or a rate/threshold for positive obligations while any hard invariant failure fails the configuration.
+- Single-run smoke evidence only: acceptable for early exploration but too weak for a first milestone claim unless the claim is deliberately narrowed.
 
 Decision Criteria:
 
-- supports reproducible stale-history handling for the accepted `SCN-001` boundary;
-- supports current/stale-basis checks for trial activation;
-- preserves occurrence time, observation time, and session ordering where relevant;
-- avoids general scheduler, due-state, expiry, or longitudinal-clock architecture;
-- makes clear which time facts are harness-supplied and which temporal applicability judgments are inside the SUT.
+- preserves canonical scenario evaluation semantics: run-level pass does not automatically establish scenario-level acceptance;
+- identifies hard invariant failures that cannot be averaged away;
+- defines acceptable variance without requiring exact wording, hidden chain-of-thought, or one final schema;
+- names minimum run evidence and tested behavior-configuration metadata needed before claiming a milestone pass;
+- keeps the first milestone narrower than full `SCN-001` scenario acceptance.
 
 Evidence Needed:
 
-- minimum fixture chronology fields for old practice history, current resume session, focused drill, spontaneous correction session, and later outcome session;
-- selected-slice stale-for-current-skill rule or criterion;
-- examples showing old history remains relevant but not current-skill authority, including current observations creating a new current basis rather than refreshing old records;
-- examples showing stale-basis re-check for trial activation;
-- explicit non-scope list for scheduler, reminders, due state, expiry machinery, and full longitudinal clock semantics.
+- list of hard invariant failures for accepted `ADR-002`/`ADR-003` responsibilities;
+- examples of allowed wording/path variance that still exposes equivalent effective state;
+- examples of nondeterministic failures that invalidate the run or tested configuration;
+- minimum run count or acceptance policy for positive obligations, if more than one run is required;
+- behavior-configuration metadata needed to bind evidence to the tested system.
 
-Working Assumptions / Fixtures: `ADR-002` is accepted; the first milestone uses synthetic fixture chronology and makes no real continuity, reminder, scheduling, or due-state claim.
+Working Assumptions / Fixtures: `ADR-001`, `ADR-002`, and `ADR-003` are accepted; the first milestone is a bounded first-milestone claim, not full `SCN-001` scenario acceptance.
 
 Decision Authority: project owner.
 
 Needed By: before `EVAL-002`, `SLICE-002`, and `SLICE-005`.
 
-Resolution Shape: selected-slice chronology/staleness contract or short ADR.
+Resolution Shape: selected-slice nondeterministic acceptance and invariant-failure policy or short ADR.
 
 ## Open Question Index
 
 | ID | Status | Trigger | Depends On | Source | Question |
 | --- | --- | --- | --- | --- | --- |
 | `SLICE-001` | Resolved | Accepted by `ADR-001` | - | S1, S2, SCM | Choose first vertical slice: `SCN-001` or `SCN-002`. |
-| `SLICE-002` | Blocked | After `EVAL-001`, `GROW-001`, `TIME-002`, and selected-slice eval pressure are known | `SLICE-001`, `EVAL-006`, `EVAL-001`, `GROW-001`, `TIME-002` | SCM, S1, S2 | What minimum persistent state is required for the selected slice? |
+| `SLICE-002` | Blocked | After `EVAL-001`, `EVAL-002`, `EVAL-003`, and accepted first-milestone boundary/trial/time semantics are known | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-002`, `EVAL-003`, `GROW-001`, `TIME-002` | SCM, S1, S2 | What minimum persistent state is required for the selected slice? |
 | `SLICE-003` | Blocked | After selected-slice state/eval pressure is known | `SLICE-002`, `DEP-001`, `EVAL-002`, `EVAL-006` | SCM | What minimum internal boundary is forced by selected-slice behavior? |
 | `SLICE-005` | Blocked | After selected-slice oracle, system-under-test boundary, trial/time semantics, and acceptance semantics are known | `EVAL-002`, `EVAL-003`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2 | What acceptance gate says the first slice is done? |
 | `MEM-001` | Deferred | Selected slice proposes retaining personal state | `SLICE-001` | T, SCM | What retention bases and transient defaults does the selected slice need? |
@@ -296,8 +292,8 @@ Resolution Shape: selected-slice chronology/staleness contract or short ADR.
 | `DEP-003` | Blocked | After selected state/dependency types are known | `DEP-001` | SCM | Which runtime maintenance triggers are required: expiry, revocation, capability degradation, external refresh, or manual review? |
 | `DEP-004` | Deferred | Selected slice has component operations or grouped state | `SLICE-002` | S2, SCM | What component/group status model is required without building a full workflow engine? |
 | `TIME-001` | Deferred | Scheduler, reminders, due state, expiry, background temporal maintenance, or full longitudinal governed-clock semantics enter active milestone scope | `SLICE-001` | S1, S2, SCM | What governed-clock contract is needed for reproducible expiry, freshness, due state, and longitudinal time? |
-| `TIME-002` | Active | `ADR-002` accepted with SUT-owned stale-history handling from supplied chronology; split from the broader `TIME-001` clock question | `EVAL-006` | S1, S2, SCM | What minimal selected-slice chronology and staleness contract supports stale-history handling, trial-basis freshness, and later-session ordering without designing a general governed-clock system? |
-| `GROW-001` | Active | `ADR-002` accepted with selected-slice trial candidate, active trial, and behavior-disposition responsibilities inside the SUT | `EVAL-006` | S1, SCM | What selected-slice minimum criteria distinguish situational behavior, trial candidate, active scoped behavioral trial, and unsupported durable developmental adaptation? |
+| `TIME-002` | Resolved | Accepted by `ADR-003` Decision B | `EVAL-006` | S1, S2, SCM | What minimal selected-slice chronology and staleness contract supports stale-history handling, trial-basis freshness, and later-session ordering without designing a general governed-clock system? |
+| `GROW-001` | Resolved | Accepted by `ADR-003` Decision A | `EVAL-006` | S1, SCM | What selected-slice minimum criteria distinguish situational behavior, trial candidate, active scoped behavioral trial, and unsupported durable developmental adaptation? |
 | `GROW-002` | Deferred | `SCN-001` longitudinal eval enters milestone scope | `GROW-001`, `EVAL-002` | S1, T | What trajectory signals detect anti-correction or agreement drift without a full personality model? |
 | `GROW-003` | Deferred | Behavior-affecting replacement is proposed | - | T, SCM | What continuity reference must exist before evaluating model, runtime, prompt, specialist, or context-policy change? |
 | `GROW-004` | Deferred | Continuity evaluation work begins | `GROW-003` | T, SCM | What evidence lets valid developmental behavior enter established Zoey continuity? |
@@ -314,9 +310,9 @@ Resolution Shape: selected-slice chronology/staleness contract or short ADR.
 | `SURF-001` | Deferred | Second surface is planned | `SLICE-001` | T, SCM | What surface contract preserves identity, authority, disclosure, state updates, and uncertainty reporting? |
 | `SURF-002` | Deferred | Voice slice selected | `SURF-001`, `AUTH-001` | S2, SCM, PROD | Which console/voice differences are governed behavior rather than UI detail? |
 | `SURF-003` | Resolved | Obsolete as standalone scope prompt; future embodiment proposals create concrete questions | `SURF-001` | T, SCM, PROD | Which embodiment questions are unsupported until surface contracts are stable? |
-| `EVAL-001` | Open | `EVAL-006` resolved by `ADR-002`; pending current active frontier | `SLICE-001`, `EVAL-006` | S1, S2, SCM | Does the first slice test context discovery, or does the harness inject curated context? |
-| `EVAL-002` | Blocked | After `EVAL-001`, `GROW-001`, `TIME-002`, and accepted boundary semantics | `SLICE-001`, `EVAL-006`, `EVAL-001`, `GROW-001`, `TIME-002` | S1, S2 | What fixture and oracle data must the selected scenario expose without requiring hidden chain-of-thought? |
-| `EVAL-003` | Open | `EVAL-006` resolved by `ADR-002`; pending current active frontier | `SLICE-001`, `EVAL-006` | S1, S2 | How are nondeterministic runs accepted, and which invariant failures are hard failures? |
+| `EVAL-001` | Active | `ADR-003` accepted; context-boundary decision needed before fixture/oracle and state-contract work | `SLICE-001`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2, SCM | Does the first slice test context discovery, or does the harness inject curated context? |
+| `EVAL-002` | Blocked | After `EVAL-001`, `EVAL-003`, and accepted boundary/trial/time semantics | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-003`, `GROW-001`, `TIME-002` | S1, S2 | What fixture and oracle data must the selected scenario expose without requiring hidden chain-of-thought? |
+| `EVAL-003` | Active | `ADR-003` accepted; nondeterministic acceptance policy needed before fixture/oracle and acceptance gates | `SLICE-001`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2 | How are nondeterministic runs accepted, and which invariant failures are hard failures? |
 | `EVAL-004` | Deferred | The selected slice is preparing its first evaluation record, comparison, or compatibility claim | `EVAL-002`, `EVAL-003`, `EVAL-006` | S1, S2, SCM | What behavior-configuration metadata must each evaluation record include? |
 | `EVAL-005` | Deferred | The selected slice is preparing to define scoring or claim scenario scoreability | `EVAL-002`, `EVAL-003`, `EVAL-006` | S1, S2 | For the selected slice and declared system-under-test boundary, which unresolved questions affect specific pass criteria, and which may be carried as identified fixture assumptions without strengthening the evaluation claim? |
 | `EVAL-006` | Resolved | Accepted by `ADR-002` | `SLICE-001` | S1, S2, SCM | What is inside the system-under-test boundary for the selected slice, and which semantic inputs, control facts, time events, actor-assurance facts, external-system behavior, or cognitive candidates are supplied by the harness or simulated dependencies? |
@@ -402,6 +398,38 @@ Resolved Against / Scope: first `SCN-001` milestone uses a transition-inside sys
 Supersedes / Split From: none.
 
 Future Trigger: material change to the accepted first-slice SUT boundary, inability of `EVAL-001`, `EVAL-002`, `GROW-001`, `TIME-002`, or `SLICE-005` to preserve the accepted boundary, or a later milestone claiming broader `SCN-001` evidence than `ADR-002` permits.
+
+Date: 2026-07-07
+
+### GROW-001
+
+Outcome: `Decision`
+
+Decision Authority / Accepted By: project owner by accepting `ADR-003`.
+
+Resolution Artifact: `decisions/ADR-003-scn001-selected-slice-trial-time-contract.md`, Decision A.
+
+Resolved Against / Scope: first `SCN-001` milestone supports scoped, reversible selected-slice behavioral trials only. It defines minimum distinctions for direct situational correction, trial candidate, candidate-bound proposal where applicable, active scoped trial, later-use applicability, non-activation dispositions, and unsupported durable developmental adaptation. Durable developmental adaptation remains unsupported for the first milestone.
+
+Supersedes / Split From: none.
+
+Future Trigger: material change to selected-slice trial semantics, a future milestone claiming durable developmental adaptation, broader trial generalization, user-facing durable adaptation, or inability of `EVAL-002`, `SLICE-002`, or `SLICE-005` to preserve `ADR-003` Decision A.
+
+Date: 2026-07-07
+
+### TIME-002
+
+Outcome: `Decision`
+
+Decision Authority / Accepted By: project owner by accepting `ADR-003`.
+
+Resolution Artifact: `decisions/ADR-003-scn001-selected-slice-trial-time-contract.md`, Decision B.
+
+Resolved Against / Scope: first `SCN-001` milestone uses a selected-slice chronology and staleness contract. The harness supplies chronology facts, not temporal-applicability verdicts; the SUT owns prior-evidence current-authority eligibility and stale-history handling under the selected synthetic rule. This does not resolve `TIME-001` or define scheduler, reminders, due state, expiry, background temporal maintenance, active-trial TTL, or full longitudinal governed-clock semantics.
+
+Supersedes / Split From: split from `TIME-001`, whose broader governed-clock scope remains deferred.
+
+Future Trigger: material change to the selected-slice staleness rule, need for active-trial age-based expiry or TTL, need for scheduler/reminder/due/expiry semantics, or inability of `EVAL-002`, `SLICE-002`, or `SLICE-005` to preserve `ADR-003` Decision B.
 
 Date: 2026-07-07
 
@@ -499,6 +527,6 @@ The register is acceptable only if:
 
 ## Next Decision Step
 
-Prepare the evidence for `GROW-001` and `TIME-002` under accepted `ADR-002`.
+Prepare the evidence for `EVAL-001` and `EVAL-003` under accepted `ADR-002` and `ADR-003`.
 
-First, define the selected-slice minimum criteria for trial candidate, active scoped trial, situational correction, unsupported durable adaptation, and selected-slice chronology/staleness. After those are accepted, address `EVAL-001` and `EVAL-003` before defining fixture/oracle data, state contracts, or acceptance gates.
+First, decide whether the first milestone tests context discovery or receives curated context, and define the selected-slice nondeterministic acceptance/hard-invariant policy. After those are accepted, address `EVAL-002` before defining state contracts or acceptance gates.
