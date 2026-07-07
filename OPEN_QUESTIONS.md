@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.8`
+Document version: `V0.2.9`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -162,7 +162,7 @@ Active questions:
 - `GROW-001`
 - `TIME-002`
 
-Re-triage queue after `EVAL-006` acceptance:
+Pending re-triage queue after the current active frontier is resolved:
 
 - `EVAL-001`
 - `EVAL-003`
@@ -266,7 +266,7 @@ Evidence Needed:
 
 - minimum fixture chronology fields for old practice history, current resume session, focused drill, spontaneous correction session, and later outcome session;
 - selected-slice stale-for-current-skill rule or criterion;
-- examples showing old history remains relevant but not current-skill authority;
+- examples showing old history remains relevant but not current-skill authority, including current observations creating a new current basis rather than refreshing old records;
 - examples showing stale-basis re-check for trial activation;
 - explicit non-scope list for scheduler, reminders, due state, expiry machinery, and full longitudinal clock semantics.
 
