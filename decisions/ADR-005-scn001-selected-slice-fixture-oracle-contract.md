@@ -1,14 +1,16 @@
 # ADR-005: SCN-001 Selected-Slice Fixture And Oracle Contract
 
-Status: `Draft`
+Status: `Accepted`
 
 Date: 2026-07-08
+
+Accepted: 2026-07-08
 
 Record revision: `R2`
 
 Decision authority: project owner
 
-Related open question: `EVAL-002`
+Resolved question IDs: `EVAL-002`
 
 Decision-Time Baselines:
 
@@ -21,7 +23,7 @@ Decision-Time Baselines:
 - `decisions/ADR-003-scn001-selected-slice-trial-time-contract.md` `R2`
 - `decisions/ADR-004-scn001-first-milestone-evaluation-policy.md` `R3`
 
-Draft register effect: none. This draft does not resolve `EVAL-002` until accepted by the project owner.
+Post-decision register state: `OPEN_QUESTIONS.md` records `EVAL-002` as resolved by this ADR and activates `SLICE-002` as the next decision frontier, while leaving `SLICE-005`, `EVAL-004`, and `EVAL-005` for re-triage before their triggers are used.
 
 ## Decision
 
@@ -40,7 +42,7 @@ The oracle inspects effective SUT state and transition basis. It may require str
 
 ## Compatibility Red-Team Result
 
-This draft is constrained by the following failure checks before acceptance:
+This decision is constrained by the following accepted compatibility checks:
 
 | Accepted decision | Red-team pressure | Contract response |
 | --- | --- | --- |
@@ -158,7 +160,7 @@ Bundle IDs are fixture configuration, not implementation schemas. A decision poi
 | `B-CALIBRATION` | `C-005`, `C-006`. |
 | `B-TRIAL-FORM` | `TD-001`, `C-004`, `C-005`, `C-006`, `C-007`, `FC-TRIAL-001`, `FC-CONSEQ-001`, `FC-REV-001`. |
 | `B-PROPOSAL-ACTIVATE` | `P-001R`, `P-USER-ACCEPT`, `FC-RET-001`, `FC-UGC-001`, `FC-CONSEQ-001`, `FC-REV-001`. |
-| `B-FOCUSED-DRILL` | `D-001`, `D-002`, `D-003R`, `D-003`, `D-004`. |
+| `B-FOCUSED-DRILL` | Staged bundle: `D-001` and `D-002` are delivered after `CP-PROD-ACTIVE`; `D-003R` is delivered only after the SUT selects focused-drill correction behavior; `D-003` and `D-004` are delivered only after `CP-DRILL-REALIZATION-MATCH`. |
 | `B-SPONT-CORRECT` | `V-001`, `V-002`, `V-003`, `V-004`, `V-005R`, `FC-UGC-001`, `FC-CONSEQ-001`, `FC-REV-001`. |
 | `B-DELAY-CANDIDATE` | `V-001`, `V-002`, `V-003`, `V-004`, `V-005R`, `FC-TRIAL-001`, `FC-UGC-001`, `FC-CONSEQ-001`, `FC-REV-001`. |
 | `B-DELAY-ACTIVATE` | `FC-RET-001`, `FC-UGC-001`, `FC-CONSEQ-001`, `FC-REV-001`. |
@@ -185,7 +187,7 @@ At each material SUT-owned semantic transition, this package freezes fixture-own
 | `DP-PROPOSAL` | Surface candidate-bound proposal if a candidate was formed and expose proposal-to-candidate material intent before wording realization. | No new fixture-owned evidence. | SUT-owned candidate and support lineage. |
 | `DP-PROPOSAL-REALIZATION` | Simulated dependency renders proposal wording without changing material intent. | `P-001R` only after SUT proposal intent exists. | SUT-owned proposal intent and candidate binding. |
 | `DP-ACTIVATE-PROD` | Bind user response to actual surfaced proposal and perform activation checks. | `B-PROPOSAL-ACTIVATE` only if proposal realization fidelity passes branch policy. | SUT-owned candidate, surfaced proposal, comparison, attribution, temporal eligibility, and activation-basis state. |
-| `DP-FOCUSED-DRILL` | Select immediate correction behavior for the accepted focused drill and retain production trial, drill correction preference, and short-term drill outcome separately. | `B-FOCUSED-DRILL`, delivered only after `CP-PROD-ACTIVE` and `D-003R` realization fidelity. | SUT-owned active production trial and proposal/activation lineage. |
+| `DP-FOCUSED-DRILL` | Select immediate correction behavior for the accepted focused drill and retain production trial, drill correction preference, and short-term drill outcome separately. | Staged `B-FOCUSED-DRILL`: `D-001`/`D-002` after `CP-PROD-ACTIVE`, `D-003R` after SUT drill disposition, and `D-003`/`D-004` only after `CP-DRILL-REALIZATION-MATCH`. | SUT-owned active production trial and proposal/activation lineage. |
 | `DP-DIRECT-CORRECTION` | Apply current-session correction without promoting it to future preference or active trial. | `B-SPONT-CORRECT`; `V-005R` delivered only after SUT current-session correction disposition exists. | SUT-owned focused-drill preference, production trial, outcome state, and event history. |
 | `DP-DELAY-TRIAL-FORM` | Form, withhold, or defer a separate delayed-correction trial candidate as non-active state. | `B-DELAY-CANDIDATE`. | SUT-owned current-session disposition, correction realization, focused-drill evidence, and retained prior state. |
 | `DP-DELAY-TRIAL-ACTIVATE` | Activate the same delayed-correction candidate only if selected activation basis and checks pass. | `B-DELAY-ACTIVATE`. | Same non-active delayed-correction candidate from `DP-DELAY-TRIAL-FORM` and its support lineage. |
@@ -472,7 +474,7 @@ A formal campaign using this contract must pre-register:
 - scenario pressure ID and version, `SCN-001 V0.2.2`;
 - thesis baseline, `SYSTEM_THESIS.md V0.3.1`;
 - state/control baseline, `STATE_AND_CONTROL_MODEL.md V0.4.1`;
-- accepted ADR revisions, including `ADR-001 R1`, `ADR-002 R2`, `ADR-003 R2`, `ADR-004 R3`, and accepted `ADR-005` revision when this draft is accepted;
+- accepted ADR revisions, including `ADR-001 R1`, `ADR-002 R2`, `ADR-003 R2`, `ADR-004 R3`, and `ADR-005 R2`;
 - fixture/oracle package identifier, `SCN001-SSFO-V0.2.0`, and each fixture path to be run;
 - context-bundle policy, branch policy, and completeness declarations;
 - claim classes under evaluation and required path coverage;
@@ -551,13 +553,13 @@ For a required claim/path combination, `NOT_REACHED` is non-passing and prevents
 
 ## Claim-Class Obligation Map
 
-The oracle must score claim classes using this map. The earliest failed obligation attributable to the claim class receives `OBLIGATION_FAIL`. Dependent claim classes blocked solely by that failed SUT prerequisite receive `NOT_REACHED`. A run-global hard invariant failure overrides the per-claim obligation result for bounded milestone pass purposes.
+The oracle must score claim classes using this map. Short obligation IDs are aliases for the full package-local IDs prefixed by `SCN001-SSFO-V0.2.0-`. For example, `OBL-EVID-001` means `SCN001-SSFO-V0.2.0-OBL-EVID-001`. The earliest failed obligation attributable to the claim class receives `OBLIGATION_FAIL`. Dependent claim classes blocked solely by that failed SUT prerequisite receive `NOT_REACHED`. A run-global hard invariant failure overrides the per-claim obligation result for bounded milestone pass purposes.
 
 | Claim class | Required path | Mandatory obligation IDs | Required checkpoints | Missing-prerequisite treatment |
 | --- | --- | --- | --- | --- |
 | `CC-TIME-STALE-BASIS` | `CANONICAL-THIN` | `OBL-TIME-OLD-001` | `DP-HISTORY-TEMPORAL-ELIGIBILITY` output exists. | Own miss is `OBLIGATION_FAIL`; unrelated downstream trial misses do not fail this claim if temporal obligations pass. |
 | `CC-TIME-STALE-BASIS` | `CF-RECENT-BASIS` | `OBL-TIME-RECENT-001` | `DP-HISTORY-TEMPORAL-ELIGIBILITY` output over `B-CF3-TEMPORAL-RECENT`. | Own miss is `OBLIGATION_FAIL`. |
-| `CC-EVIDENCE-TRIAL-FORMATION` | `CANONICAL-THIN` | `OBL-ATTR-001`, `OBL-TIME-OLD-001`, `OBL-COMPARE-001`, `OBL-EVID-001`, `OBL-EVID-002`, `OBL-EVID-004` | `CP-PROD-PROPOSAL-REALIZED`, `CP-PROD-ACTIVE`. | Own root miss is `OBLIGATION_FAIL`. |
+| `CC-EVIDENCE-TRIAL-FORMATION` | `CANONICAL-THIN` | `OBL-ATTR-001`, `OBL-TIME-OLD-001`, `OBL-COMPARE-001`, `OBL-EVID-001`, `OBL-EVID-002`, `OBL-EVID-003`, `OBL-EVID-004` | `CP-PROD-PROPOSAL-REALIZED`, `CP-PROD-ACTIVE`. | Own root miss is `OBLIGATION_FAIL`. |
 | `CC-EVIDENCE-TRIAL-FORMATION` | `CF-CALIBRATION-NO-SPLIT` | `OBL-ATTR-001`, `OBL-COMPARE-001`, `OBL-EVID-005` | no active production trial from unsupported production basis. | Own miss is `OBLIGATION_FAIL` or `HARD_FAIL` if unsupported active state is created. |
 | `CC-SCOPE-TRIAL-USE` | `CANONICAL-THIN` | `OBL-DRILL-001`, `OBL-CORR-001`, `OBL-DELAY-001`, `OBL-DELAY-002`, `OBL-SCOPE-001` | `CP-DRILL-REALIZATION-MATCH`, `CP-DIRECT-CORRECTION-REALIZED`, `CP-DELAY-CANDIDATE`, `CP-DELAY-ACTIVE`, `CP-LATER-DISPOSITION`. | Own root miss is `OBLIGATION_FAIL`; missing production prefix may be `NOT_REACHED` if scope obligations cannot be reached. |
 | `CC-SCOPE-TRIAL-USE` | `CF-DRILL-OPT-IN` | `OBL-SCOPE-002` | same-run `CP-DELAY-ACTIVE` from the counterfactual run prefix. | Upstream canonical-prefix failure is `NOT_REACHED`; broad delayed use in focused drill is `HARD_FAIL`. |
@@ -723,7 +725,7 @@ Allowed variance does not include changing bundle membership, adding clarificati
 
 ## Bounded Claim Language
 
-If accepted, implemented, and passed under `SLICE-005`, this contract may support only bounded language of this form:
+If implemented and passed under `SLICE-005`, this contract may support only bounded language of this form:
 
 ```text
 Under synthetic SCN-001 selected-slice fixture context `SCN001-SSFO-V0.2.0`,
@@ -754,11 +756,11 @@ This contract does not support claims that:
 
 `SLICE-005` must decide the acceptance gate using the claim-class matrix, formal campaign policy, hard-invariant rules, positive-obligation aggregation, invalid-run replacement policy, and bounded claim language above. It must reject evidence based on cherry-picked nondeterministic runs, unlimited invalid-run replacement, or repeated campaigns under the same materially unchanged behavior and evaluation configuration.
 
-## Proposed Register Effect
+## Register Effect
 
-If accepted, this ADR resolves `EVAL-002` by defining the selected-slice fixture paths, context-bundle contract, oracle-visible state, run-validity rules, claim-class scoring shape, failure artifacts, and bounded claim language for the first `SCN-001` milestone.
+This ADR resolves `EVAL-002` by defining the selected-slice fixture paths, context-bundle contract, oracle-visible state, run-validity rules, claim-class scoring shape, failure artifacts, and bounded claim language for the first `SCN-001` milestone.
 
-Acceptance should trigger re-triage of:
+Acceptance triggers re-triage of:
 
 - `SLICE-002`, expected immediate frontier unless evaluation-record or scoring questions block it;
 - `SLICE-005`, still blocked until minimum selected-slice state is known;
@@ -781,7 +783,7 @@ This decision must be reconsidered or superseded if:
 
 ## Non-Scope
 
-This draft does not decide:
+This decision does not decide:
 
 - final data schemas or serialization format;
 - implementation repository structure;

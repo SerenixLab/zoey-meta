@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.13`
+Document version: `V0.2.14`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -155,84 +155,90 @@ Do not include:
 
 ## Active Decision Frontier
 
-Current milestone: define fixture and oracle data for the accepted `SCN-001` first-milestone boundary before state-contract or acceptance-gate work.
+Current milestone: define the minimum selected-slice state required by the accepted `SCN-001` first-milestone boundary, trial/time contract, evaluation policy, and fixture/oracle contract.
 
 Active questions:
 
-- `EVAL-002`
+- `SLICE-002`
 
 Pending re-triage queue after the current active frontier is resolved:
 
-- `SLICE-002`
 - `SLICE-005`
+- `EVAL-004`
+- `EVAL-005`
 - selected-slice trigger checks for `MEM`, `DEP`, `GROW`, `AUTH`, `SURF`, `INIT`, `PROD`, `LEG`, `TRUST`, and `CONT`.
 
 `EVAL-001` and `EVAL-003` are resolved by accepted `ADR-004 R3`. The first `SCN-001` milestone uses harness-curated fixture context, excludes retrieval/context-assembly claims, and accepts nondeterministic runs only through formal milestone campaigns with hard invariant gates, bounded variance, outcome-independent run selection, claim-class aggregation, and run-validity controls.
 
-`EVAL-002` is active because fixture and oracle data can now be designed against the accepted SUT boundary, selected-slice trial/time contract, curated-context policy, and formal evaluation campaign policy.
+`EVAL-002` is resolved by accepted `ADR-005 R2`. The first `SCN-001` milestone has a selected-slice fixture/oracle contract with canonical and counterfactual paths, decision-point bundles, simulator realization facts, oracle-visible fields, formal run validity, claim-class scoring, rule IDs, and bounded claim language.
 
 `GROW-001` and `TIME-002` are resolved by accepted `ADR-003`. `TIME-001` remains deferred for scheduler, reminder, due-state, expiry, background temporal-maintenance, and full longitudinal-clock semantics.
 
-No other open question currently blocks progress. Legacy reading, non-committing experiments, document review, fixture sketching, and rough implementation exploration may continue as long as they do not claim final architecture compatibility, selected-slice pass evidence, or final fixture/oracle sufficiency.
+`SLICE-002` is active because the fixture/oracle contract now defines the oracle-visible semantic responsibilities that the implementation must support without turning every oracle field into independently persisted state.
+
+`SLICE-005`, `EVAL-004`, and `EVAL-005` have been re-triaged after `ADR-005` acceptance and remain non-active until their concrete triggers occur. `SLICE-005` waits for minimum selected-slice state. `EVAL-004` triggers before the first evaluation record, comparison, or compatibility claim. `EVAL-005` triggers before final scoring or scenario-scoreability criteria are defined.
+
+No other open question currently blocks progress. Legacy reading, non-committing experiments, document review, fixture sketching, and rough implementation exploration may continue as long as they do not claim final architecture compatibility, selected-slice pass evidence, first evaluation-record sufficiency, or final acceptance-gate sufficiency.
 
 ## Active Questions
 
-### EVAL-002
+### SLICE-002
 
 Status: `Active`
 
-Question: What fixture and oracle data must the selected scenario expose without requiring hidden chain-of-thought?
+Question: What minimum persistent, derived, and inspection-only state is required for the selected slice?
 
-Why It Matters: Accepted `ADR-002`, `ADR-003`, and `ADR-004` now define the SUT-owned semantic transitions, selected-slice trial/time semantics, curated-context boundary, and formal evaluation campaign policy. The next artifact must turn those decisions into concrete fixture paths, context bundles, oracle-visible state, campaign metadata, and pass/fail evidence without handing the SUT the semantic answers.
+Why It Matters: Accepted `ADR-005` defines what the selected-slice fixture and oracle must inspect, but explicitly does not decide which oracle-visible facts must be independently persisted. The next artifact must identify the minimum implementation state needed to satisfy the selected semantic transitions without copying the oracle checklist into a database schema.
 
-Source / Pressure: `CANONICAL_SCENARIOS.md` `SCN-001`; `ADR-002`; `ADR-003`; `ADR-004`; `STATE_AND_CONTROL_MODEL.md`.
+Source / Pressure: `STATE_AND_CONTROL_MODEL.md`; `CANONICAL_SCENARIOS.md` `SCN-001`; `ADR-001`; `ADR-002`; `ADR-003`; `ADR-004`; `ADR-005`.
 
-Blocks: `SLICE-002` minimum selected-slice state, `SLICE-005` acceptance gate, and any selected-slice pass evidence claim.
+Blocks: `SLICE-003` minimum internal boundary, `DEP-001` dependency identity metadata, `SLICE-005` acceptance gate, and any implementation claim that the selected-slice state contract satisfies `ADR-005`.
 
-Does Not Block: thesis/scenario/state-model review, legacy inventory, non-committing prototypes, state-contract sketching, acceptance-gate sketching, document review, or explicitly throwaway experiments that do not claim final fixture/oracle sufficiency.
+Does Not Block: thesis/scenario/state-model review, legacy inventory, non-committing prototypes, evaluation-record sketching, acceptance-gate sketching, document review, or explicitly throwaway experiments that do not claim final selected-slice state sufficiency.
 
-Depends On: `SLICE-001`, resolved by `ADR-001`; `EVAL-006`, resolved by `ADR-002`; `GROW-001` and `TIME-002`, resolved by `ADR-003`; `EVAL-001` and `EVAL-003`, resolved by `ADR-004`.
+Depends On: `SLICE-001`, resolved by `ADR-001`; `EVAL-006`, resolved by `ADR-002`; `GROW-001` and `TIME-002`, resolved by `ADR-003`; `EVAL-001` and `EVAL-003`, resolved by `ADR-004`; `EVAL-002`, resolved by `ADR-005`.
 
-Applies When / Decision Trigger: `ADR-004` is accepted and the next artifact would define selected-slice fixture paths, oracle inspection data, or evidence records for the first `SCN-001` milestone.
+Applies When / Decision Trigger: `ADR-005` is accepted and the next artifact would define implementation state, persistence boundaries, derived-state rules, state inspection projections, or internal semantic records for the first `SCN-001` selected slice.
 
 Known Options:
 
-- Canonical path plus claim-class paired counterfactual fixture/oracle contract: define one thin canonical trajectory and the minimum counterfactual pressure needed to reject evidence-responsive and scope-responsive hardcoding.
-- Broader adversarial fixture suite: include more `SCN-001` adversarial variants now, increasing coverage but expanding first-milestone scope.
-- Smoke fixture only: acceptable for exploration, but insufficient for a first milestone claim under accepted `ADR-002`, `ADR-003`, and `ADR-004`.
+- Minimal retained semantic state plus derived oracle projections: persist only state whose identity or later use matters, derive other oracle-visible facts from event/state lineage.
+- Direct oracle-field persistence: store each oracle-visible field as persistent state, simpler to inspect but likely overfits implementation architecture to the evaluation contract.
+- Event-sourced transition log with projections: retain transition evidence and derive current semantic state, higher rigor but potentially more machinery than the first slice needs.
+- Ephemeral state only: acceptable for throwaway exploration, but insufficient for retained active-trial and later-use obligations under `ADR-005`.
 
 Decision Criteria:
 
-- exercises SUT-owned semantic transitions without supplying stale judgments, trial choices, activation decisions, later behavior dispositions, outcome conclusions, or claim-support conclusions;
-- preserves `ADR-004` curated-context state-origin, context-role, completeness, and anti-adaptive-rescue rules;
-- includes enough claim-class-specific paired counterfactual pressure to distinguish evidence-responsive and scope-responsive behavior from canonical-path hardcoding;
-- exposes oracle-visible effective state without requiring hidden chain-of-thought or a final schema;
-- defines formal campaign fixture paths, run-validity criteria, invalid-run replacement policy, outcome-independent run selection, claim-class aggregation, and evidence-record minimums;
-- keeps the first milestone narrower than full `SCN-001` scenario acceptance.
+- preserves the SUT-owned semantic distinctions required by `ADR-002`, `ADR-003`, and `ADR-005` without requiring a final production schema;
+- distinguishes independently persisted state, lineage-preserving projections, derived inspection facts, and transient run-only artifacts;
+- keeps active trial identity, proposal binding, activation checks, direct correction, later-use applicability, outcome lineage, and explanation support inspectable enough for `ADR-005`;
+- avoids turning evaluator-only annotations, fixture controls, or oracle result vectors into SUT-owned semantic state;
+- excludes retrieval, broad context assembly, durable developmental adaptation, real voice/avatar, production memory custody, and full `SCN-001` claims;
+- is small enough to implement as the first selected slice while leaving `SLICE-003`, `DEP-001`, `EVAL-004`, and `SLICE-005` for their proper triggers.
 
 Evidence Needed:
 
-- fixture responsibility table for each path, distinguishing harness-supplied fixture evidence, communication events, control facts, context labels, affordance facts, SUT-owned retained semantic state, and oracle-visible state;
-- context-bundle roles, completeness declarations by fixture-state family, declared synthetic scope, and material decision point or bundle policy;
-- canonical thin path fixture data and paired counterfactual paths required for each claimed responsiveness class under `ADR-002`/`ADR-003`/`ADR-004`;
-- oracle inspection fields for transition basis, attribution status, activation checks, retained active trial state, later-use applicability, outcome lineage, explanation support, positive-obligation failures, hard failures, and artifact-level claim invalidity;
-- formal campaign metadata required by `ADR-004`, including tested behavior configuration, evaluation configuration, fixture/oracle versions, run-selection policy, run-validity criteria, invalid-run replacement policy, deterministic replay evidence if applicable, and claim-class aggregation;
-- examples of hard-invariant failures, positive-obligation failures, invalid/unscorable runs, allowed schema or wording variance, and overclaim artifacts for the selected fixture paths.
+- state responsibility table separating persisted state, derived/projection state, fixture-supplied facts, simulator realization records, oracle-only classifications, and transient run artifacts;
+- minimum retained records or equivalent lineage for attributed assertions, temporal eligibility, scoped comparison, trial candidates, proposal bindings, activation checks, active trials, direct correction dispositions, realization refs, outcome records, and explanation support;
+- mapping from each `ADR-005` oracle-visible field family to required persistence, derivability, or inspection-only status;
+- lifecycle and identity rules for retained trial candidates and active trials across the selected synthetic trajectory;
+- examples of what must not be persisted as SUT-owned state, including fixture answer keys, evaluator annotations, claim-class result vectors, and global user/profile conclusions;
+- compatibility argument showing the minimum state supports `SCN001-SSFO-V0.2.0` without claiming retrieval/context assembly or durable adaptation.
 
-Working Assumptions / Fixtures: `ADR-001`, `ADR-002`, `ADR-003`, and `ADR-004` are accepted; first-slice state is synthetic fixture state; no real retrieval, production context assembly, real personal continuity, real voice/avatar behavior, Japanese pedagogy quality, durable developmental adaptation, statistical reliability, longitudinal drift handling, or full `SCN-001` pass is claimed.
+Working Assumptions / Fixtures: `ADR-001` through `ADR-005` are accepted; first-slice state is synthetic fixture state; oracle-visible does not automatically mean independently persisted; no real retrieval, production context assembly, real personal continuity, real voice/avatar behavior, Japanese pedagogy quality, durable developmental adaptation, statistical reliability, longitudinal drift handling, or full `SCN-001` pass is claimed.
 
 Decision Authority: project owner.
 
-Needed By: before `SLICE-002` and `SLICE-005`.
+Needed By: before `SLICE-003`, `DEP-001`, `SLICE-005`, and implementation claims of selected-slice state sufficiency.
 
-Resolution Shape: selected-slice fixture/oracle contract or short ADR.
+Resolution Shape: selected-slice minimum-state contract or short ADR.
 
 ## Open Question Index
 
 | ID | Status | Trigger | Depends On | Source | Question |
 | --- | --- | --- | --- | --- | --- |
 | `SLICE-001` | Resolved | Accepted by `ADR-001` | - | S1, S2, SCM | Choose first vertical slice: `SCN-001` or `SCN-002`. |
-| `SLICE-002` | Blocked | After `EVAL-001`, `EVAL-002`, `EVAL-003`, and accepted first-milestone boundary/trial/time/evaluation semantics are known | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-002`, `EVAL-003`, `GROW-001`, `TIME-002` | SCM, S1, S2 | What minimum persistent state is required for the selected slice? |
+| `SLICE-002` | Active | After `EVAL-001`, `EVAL-002`, `EVAL-003`, and accepted first-milestone boundary/trial/time/evaluation semantics are known | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-002`, `EVAL-003`, `GROW-001`, `TIME-002` | SCM, S1, S2 | What minimum persistent state is required for the selected slice? |
 | `SLICE-003` | Blocked | After selected-slice state/eval pressure is known | `SLICE-002`, `DEP-001`, `EVAL-002`, `EVAL-006` | SCM | What minimum internal boundary is forced by selected-slice behavior? |
 | `SLICE-005` | Blocked | After selected-slice oracle, system-under-test boundary, trial/time semantics, and acceptance semantics are known | `EVAL-002`, `EVAL-003`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2 | What acceptance gate says the first slice is done? |
 | `MEM-001` | Deferred | Selected slice proposes retaining personal state | `SLICE-001` | T, SCM | What retention bases and transient defaults does the selected slice need? |
@@ -264,7 +270,7 @@ Resolution Shape: selected-slice fixture/oracle contract or short ADR.
 | `SURF-002` | Deferred | Voice slice selected | `SURF-001`, `AUTH-001` | S2, SCM, PROD | Which console/voice differences are governed behavior rather than UI detail? |
 | `SURF-003` | Resolved | Obsolete as standalone scope prompt; future embodiment proposals create concrete questions | `SURF-001` | T, SCM, PROD | Which embodiment questions are unsupported until surface contracts are stable? |
 | `EVAL-001` | Resolved | Accepted by `ADR-004` Decision A | `SLICE-001`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2, SCM | Does the first slice test context discovery, or does the harness inject curated context? |
-| `EVAL-002` | Active | `ADR-004` accepted; fixture/oracle design needed before state-contract and acceptance-gate work | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-003`, `GROW-001`, `TIME-002` | S1, S2 | What fixture and oracle data must the selected scenario expose without requiring hidden chain-of-thought? |
+| `EVAL-002` | Resolved | Accepted by `ADR-005 R2` | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-003`, `GROW-001`, `TIME-002` | S1, S2, SCM | What fixture and oracle data must the selected scenario expose without requiring hidden chain-of-thought? |
 | `EVAL-003` | Resolved | Accepted by `ADR-004` Decision B | `SLICE-001`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2 | How are nondeterministic runs accepted, and which invariant failures are hard failures? |
 | `EVAL-004` | Deferred | The selected slice is preparing its first evaluation record, comparison, or compatibility claim | `EVAL-002`, `EVAL-003`, `EVAL-006` | S1, S2, SCM | What behavior-configuration metadata must each evaluation record include? |
 | `EVAL-005` | Deferred | The selected slice is preparing to define scoring or claim scenario scoreability | `EVAL-002`, `EVAL-003`, `EVAL-006` | S1, S2 | For the selected slice and declared system-under-test boundary, which unresolved questions affect specific pass criteria, and which may be carried as identified fixture assumptions without strengthening the evaluation claim? |
@@ -418,6 +424,22 @@ Future Trigger: a later milestone claims full `SCN-001` pass, longitudinal drift
 
 Date: 2026-07-08
 
+### EVAL-002
+
+Outcome: `Decision`
+
+Decision Authority / Accepted By: project owner by accepting `ADR-005 R2`.
+
+Resolution Artifact: `decisions/ADR-005-scn001-selected-slice-fixture-oracle-contract.md`.
+
+Resolved Against / Scope: first `SCN-001` milestone uses selected-slice fixture/oracle package `SCN001-SSFO-V0.2.0`. The contract defines canonical and counterfactual paths, exact decision-point bundle membership, fixture-control facts, simulator realization facts, oracle-visible fields, run-validity rules, claim-class obligation mapping, package-local oracle rule IDs, bounded variance, failure artifacts, and bounded claim language without requiring hidden chain-of-thought or a final implementation schema.
+
+Supersedes / Split From: none.
+
+Future Trigger: material change to selected-slice fixture/oracle semantics, inability of `SLICE-002`, `SLICE-005`, `EVAL-004`, or `EVAL-005` to preserve the accepted fixture/oracle boundary, or a later milestone claiming broader `SCN-001` evidence than `ADR-005` permits.
+
+Date: 2026-07-08
+
 ### INIT-003
 
 Outcome: `Merged`
@@ -512,6 +534,6 @@ The register is acceptable only if:
 
 ## Next Decision Step
 
-Prepare the fixture/oracle contract for `EVAL-002` under accepted `ADR-002`, `ADR-003`, and `ADR-004`.
+Prepare the minimum selected-slice state contract for `SLICE-002` under accepted `ADR-001` through `ADR-005`.
 
-Define the canonical thin path, claim-class paired counterfactual pressure, context-bundle roles and completeness declarations, oracle-visible state fields, formal campaign metadata, run-validity criteria, invalid-run replacement policy, and claim-class aggregation without requiring hidden chain-of-thought or supplying the SUT's semantic answers. After `EVAL-002` is accepted, address `SLICE-002` before defining the first acceptance gate.
+Define which `ADR-005` oracle-visible facts require independently persisted state, which may be lineage-preserving projections, which may be derived inspection facts, and which remain fixture/oracle-only artifacts. Preserve the accepted SUT boundary, selected-slice trial/time semantics, curated-context policy, and fixture/oracle contract without turning oracle fields into a final database schema.
