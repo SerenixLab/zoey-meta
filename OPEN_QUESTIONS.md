@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.12`
+Document version: `V0.2.13`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -155,23 +155,21 @@ Do not include:
 
 ## Active Decision Frontier
 
-Current milestone: define context-boundary and nondeterministic acceptance policy for the accepted `SCN-001` first-milestone boundary before fixture/oracle, state-contract, or acceptance-gate work.
+Current milestone: define fixture and oracle data for the accepted `SCN-001` first-milestone boundary before state-contract or acceptance-gate work.
 
 Active questions:
 
-- `EVAL-001`
-- `EVAL-003`
+- `EVAL-002`
 
 Pending re-triage queue after the current active frontier is resolved:
 
-- `EVAL-002`
 - `SLICE-002`
 - `SLICE-005`
 - selected-slice trigger checks for `MEM`, `DEP`, `GROW`, `AUTH`, `SURF`, `INIT`, `PROD`, `LEG`, `TRUST`, and `CONT`.
 
-`EVAL-001` is active because accepted `ADR-002` and `ADR-003` define the SUT-owned semantic transitions, but the first evaluation still must decide whether context discovery/relevance selection is inside the tested boundary or whether the harness injects curated context.
+`EVAL-001` and `EVAL-003` are resolved by accepted `ADR-004 R3`. The first `SCN-001` milestone uses harness-curated fixture context, excludes retrieval/context-assembly claims, and accepts nondeterministic runs only through formal milestone campaigns with hard invariant gates, bounded variance, outcome-independent run selection, claim-class aggregation, and run-validity controls.
 
-`EVAL-003` is active because fixture/oracle data and acceptance gates cannot be finalized until nondeterministic run acceptance and hard invariant failures are defined for the selected milestone.
+`EVAL-002` is active because fixture and oracle data can now be designed against the accepted SUT boundary, selected-slice trial/time contract, curated-context policy, and formal evaluation campaign policy.
 
 `GROW-001` and `TIME-002` are resolved by accepted `ADR-003`. `TIME-001` remains deferred for scheduler, reminder, due-state, expiry, background temporal-maintenance, and full longitudinal-clock semantics.
 
@@ -179,100 +177,55 @@ No other open question currently blocks progress. Legacy reading, non-committing
 
 ## Active Questions
 
-### EVAL-001
+### EVAL-002
 
 Status: `Active`
 
-Question: Does the first slice test context discovery, or does the harness inject curated context?
+Question: What fixture and oracle data must the selected scenario expose without requiring hidden chain-of-thought?
 
-Why It Matters: `ADR-002` and `ADR-003` put stale-history handling, attributed assertions, trial formation, trial activation, later behavior disposition, and selected staleness semantics inside the SUT. The first fixture/oracle decision must now say whether the SUT is also responsible for discovering and selecting relevant context from available retained state, or whether the harness provides a curated effective context bundle.
+Why It Matters: Accepted `ADR-002`, `ADR-003`, and `ADR-004` now define the SUT-owned semantic transitions, selected-slice trial/time semantics, curated-context boundary, and formal evaluation campaign policy. The next artifact must turn those decisions into concrete fixture paths, context bundles, oracle-visible state, campaign metadata, and pass/fail evidence without handing the SUT the semantic answers.
 
-Source / Pressure: `ADR-002`; `ADR-003`; `CANONICAL_SCENARIOS.md` `SCN-001`; `STATE_AND_CONTROL_MODEL.md`.
+Source / Pressure: `CANONICAL_SCENARIOS.md` `SCN-001`; `ADR-002`; `ADR-003`; `ADR-004`; `STATE_AND_CONTROL_MODEL.md`.
 
-Blocks: `EVAL-002` fixture/oracle design, `SLICE-002` minimum selected-slice state, and any milestone claim that includes context discovery, retrieval, relevance selection, or context-assembly behavior.
+Blocks: `SLICE-002` minimum selected-slice state, `SLICE-005` acceptance gate, and any selected-slice pass evidence claim.
 
-Does Not Block: nondeterminism policy discussion, thesis/scenario/state-model review, legacy inventory, fixture sketching, non-committing prototypes, document review, or explicitly throwaway experiments that do not claim final context-boundary evidence.
+Does Not Block: thesis/scenario/state-model review, legacy inventory, non-committing prototypes, state-contract sketching, acceptance-gate sketching, document review, or explicitly throwaway experiments that do not claim final fixture/oracle sufficiency.
 
-Depends On: `SLICE-001`, resolved by `ADR-001`; `EVAL-006`, resolved by `ADR-002`; `GROW-001` and `TIME-002`, resolved by `ADR-003`.
+Depends On: `SLICE-001`, resolved by `ADR-001`; `EVAL-006`, resolved by `ADR-002`; `GROW-001` and `TIME-002`, resolved by `ADR-003`; `EVAL-001` and `EVAL-003`, resolved by `ADR-004`.
 
-Applies When / Decision Trigger: `ADR-003` is accepted and the next artifact would define fixture/oracle data, state contracts, or acceptance claims that depend on what context the SUT receives versus discovers.
-
-Known Options:
-
-- Harness-curated context: the harness supplies a bounded, relevant effective context bundle while the SUT owns the semantic transitions over that context. This avoids testing retrieval/context discovery in the first milestone.
-- SUT context discovery: the harness supplies available retained state and events, and the SUT must retrieve/select relevant context before semantic transitions. This broadens the first milestone substantially.
-- Hybrid bounded discovery: the harness supplies a small available-context set with distractors, and the SUT owns a limited relevance-selection step without claiming general memory retrieval.
-
-Decision Criteria:
-
-- preserves `ADR-002` and `ADR-003` central SUT responsibilities without allowing the harness to supply semantic answers;
-- prevents a context-curation choice from becoming an unclaimed hidden dependency in fixture/oracle evidence;
-- is narrow enough for the first milestone and explicit about any claim it excludes;
-- distinguishes available context, discovered candidate context, active cognitive frame, and semantic transition basis where the selected boundary needs those distinctions;
-- avoids claiming general retrieval, memory search, or context-assembly capability unless that work is actually inside the tested boundary.
-
-Evidence Needed:
-
-- fixture responsibility table for available retained state, curated context, distractors if any, and active context supplied to the SUT;
-- examples showing whether stale old history, current calibration, explicit drill preference, later correction, and outcome evidence are supplied as curated context or discovered from available state;
-- claim boundary for what the milestone may and may not say about context discovery, retrieval, relevance selection, and context assembly;
-- oracle inspection fields needed to show the chosen context boundary without requiring hidden chain-of-thought.
-
-Working Assumptions / Fixtures: `ADR-001`, `ADR-002`, and `ADR-003` are accepted; first-slice state is synthetic fixture state; no real memory retrieval or production context-assembly claim is made unless this question puts it inside the selected boundary.
-
-Decision Authority: project owner.
-
-Needed By: before `EVAL-002`, `SLICE-002`, and `SLICE-005`.
-
-Resolution Shape: selected-slice context-boundary decision or short ADR.
-
-### EVAL-003
-
-Status: `Active`
-
-Question: How are nondeterministic runs accepted, and which invariant failures are hard failures?
-
-Why It Matters: `ADR-002` and `ADR-003` define semantic transitions that may be produced by nondeterministic model or orchestration behavior. Before fixture/oracle data or acceptance gates can be final, the milestone needs a policy for which variation is acceptable, which invariants are hard failures, and what run evidence is sufficient for a bounded claim.
-
-Source / Pressure: `CANONICAL_SCENARIOS.md` evaluation semantics; `ADR-002`; `ADR-003`; `STATE_AND_CONTROL_MODEL.md`.
-
-Blocks: `EVAL-002` fixture/oracle design, `SLICE-005` acceptance gate, and any scenario-run or milestone evidence claim.
-
-Does Not Block: context-boundary discussion, thesis/scenario/state-model review, legacy inventory, fixture sketching, non-committing prototypes, document review, or explicitly throwaway experiments that do not claim accepted run evidence.
-
-Depends On: `SLICE-001`, resolved by `ADR-001`; `EVAL-006`, resolved by `ADR-002`; `GROW-001` and `TIME-002`, resolved by `ADR-003`.
-
-Applies When / Decision Trigger: `ADR-003` is accepted and the next artifact would define fixture/oracle data, acceptance gates, or run-level pass/fail evidence for the first `SCN-001` milestone.
+Applies When / Decision Trigger: `ADR-004` is accepted and the next artifact would define selected-slice fixture paths, oracle inspection data, or evidence records for the first `SCN-001` milestone.
 
 Known Options:
 
-- Hard-invariant gate plus bounded variance: define non-negotiable state/control failures and allow natural-language or benign path variance when effective state satisfies the oracle.
-- Repeated-run acceptance: require multiple successful runs or a rate/threshold for positive obligations while any hard invariant failure fails the configuration.
-- Single-run smoke evidence only: acceptable for early exploration but too weak for a first milestone claim unless the claim is deliberately narrowed.
+- Canonical path plus claim-class paired counterfactual fixture/oracle contract: define one thin canonical trajectory and the minimum counterfactual pressure needed to reject evidence-responsive and scope-responsive hardcoding.
+- Broader adversarial fixture suite: include more `SCN-001` adversarial variants now, increasing coverage but expanding first-milestone scope.
+- Smoke fixture only: acceptable for exploration, but insufficient for a first milestone claim under accepted `ADR-002`, `ADR-003`, and `ADR-004`.
 
 Decision Criteria:
 
-- preserves canonical scenario evaluation semantics: run-level pass does not automatically establish scenario-level acceptance;
-- identifies hard invariant failures that cannot be averaged away;
-- defines acceptable variance without requiring exact wording, hidden chain-of-thought, or one final schema;
-- names minimum run evidence and tested behavior-configuration metadata needed before claiming a milestone pass;
+- exercises SUT-owned semantic transitions without supplying stale judgments, trial choices, activation decisions, later behavior dispositions, outcome conclusions, or claim-support conclusions;
+- preserves `ADR-004` curated-context state-origin, context-role, completeness, and anti-adaptive-rescue rules;
+- includes enough claim-class-specific paired counterfactual pressure to distinguish evidence-responsive and scope-responsive behavior from canonical-path hardcoding;
+- exposes oracle-visible effective state without requiring hidden chain-of-thought or a final schema;
+- defines formal campaign fixture paths, run-validity criteria, invalid-run replacement policy, outcome-independent run selection, claim-class aggregation, and evidence-record minimums;
 - keeps the first milestone narrower than full `SCN-001` scenario acceptance.
 
 Evidence Needed:
 
-- list of hard invariant failures for accepted `ADR-002`/`ADR-003` responsibilities;
-- examples of allowed wording/path variance that still exposes equivalent effective state;
-- examples of nondeterministic failures that invalidate the run or tested configuration;
-- minimum run count or acceptance policy for positive obligations, if more than one run is required;
-- behavior-configuration metadata needed to bind evidence to the tested system.
+- fixture responsibility table for each path, distinguishing harness-supplied fixture evidence, communication events, control facts, context labels, affordance facts, SUT-owned retained semantic state, and oracle-visible state;
+- context-bundle roles, completeness declarations by fixture-state family, declared synthetic scope, and material decision point or bundle policy;
+- canonical thin path fixture data and paired counterfactual paths required for each claimed responsiveness class under `ADR-002`/`ADR-003`/`ADR-004`;
+- oracle inspection fields for transition basis, attribution status, activation checks, retained active trial state, later-use applicability, outcome lineage, explanation support, positive-obligation failures, hard failures, and artifact-level claim invalidity;
+- formal campaign metadata required by `ADR-004`, including tested behavior configuration, evaluation configuration, fixture/oracle versions, run-selection policy, run-validity criteria, invalid-run replacement policy, deterministic replay evidence if applicable, and claim-class aggregation;
+- examples of hard-invariant failures, positive-obligation failures, invalid/unscorable runs, allowed schema or wording variance, and overclaim artifacts for the selected fixture paths.
 
-Working Assumptions / Fixtures: `ADR-001`, `ADR-002`, and `ADR-003` are accepted; the first milestone is a bounded first-milestone claim, not full `SCN-001` scenario acceptance.
+Working Assumptions / Fixtures: `ADR-001`, `ADR-002`, `ADR-003`, and `ADR-004` are accepted; first-slice state is synthetic fixture state; no real retrieval, production context assembly, real personal continuity, real voice/avatar behavior, Japanese pedagogy quality, durable developmental adaptation, statistical reliability, longitudinal drift handling, or full `SCN-001` pass is claimed.
 
 Decision Authority: project owner.
 
-Needed By: before `EVAL-002`, `SLICE-002`, and `SLICE-005`.
+Needed By: before `SLICE-002` and `SLICE-005`.
 
-Resolution Shape: selected-slice nondeterministic acceptance and invariant-failure policy or short ADR.
+Resolution Shape: selected-slice fixture/oracle contract or short ADR.
 
 ## Open Question Index
 
@@ -310,9 +263,9 @@ Resolution Shape: selected-slice nondeterministic acceptance and invariant-failu
 | `SURF-001` | Deferred | Second surface is planned | `SLICE-001` | T, SCM | What surface contract preserves identity, authority, disclosure, state updates, and uncertainty reporting? |
 | `SURF-002` | Deferred | Voice slice selected | `SURF-001`, `AUTH-001` | S2, SCM, PROD | Which console/voice differences are governed behavior rather than UI detail? |
 | `SURF-003` | Resolved | Obsolete as standalone scope prompt; future embodiment proposals create concrete questions | `SURF-001` | T, SCM, PROD | Which embodiment questions are unsupported until surface contracts are stable? |
-| `EVAL-001` | Active | `ADR-003` accepted; context-boundary decision needed before fixture/oracle and state-contract work | `SLICE-001`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2, SCM | Does the first slice test context discovery, or does the harness inject curated context? |
-| `EVAL-002` | Blocked | After `EVAL-001`, `EVAL-003`, and accepted boundary/trial/time semantics | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-003`, `GROW-001`, `TIME-002` | S1, S2 | What fixture and oracle data must the selected scenario expose without requiring hidden chain-of-thought? |
-| `EVAL-003` | Active | `ADR-003` accepted; nondeterministic acceptance policy needed before fixture/oracle and acceptance gates | `SLICE-001`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2 | How are nondeterministic runs accepted, and which invariant failures are hard failures? |
+| `EVAL-001` | Resolved | Accepted by `ADR-004` Decision A | `SLICE-001`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2, SCM | Does the first slice test context discovery, or does the harness inject curated context? |
+| `EVAL-002` | Active | `ADR-004` accepted; fixture/oracle design needed before state-contract and acceptance-gate work | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-003`, `GROW-001`, `TIME-002` | S1, S2 | What fixture and oracle data must the selected scenario expose without requiring hidden chain-of-thought? |
+| `EVAL-003` | Resolved | Accepted by `ADR-004` Decision B | `SLICE-001`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2 | How are nondeterministic runs accepted, and which invariant failures are hard failures? |
 | `EVAL-004` | Deferred | The selected slice is preparing its first evaluation record, comparison, or compatibility claim | `EVAL-002`, `EVAL-003`, `EVAL-006` | S1, S2, SCM | What behavior-configuration metadata must each evaluation record include? |
 | `EVAL-005` | Deferred | The selected slice is preparing to define scoring or claim scenario scoreability | `EVAL-002`, `EVAL-003`, `EVAL-006` | S1, S2 | For the selected slice and declared system-under-test boundary, which unresolved questions affect specific pass criteria, and which may be carried as identified fixture assumptions without strengthening the evaluation claim? |
 | `EVAL-006` | Resolved | Accepted by `ADR-002` | `SLICE-001` | S1, S2, SCM | What is inside the system-under-test boundary for the selected slice, and which semantic inputs, control facts, time events, actor-assurance facts, external-system behavior, or cognitive candidates are supplied by the harness or simulated dependencies? |
@@ -433,6 +386,38 @@ Future Trigger: material change to the selected-slice staleness rule, need for a
 
 Date: 2026-07-07
 
+### EVAL-001
+
+Outcome: `Decision`
+
+Decision Authority / Accepted By: project owner by accepting `ADR-004 R3`.
+
+Resolution Artifact: `decisions/ADR-004-scn001-first-milestone-evaluation-policy.md`, Decision A.
+
+Resolved Against / Scope: first `SCN-001` milestone uses harness-curated fixture context at each material decision point. The SUT owns semantic use of supplied context, but this milestone excludes open retrieval, memory search, broad relevance selection, distractor filtering, and active context-assembly claims. Curated context is constrained by state-origin, role-preservation, completeness, and anti-adaptive-rescue rules.
+
+Supersedes / Split From: none.
+
+Future Trigger: a later milestone claims retrieval quality, context discovery, relevance selection, sensitivity-aware context assembly, production memory architecture, or inability of `EVAL-002`, `SLICE-002`, or `SLICE-005` to preserve `ADR-004` Decision A.
+
+Date: 2026-07-08
+
+### EVAL-003
+
+Outcome: `Decision`
+
+Decision Authority / Accepted By: project owner by accepting `ADR-004 R3`.
+
+Resolution Artifact: `decisions/ADR-004-scn001-first-milestone-evaluation-policy.md`, Decision B.
+
+Resolved Against / Scope: first `SCN-001` milestone uses formal milestone evaluation campaigns with hard invariant gates plus bounded variance. Nondeterministic configurations require three fresh valid runs per fixture path, outcome-independent run selection, fresh-run isolation, run-validity controls, invalid-run replacement review, claim-class aggregation, and no hard-invariant averaging. Deterministic replayable configurations may use one recorded run per fixture path only when material inspected-state replayability is established.
+
+Supersedes / Split From: none.
+
+Future Trigger: a later milestone claims full `SCN-001` pass, longitudinal drift handling, production rollout reliability, statistical acceptance, or inability of `EVAL-002` or `SLICE-005` to preserve `ADR-004` Decision B.
+
+Date: 2026-07-08
+
 ### INIT-003
 
 Outcome: `Merged`
@@ -527,6 +512,6 @@ The register is acceptable only if:
 
 ## Next Decision Step
 
-Prepare the evidence for `EVAL-001` and `EVAL-003` under accepted `ADR-002` and `ADR-003`.
+Prepare the fixture/oracle contract for `EVAL-002` under accepted `ADR-002`, `ADR-003`, and `ADR-004`.
 
-First, decide whether the first milestone tests context discovery or receives curated context, and define the selected-slice nondeterministic acceptance/hard-invariant policy. After those are accepted, address `EVAL-002` before defining state contracts or acceptance gates.
+Define the canonical thin path, claim-class paired counterfactual pressure, context-bundle roles and completeness declarations, oracle-visible state fields, formal campaign metadata, run-validity criteria, invalid-run replacement policy, and claim-class aggregation without requiring hidden chain-of-thought or supplying the SUT's semantic answers. After `EVAL-002` is accepted, address `SLICE-002` before defining the first acceptance gate.
