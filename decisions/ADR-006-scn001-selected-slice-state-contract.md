@@ -1,14 +1,16 @@
 # ADR-006: SCN-001 Selected-Slice State Contract
 
-Status: `Proposed`
+Status: `Accepted`
 
 Date: 2026-07-08
+
+Accepted: 2026-07-09
 
 Record revision: `R2`
 
 Decision authority: project owner
 
-Related open question: `SLICE-002`
+Resolved question IDs: `SLICE-002`
 
 Decision-Time Baselines:
 
@@ -22,7 +24,7 @@ Decision-Time Baselines:
 - `decisions/ADR-004-scn001-first-milestone-evaluation-policy.md` `R3`
 - `decisions/ADR-005-scn001-selected-slice-fixture-oracle-contract.md` `R2`
 
-Proposed post-decision register state: acceptance of this ADR would resolve `SLICE-002` for the first `SCN-001` selected slice, activate `DEP-001` as the next immediate frontier, leave `SLICE-003` blocked until dependency identity metadata is known, and re-triage `SLICE-005`, `EVAL-004`, and `EVAL-005` without automatically activating them.
+Post-decision register state: `OPEN_QUESTIONS.md` `V0.2.15` records `SLICE-002` as resolved by this ADR, activates `DEP-001` as the next immediate frontier, leaves `SLICE-003` blocked until dependency identity metadata is known, and re-triages `SLICE-005`, `EVAL-004`, and `EVAL-005` without automatically activating them.
 
 ## Decision
 
@@ -282,9 +284,9 @@ This state contract does not support or require:
 | `ADR-005 R2` | The oracle-visible checklist could be copied wholesale into cross-transition state, or under-persisted so later behavior is narrative-only. | The mapping separates cross-transition state, transition evidence, projections, derived inspection facts, and oracle-only facts. Behavior-driving transitions retain identity only to their required horizon; scoring, validity, aggregation, and claim-boundary facts remain oracle-only. |
 | Mechanism and topology non-assumptions | The state contract could define candidates, retained trial state, or explanation support as outputs of a specific local model chain, hosted model, provider session, prompt artifact, or future "Zoey Core" module. | Semantic roles are mechanism-neutral while preserving lineage. Candidate-producing mechanisms do not gain activation authority, computational artifacts are not automatically semantic state, and opaque mechanism-local memory cannot satisfy selected-slice persistence obligations. This is not an `EVAL-004` compatibility claim. |
 
-## Proposed Register Effect
+## Register Effect
 
-If accepted, update `OPEN_QUESTIONS.md` as follows:
+Upon acceptance, update `OPEN_QUESTIONS.md` as follows:
 
 - move `SLICE-002` to `Resolved` with outcome `Decision`, resolved by this ADR for the first `SCN-001` selected-slice milestone;
 - record that the selected state contract uses minimum run-scoped cross-transition state, SUT-owned transition evidence, and lineage-preserving projections, not a final schema or production memory architecture;
