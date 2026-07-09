@@ -1,6 +1,6 @@
 # Zoey Engineering Standard
 
-Document version: `V0.1.1`
+Document version: `V0.2.0`
 
 Status: `Draft`
 
@@ -35,6 +35,23 @@ It is not a product architecture, acceptance gate, scoring policy, runtime trust
 
 The standard is intentionally stricter where mistakes could create an unearned selected-slice pass, leak oracle information into SUT behavior, hide state provenance, or make later evidence impossible to inspect.
 
+## Authority And Baseline Validity
+
+This standard is a derivative engineering-conformance artifact. It does not create, redefine, or supersede semantic architecture decisions.
+
+For any selected-slice rule in this standard:
+
+```text
+governing ADR or register entry = semantic authority
+ENGINEERING_STANDARD.md = engineering consequence and enforcement path
+```
+
+If this standard conflicts with a cited governing artifact, the governing artifact wins. The affected standard rule is treated as invalid for conformance claims until corrected.
+
+The standard is valid only against the exact baseline listed above. If any listed governing artifact is superseded, materially revised, or discovered not to be accepted at the declared revision, implementation work MUST revalidate the affected rules before using this standard to support architecture-compatibility, selected-slice, or milestone claims.
+
+The implementation repo MUST record the governing baseline it uses. A conformance ledger entry that cites this standard without also citing the governing ADR/register source is incomplete.
+
 ## Engineering Need Analysis
 
 The accepted ADR sequence creates an unusual engineering problem: the first implementation must be small and synthetic, but its code must preserve distinctions that are normally lost in prototypes.
@@ -51,6 +68,17 @@ The strongest risks found in the current design baseline are:
 - overclaiming: implementation artifacts imply acceptance, scoreability, production memory, or full scenario pass before the corresponding questions are resolved.
 
 The engineering response is therefore not to pick a final framework early. It is to create mechanical guardrails around ownership, dependency direction, input safety, output selection, state evidence, relation inspection, test coverage, and claim language.
+
+The research-backed principle used here is: standards should define outcomes and checkpoints without pretending that one tool or workflow is universal. NIST's SSDF is useful as a model here because it frames practices as outcomes rather than mandating one mechanism. Google Engineering Practices are useful for the code-health layer because they emphasize small, reviewable changes, tests with behavior changes, and continuous code-health improvement. OWASP SAMM is useful for the conformance layer because it treats internal policies and standards as application-specific requirements that can be measured.
+
+## External Engineering References
+
+These references inform the shape of this standard. They are not semantic authority for Zoey; accepted Zoey ADRs and registers remain authoritative.
+
+- NIST SP 800-218, Secure Software Development Framework: <https://csrc.nist.gov/pubs/sp/800/218/final>. Used for the idea that a standard should define high-level outcomes, residual-risk visibility, and common vocabulary without binding the project to one tool.
+- Google Engineering Practices, Code Review Standard: <https://google.github.io/eng-practices/review/reviewer/standard.html>. Used for the code-health floor, especially the rule that each change should improve or at least not degrade overall code health.
+- Google Engineering Practices, Small CLs: <https://google.github.io/eng-practices/review/developer/small-cls.html>. Used for small, self-contained changes, behavior-change test obligation, and separating refactors from feature changes.
+- OWASP SAMM Policy And Compliance: <https://owaspsamm.org/model/governance/policy-and-compliance/>. Used for application-specific requirements, baseline expectations, checkpoints, and measurable adherence.
 
 ## Engineering Layers
 
@@ -100,6 +128,46 @@ mechanically impossible
 
 Rules that protect SUT/evaluation dependency direction, answer-bearing payload exclusion, SUT-visible reference safety, public-boundary behavior evidence, inspection passivity, and harness non-arbitration SHOULD become `static`, `contract-test`, or `negative-test` before they support selected-slice claims.
 
+## Engineering Rule Identity
+
+Binding implementation rules SHOULD have stable rule IDs before they are used in tests, reviews, CI output, trace metadata, or conformance claims.
+
+Use these prefixes unless the implementation repo defines a stricter local scheme:
+
+| Prefix | Rule family |
+| --- | --- |
+| `ENG-BASE-*` | Baseline validity, source authority, and revision checks. |
+| `ENG-HEALTH-*` | General code-health and change-discipline floor. |
+| `ENG-CONF-*` | Selected-slice architecture conformance. |
+| `ENG-CLAIM-*` | Artifact labeling, evidence labels, and claim boundaries. |
+| `ENG-CHANGE-*` | Change-control triggers and deferred-question activation. |
+
+Each binding rule SHOULD be expressible in this form:
+
+```text
+ID:
+Source:
+Rule:
+Forbidden Shape:
+Required Check:
+Enforcement Class:
+Failure Consequence:
+```
+
+Example:
+
+```text
+ID: ENG-CONF-IMPORT-001
+Source: ADR-008 R2; ENGINEERING_STANDARD.md V0.2.0
+Rule: SUT core has no direct or transitive dependency path to evaluation modules.
+Forbidden Shape: scn001_sut_core imports, instantiates, configures, or reflects into scn001_eval.
+Required Check: language-appropriate dependency conformance check plus review of dynamic import surfaces.
+Enforcement Class: static, with residual-risk review gate for dynamic loading if present.
+Failure Consequence: block merge or mark the work throwaway; the run cannot support selected-slice implementation claims.
+```
+
+If a test fails, review blocks, or report flags a conformance issue, it SHOULD name the rule ID and governing source. This keeps failures tied to the accepted architecture instead of to reviewer preference.
+
 ## Conformance Ledger
 
 Each non-throwaway implementation repo SHOULD maintain a small conformance ledger. It may be a Markdown file, test manifest, CI note, or equivalent project-local artifact.
@@ -107,6 +175,7 @@ Each non-throwaway implementation repo SHOULD maintain a small conformance ledge
 The ledger SHOULD use this shape:
 
 ```text
+Rule ID:
 Rule:
 Source:
 Applies To:
@@ -121,8 +190,9 @@ Last Checked:
 Example:
 
 ```text
+Rule ID: ENG-CONF-IMPORT-001.
 Rule: SUT core has no dependency path to evaluation modules.
-Source: ADR-008 R2; ENGINEERING_STANDARD.md V0.1.1.
+Source: ADR-008 R2; ENGINEERING_STANDARD.md V0.2.0.
 Applies To: scn001_sut_core.
 Enforcement Class: static.
 Mechanism: implementation-selected import/dependency conformance tool.
@@ -226,18 +296,90 @@ A refactor is not acceptable if it keeps final behavior but loses:
 
 The first implementation SHOULD stay small, explicit, and local. The goal is not to create a general framework; it is to make the selected-slice pressure executable without losing the accepted distinctions.
 
-Non-throwaway implementation SHOULD follow these rules:
+Non-throwaway implementation SHOULD follow these rules.
 
-- modules and files should have one visible responsibility;
-- helpers should be local before they become shared;
-- shared helpers must not hide ownership boundaries;
-- abstractions should be introduced only after repeated concrete pressure appears;
-- tests should explain which boundary or behavior they protect;
-- failure messages should point to the violated contract or rule;
-- dead scaffolding should be removed or clearly marked throwaway;
-- broad names such as `manager`, `engine`, `context`, `memory`, `state`, `handler`, or `processor` should be avoided unless the responsibility is explicitly bounded;
-- generated code should be reviewed before it creates project structure, record families, or shared contracts;
-- documentation should explain current non-scope as clearly as current capability.
+### Change Discipline
+
+Each change SHOULD have one primary purpose:
+
+- feature behavior;
+- boundary/conformance protection;
+- test coverage;
+- refactor;
+- documentation;
+- build/tooling.
+
+Mixing behavior changes with broad refactors SHOULD NOT happen unless the implementation records why the split would be more dangerous than the combined change. In that case, the review must identify which lines are behavior-changing and which are structural.
+
+Large changes SHOULD be split when they cross multiple ownership areas, introduce new public contracts, move state ownership, or touch both SUT and evaluation code. A change that cannot be understood by direct review is too large to support first-slice evidence without an explicit split plan.
+
+### Behavior-Change Test Obligation
+
+Any non-throwaway behavior change SHOULD add or update tests that fail without the change.
+
+Bug fixes SHOULD include a regression test unless the failure is purely editorial, build-environment-specific, or not reproducible in the implementation test harness. If no regression test is added, the reason must be recorded in the review or ledger.
+
+Tests SHOULD name the behavior, boundary, or rule they protect. A vague test that only checks a happy-path final string is insufficient when the change affects state ownership, evaluation visibility, relation evidence, harness behavior, or claim labels.
+
+### Refactoring Discipline
+
+A refactor must preserve externally relevant behavior and conformance evidence.
+
+Refactors SHOULD be separate from feature changes. If a refactor changes behavior, the change is not a pure refactor and must satisfy the behavior-change test obligation.
+
+Refactors MUST NOT remove, merge, rename, or hide evidence needed to inspect:
+
+- input role and state origin;
+- SUT-owned transition basis;
+- retained state identity;
+- effective endpoint identity;
+- order and consumer history;
+- local typed relations;
+- separation between SUT state and oracle-only facts;
+- passive inspection surface.
+
+### Locality And Naming
+
+Modules and files SHOULD have one visible responsibility.
+
+Helpers SHOULD be local before they become shared. Shared helpers MUST NOT hide ownership boundaries or create a transitive path from SUT core to evaluation-owned semantics.
+
+Abstractions SHOULD be introduced only after repeated concrete pressure appears. A generic abstraction is suspect if it appears before at least two concrete call sites prove the shared shape.
+
+Broad names such as `manager`, `engine`, `context`, `memory`, `state`, `handler`, `processor`, `service`, or `system` SHOULD be avoided unless the responsibility is explicitly bounded in the name or module path.
+
+### Dead Code, TODOs, And Scaffolding
+
+Dead scaffolding SHOULD be removed once it is no longer needed.
+
+Throwaway code MUST remain clearly marked and MUST NOT be imported by non-throwaway implementation code.
+
+TODOs in non-throwaway code SHOULD identify one of:
+
+- the governing ADR or open question that blocks completion;
+- the follow-up issue or decision record;
+- the reason the work is intentionally deferred;
+- the review owner responsible for removing or resolving it.
+
+A TODO that says only `fix later`, `temporary`, or `clean up` is not enough for architecture-bearing code.
+
+### Failure Quality
+
+Failure messages SHOULD point to the violated contract, rule ID, or governing ADR.
+
+Boundary failures SHOULD fail closed and explain what was rejected without exposing oracle answers, expected transitions, branch labels, claim-class labels, or scoring metadata to SUT-visible surfaces.
+
+### Generated Structure
+
+Generated code SHOULD be reviewed before it creates project structure, record families, shared contracts, broad DTOs, or serialized payload shapes.
+
+Generated code MUST NOT become the first source of authority for ownership boundaries, state categories, relation names, evidence labels, or acceptance claims.
+
+### Documentation Symmetry
+
+Documentation should explain current non-scope as clearly as current capability.
+
+Implementation documentation SHOULD make unsupported claims hard to copy into demos, reports, or README summaries.
 
 Code-health failures do not automatically violate ADR-008, but they make boundary review weaker. A small confusing helper can become the first dependency leak. A broad DTO can become the first answer leak. A vague test can become the first overclaim.
 
@@ -258,6 +400,26 @@ The first implementation profile consists of the following mandatory conformance
 | Reports and traces cannot claim acceptance before trigger questions resolve | `review-gate` plus documentation test where practical |
 
 If an implementation cannot enforce one of these areas mechanically yet, the conformance ledger MUST record the residual risk before the code is used as non-throwaway implementation.
+
+## Engineering Consequence Matrix
+
+This matrix is the intended shape of selected-slice enforcement. It does not replace the governing ADRs; it maps them to implementation consequences.
+
+| Rule ID | Source | Engineering consequence | Preferred enforcement | Failure consequence |
+| --- | --- | --- | --- | --- |
+| `ENG-BASE-001` | Baseline list in this standard | Conformance claims must cite the exact governing ADR/register revisions used by the implementation. | `review-gate` plus ledger check | Claim is incomplete until baseline is recorded. |
+| `ENG-CONF-IMPORT-001` | `ADR-008 R2` | SUT core has no direct or transitive dependency path to evaluation modules. | `static` | Block merge or mark work throwaway. |
+| `ENG-CONF-PAYLOAD-001` | `ADR-005 R2`; `ADR-008 R2` | SUT-visible payloads use allowlist projection and reject answer-bearing or unknown evaluation fields. | `contract-test` plus `negative-test` | Behavior evidence is invalid until rejected paths fail closed. |
+| `ENG-CONF-ROLE-001` | `ADR-005 R2`; `ADR-006 R2` | Evaluation adapters preserve input role and state origin; they do not precompute SUT-owned semantic conclusions. | `contract-test` plus review of adapters | Adapter output cannot support selected-slice claims. |
+| `ENG-CONF-PUBLIC-001` | `ADR-008 R2` | Selected-slice behavior evidence drives SUT through the public boundary, not internal transition commands. | `contract-test` plus review gate | Evidence is implementation-only, not behavior-compatibility evidence. |
+| `ENG-CONF-HARNESS-001` | `ADR-008 R2` | Harness transports the SUT-selected material output and does not arbitrate among competing candidates. | `negative-test` | Run is invalid for selected-slice behavior claims. |
+| `ENG-CONF-STATE-001` | `ADR-006 R2`; `ADR-007 R3` | State access remains selected-slice bounded identity/local-relation access, not retrieval or relevance ranking. | `contract-test` or explicit residual-risk review gate | Stop and re-triage open questions before milestone claims. |
+| `ENG-CONF-INSPECT-001` | `ADR-006 R2`; `ADR-008 R2` | Inspection is passive and cannot create, repair, narrow, retire, or activate behavior-driving state. | `contract-test` plus `negative-test` | Inspection artifacts cannot be used as conformance evidence. |
+| `ENG-HEALTH-CHANGE-001` | Code-health floor; external engineering references | Changes have one primary purpose and are small enough for direct review. | `review-gate` | Split or record why a combined change is safer. |
+| `ENG-HEALTH-TEST-001` | Code-health floor; external engineering references | Non-throwaway behavior changes add or update tests that fail without the change. | `review-gate` plus test result | Block promotion to non-throwaway code unless exception is recorded. |
+| `ENG-CLAIM-LABEL-001` | `OPEN_QUESTIONS.md`; evaluation ADRs | Artifacts use labels matching what they can support and do not imply acceptance or scoring early. | `review-gate` plus documentation checks | Report/readme/trace label must be corrected before use. |
+
+When a new implementation risk appears, prefer adding one row to this matrix plus one ledger entry over expanding narrative prose. The goal is not more text; it is a shorter path from accepted decision to enforceable check.
 
 ## Project And Package Shape
 
@@ -455,7 +617,7 @@ SUT-owned state access in the selected slice means:
 
 - identity resolution;
 - direct access to selected-slice state already active in the current run;
-- local relation traversal required by `ADR-006` and `ADR-007`.
+- local relation traversal required by `ADR-006 R2` and `ADR-007 R3`.
 
 It does not authorize:
 
@@ -501,26 +663,27 @@ The standard does not require a general graph query engine.
 
 ## State And Relation Standard
 
-### Required Distinctions
+This section is an engineering conformance profile over `ADR-006 R2` and `ADR-007 R3`. It is not an independent semantic restatement of those ADRs.
 
-Implementation MUST preserve the selected-slice distinctions accepted by `ADR-006`:
+The implementation MUST treat `ADR-006 R2` as the authority for selected-slice state categories and `ADR-007 R3` as the authority for dependency identity and local relation semantics.
 
-- run-scoped cross-transition SUT state;
-- SUT-owned transition evidence;
-- lineage-preserving projections;
-- derived inspection facts;
-- fixture/oracle-only facts.
+If this section gives an example that appears broader, narrower, or different from those ADRs, the ADR wins and this standard must be corrected before the affected rule supports a conformance claim.
 
-It MUST NOT collapse:
+### Engineering Consequences
 
-- user assertion into objective fact;
-- raw observation into skill conclusion;
-- direct current-session correction into future trial state;
-- proposal intent into activation;
-- simulator realization into semantic correctness;
-- outcome observation into causal proof;
-- fixture label into SUT transition result;
-- oracle score into SUT state.
+For each selected-slice state or relation obligation required by `ADR-006 R2` or `ADR-007 R3`, the implementation SHOULD identify:
+
+- the code owner that creates it;
+- the code owner that may consume it;
+- whether it is SUT-owned, evaluation-owned, or inspection-derived;
+- whether it may cross the SUT public boundary;
+- the reference shape used to cite it;
+- the inspection surface that exposes it;
+- the test, static check, or review gate that protects it.
+
+Implementation MUST NOT collapse semantically distinct state or relation obligations into a convenient generic record when doing so would hide origin, ownership, order, lifecycle, dependency identity, or oracle-only status.
+
+Examples of prohibited collapses include promoting raw evidence into SUT conclusions outside the SUT, turning simulator realization into semantic correctness, treating fixture labels as SUT transition results, or writing oracle scores into behavior-driving SUT state. These are examples only; `ADR-006 R2` and `ADR-007 R3` govern the full set of selected-slice obligations.
 
 ### References
 
@@ -532,24 +695,9 @@ Evaluation-side fixture IDs such as `L-002` and `CF2-L-003` MAY exist in fixture
 
 ### Relations
 
-Implementation MUST preserve the local relation semantics required by `ADR-007` where applicable:
+Implementation MUST preserve the local relation semantics required by `ADR-007 R3` where applicable, but this standard does not copy the relation catalogue as a second source of truth.
 
-- `source`;
-- `basis`;
-- `support`;
-- `binding`;
-- `transition_ancestry`;
-- `applicability`;
-- `projection_of`;
-- `realization`;
-- `outcome`;
-- `explanation_support`;
-- `supersession`;
-- `retirement`;
-- `narrowing`;
-- `conflict`.
-
-The representation may be fields, records, tables, logs, events, object references, or another inspectable structure.
+The representation may be fields, records, tables, logs, events, object references, or another inspectable structure. The selected representation must make the required relation evidence enumerable for the selected slice.
 
 The oracle MUST be able to enumerate required local relations for inspected records without relying on private manual reasoning or retrospective narrative.
 
