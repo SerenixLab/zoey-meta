@@ -4,7 +4,7 @@ Status: `Proposed`
 
 Date: 2026-07-08
 
-Record revision: `Draft R0`
+Record revision: `R1`
 
 Decision authority: project owner
 
@@ -28,27 +28,56 @@ Proposed post-decision register state: acceptance of this ADR would resolve `SLI
 
 Adopt a minimum selected-slice state contract for `SCN001-SSFO-V0.2.0`.
 
-The first selected slice uses run-scoped retained semantic state plus lineage-preserving projections. It must not turn every oracle-visible field from `ADR-005` into independently persisted database state.
+The first selected slice uses run-scoped cross-transition semantic state, SUT-owned transition evidence, and lineage-preserving projections. It must not turn every oracle-visible field from `ADR-005` into persisted database state.
 
-For this ADR, "persisted" means retained inside the evaluated synthetic run long enough to drive the later SUT transition, support oracle inspection, and support the final explanation. It does not mean production memory custody, durable Zoey continuity, real personal history, or a final storage schema.
+For this ADR, "persisted" means retained inside the evaluated synthetic run long enough to drive the last required SUT consumer or the last required explanation-support use for that information. Oracle capture may preserve SUT-owned transition evidence after that last consumer. Persisted does not mean production memory custody, durable Zoey continuity, real personal history, or a final storage schema.
 
-The selected slice classifies oracle-visible information into four categories:
+The selected slice classifies oracle-visible information into five categories:
 
-1. `independent_sut_state`: SUT-owned retained semantic state or transition state whose identity, lifecycle, or later use matters.
-2. `lineage_preserving_projection`: a view or reference over the same retained SUT state or retained input facts, adding no new fixture-authored semantic conclusion.
-3. `derived_inspection_fact`: an oracle-computed fact used to validate, score, or compare exposed state without becoming behavior-driving SUT state.
-4. `fixture_or_oracle_only`: fixture setup, evaluator annotation, branch policy, score, claim-class mapping, or hidden ground truth that must not become SUT-owned semantic state.
+1. `cross_transition_sut_state`: SUT-owned semantic state whose identity, lifecycle, or later behavior-driving use must survive at least one selected-slice transition boundary.
+2. `sut_transition_evidence`: SUT-owned semantic transition result, assessment, or control decision that must be inspectable and ordered, but need not remain behavior-driving after its last required SUT consumer.
+3. `lineage_preserving_projection`: a view or reference over the same retained SUT state, retained SUT transition evidence, or retained input facts, adding no new fixture-authored semantic conclusion.
+4. `derived_inspection_fact`: an oracle-computed fact used to validate, score, or compare exposed state without becoming behavior-driving SUT state.
+5. `fixture_or_oracle_only`: fixture setup, evaluator annotation, branch policy, score, claim-class mapping, or hidden ground truth that must not become SUT-owned semantic state.
 
-The implementation may use event-sourced records, mutable semantic records with transition logs, tables, documents, in-memory objects captured by the harness, or another inspectable representation. The representation passes this contract only if the required identities, lineage, ordering, scopes, lifecycle distinctions, and claim boundaries below are preserved.
+The implementation may use event-sourced records, mutable semantic records with transition logs, tables, documents, in-memory objects observed by the harness, or another inspectable representation. The representation passes this contract only if the required identities, lineage, ordering, scopes, lifecycle distinctions, and claim-support limits below are preserved.
+
+Harness capture, inspection, serialization, or snapshotting may observe SUT-owned state. It must not satisfy cross-interaction retention by restoring, reinjecting, or recreating required SUT state after the SUT has lost it, except under a separately classified deterministic replay or fixture-start semantics that does not count as fresh persistence evidence.
+
+## Mechanism And Topology Non-Assumptions
+
+This ADR does not select or require a single-model, multi-model, local, hosted, hybrid, agentic, deterministic, or provider-session topology.
+
+The contract specifically avoids assumptions about several future pressure areas: active cognitive-frame/context construction, inference lifecycle, routing and fallback among cognitive mechanisms, and provider/session-side persistence. These names are descriptive future pressure areas, not registered open-question IDs, active frontier items, compatibility claims, or decisions resolved by this ADR. `OPEN_QUESTIONS.md` remains authoritative for question status and activation order.
+
+This ADR makes no evaluated compatibility claim about any future inference architecture. Any such claim remains subject to `EVAL-004` and the relevant trust, runtime, memory, and derived-artifact questions.
+
+The selected-slice state contract must not derive the identity, lifecycle, authority, or persistence requirement of a semantic state role from one particular model, runtime, agent, provider, process, module, or orchestration topology unless an accepted selected-slice contract requires that topology. A trial candidate, active trial, behavior disposition, outcome record, or explanation support record is a semantic role with lineage and lifecycle; it is not defined by whether it was produced by a local model, hosted model, deterministic rule, prompt, agent, service, or future cognitive mechanism.
+
+Mechanism neutrality does not erase provenance. Where consequence or inspection requires lineage, retained state may identify a candidate source, basis references, or producing-mechanism reference without making that mechanism part of the state's semantic identity. A model/runtime reference may explain how a candidate was generated; it must not by itself make the candidate true, active, authoritative, durable, or valid evidence.
+
+Producing a semantic candidate does not establish activation authority. This applies to large models, small models, deterministic classifiers, rule engines, retrieval systems, summaries, agents, tools, and future cognitive services. Candidate generation, proposal binding, activation checks, later-use applicability, outcome classification, and explanation support remain distinct selected-slice responsibilities under the accepted ADRs.
+
+Computational artifacts are not automatically selected-slice semantic state. The term is intentionally broad and includes, without limitation, prompts, model requests, model responses, provider or agent threads, runtime caches, agent scratchpads, inference traces, tool traces, checkpoints, and provider/session state. This is a semantic-state classification rule, not a prohibition on retaining such artifacts for evaluation, debugging, replay, observability, or infrastructure purposes. Retention of such an artifact does not by itself make it SUT-owned semantic state, valid evidence, transition authority, or a valid substitute for the selected-slice state anchors required by this ADR. Required semantic lineage must not be interpreted as a requirement to retain entire computational artifacts where stable basis references, transition records, or later `EVAL-004`/dependency metadata would preserve the selected-slice obligation. Separate controls may apply to retained computational artifacts under later evaluation, retention, permitted-use, derived-artifact, or trust-boundary decisions; non-semantic does not mean ungoverned.
+
+Opaque mechanism-local memory cannot satisfy selected-slice persistence obligations. If a model, agent, provider session, local cache, or runtime checkpoint happens to remember a prior interaction, that memory does not count as retained active trial state, proposal binding, later-use applicability state, or explanation basis unless the required semantic state is inspectably available as SUT-owned effective state with preserved identity and lineage.
+
+Derived selected-slice state must not erase its basis. A retained interpretation, comparison, candidate, or explanation support record must remain distinguishable from the observations, assertions, chronology, correction events, and transition checks on which it depends. A compressed inference must not replace the source-bearing evidence when later selected-slice behavior, inspection, or explanation requires that basis.
 
 ## Classification Rule
 
-An oracle-visible fact requires independently retained SUT state when any of these are true:
+An oracle-visible fact requires `cross_transition_sut_state` when any of these are true:
 
 - a later behavior disposition, activation, outcome update, or explanation must use the same SUT-owned object or transition basis;
-- the SUT owns the semantic transition and another required transition depends on that result;
-- loss or conflation of the fact is a hard invariant or positive-obligation failure under `ADR-005`;
-- the fact binds candidate -> proposal -> response -> activation -> active trial -> later use -> outcome -> explanation identity.
+- the fact's identity must survive a selected-slice interaction boundary;
+- the fact is the retained object whose lineage anchors candidate -> proposal -> response -> activation -> active trial -> later use -> outcome -> explanation support.
+
+An oracle-visible fact requires `sut_transition_evidence` when any of these are true:
+
+- the SUT owns the semantic transition result or control decision, but no later behavior needs the same object after the last consumer;
+- ordering, basis, scope, status origin, or transition result must be inspectable to score an `ADR-005` obligation;
+- loss or conflation of the fact would be a hard invariant or positive-obligation failure, but oracle capture after the last consumer is enough to preserve scoreability;
+- the fact records a SUT-produced assessment such as temporal eligibility, comparison, proposal binding, activation assessment, applicability assessment, non-activation disposition, or explanation-support output.
 
 An oracle-visible fact may be a lineage-preserving projection when:
 
@@ -64,53 +93,72 @@ An oracle-visible fact may be a derived inspection fact when:
 
 A fact is fixture/oracle-only when it is an answer key, path-pressure label, claim-class result, campaign score, branch-control rule, evaluator note, hidden scenario ground truth, or canonical expectation. These facts must not be represented as SUT semantic memory.
 
-## Minimum Independent SUT State
+## Minimum State And Transition Evidence Contract
 
-The selected slice requires these retained SUT state anchors or equivalent lineage.
+The selected slice requires these state anchors, transition evidence records, or equivalent lineage. Applicability is path-conditional; "required" means required only on paths and checkpoints that reach the relevant transition under `ADR-005`.
 
-| State anchor | Minimum retained content | Why independent state is required |
-| --- | --- | --- |
-| Run-scoped semantic namespace | Run state identity, fixture/oracle package ref, accepted baseline refs visible to the SUT where applicable, evaluation-only retention basis refs, permitted-use/run-scope/discard status, and delivered SUT-visible control fact refs. | Prevents selected-slice state from masquerading as real durable memory while allowing cross-interaction retention inside the run. |
-| Retained input-fact references | Fixture item IDs actually ingested or used, role/provenance, occurrence/observation time, session order, context labels, task-mode labels, and copied value fields needed for later SUT use. | Later SUT transitions and explanations must cite stable facts without requiring the harness to reconstruct semantic state. |
-| Attributed communication/assertion state | Current-path utterance refs, source actor, time/context, attributed status, epistemic status, status origin, and SUT transition-basis refs for SUT-derived attribution. | `C-001`, `C-002`, and `C-003` must become attributed assertions, not current skill facts. Fixture-initialized historical status remains origin-marked input. |
-| Observation evidence state | Recognition, production, drill, and outcome observation refs with task mode, dimension, correctness, scorer provenance, and separation from interpretation. | Recognition/production comparison and later outcome lineage require observations to remain distinct from conclusions. |
-| Temporal eligibility assessment | Assessed evidence/basis ref, use target, scenario time, selected `>90 scenario days` rule result where applicable, temporal uncertainty, and no re-dating of historical facts. | The SUT owns stale/current-authority judgment; old history cannot be stale because the fixture says so, and recent history cannot be marked stale by blanket retention age. |
-| Dimension comparison state | Recognition evidence refs, production evidence refs, target dimension, scoped comparison result, uncertainty, and no global skill/proficiency claim. | Trial formation must be evidence-responsive to the current recognition/production split and inspectably not a scalar Japanese-level judgment. |
-| Trial candidate state | Candidate ID, material intent, trial-direction ref or non-activation disposition, source, provisional/evaluative purpose, support lineage, proposed scope, reversibility/correction path, lifecycle status, and current/stale-basis status or unresolved status. | Candidates must retain identity before proposal and activation, and unsupported candidates must not drive behavior. |
-| Proposal intent and binding state | Surfaced proposal ref, candidate ref, SUT material intent, realization ref where applicable, user response ref, binding assessment, ambiguity/conflict status, and activation-basis status. | The production-focused trial can activate only through a response bound to the actual candidate-specific proposal. |
-| Activation assessment state | Candidate ref, activation basis type, check results for scope, basis lineage, current/stale basis, user-governed constraints, reversibility, consequence, current applicability, retention basis, and non-adaptation boundary. | Active trial state is valid only after inspectable activation checks; acceptance or candidate formation alone is insufficient. |
-| Active scoped trial state | Active trial ID, activation time/order, candidate lineage, activation-check refs, active scope, retained-state identity, current status, narrowing/retirement/supersession/conflict refs, and correction path. | Later behavior and counterfactual branches must use the same retained active trial state, not a fixture-authored copy or candidate-only state. |
-| Scoped user-governed instruction/preference state | Explicit drill immediate-correction request refs, scope, authority/status origin, applicability, and distinction from active trials and outcomes. | `D-002` must remain a focused-drill request, not a global correction preference or delayed-correction trial. |
-| Direct correction disposition state | Current-session behavior disposition ID, correction-event basis, context scope, timing/order, realization ref where applicable, and explicit distinction from future trial state. | `V-003` must change current behavior immediately without silently becoming durable preference, active trial, or global policy. |
-| Later-use applicability state | Active trial ref, later context refs, applicability review result, narrowing/supersession/conflict result where applicable, selected behavior disposition ref, and pre-outcome ordering. | Active does not mean indefinitely applicable; later behavior must be selected from retained state before outcome facts are supplied. |
-| Behavior disposition state | SUT-selected drill, current-session, and later behavior disposition IDs, material intent, selected timing behavior, basis refs, and simulator realization refs. | Simulated dependencies may realize behavior but must not choose the policy being tested. |
-| Realization link state | SUT proposal/disposition ref, simulator realization fact ref, fidelity/mismatch origin where delivered, and realized behavior descriptor where used by the SUT. | Outcome lineage must attach to the behavior actually realized without letting simulator facts choose SUT policy. |
-| Intervention-conditioned outcome state | Outcome record ID, outcome fact refs, active trial ref, behavior disposition ref, realized behavior ref, material context refs, co-intervention status, intervention-conditioned classification, and causal uncertainty. | The SUT must record outcome evidence as scoped and intervention-conditioned without proving the causal theory. |
-| Explanation support output | Explanation support ID, user-facing claim refs, retained state refs, transition-basis refs, uncertainty markers, excluded claim boundaries, and no hidden chain-of-thought dependency. | The final explanation must be grounded in retained state. The support record may be generated at explanation time, but it must cite retained identities. |
-| Non-activation and unsupported-boundary state | Withhold/defer/request-more/ask-clarification/retire/narrow disposition, affected candidate or proposed broader effect, basis refs, and unsupported durable-adaptation boundary where implicated. | Counterfactual success and durable-adaptation exclusion require inspectable non-activation, not silent absence or hidden refusal. |
+| Anchor | Classification | Applicability | Minimum content | Retention horizon |
+| --- | --- | --- | --- | --- |
+| Run-scoped SUT state boundary | `cross_transition_sut_state` | All evaluated paths. | Opaque run-state identity, synthetic actor/scope identity where required, retention-basis relation, permitted-use/run-scope/discard status, and delivered SUT-visible control fact relations. Fixture package, path, accepted ADR baselines, campaign IDs, and evaluation config remain harness/oracle metadata unless represented only as an opaque SUT-visible control reference. | Through the formal run; external campaign metadata may persist only in harness/oracle records. |
+| Delivered, ingested, and used input-fact relations | `cross_transition_sut_state` where later used; `sut_transition_evidence` for ingestion/use transitions; harness metadata for delivery. | All paths that deliver fixture facts. | Distinguish harness-delivered facts, SUT-retained/ingested facts, and transition-basis use relations. Preserve fixture item identity, role/provenance, occurrence/observation time, session order, context labels, task-mode labels, and copied value fields needed for later SUT use. | Source-bearing facts that support later behavior or explanation survive to that consumer; ingestion/use evidence may be oracle-captured after last consumer. |
+| Attributed communication/assertion state | `cross_transition_sut_state` | Current-path resume and any path using `C-001`, `C-002`, or `C-003`. | Current-path utterance refs, source actor, time/context, attributed status, epistemic status, status origin, and SUT transition-basis relations for SUT-derived attribution. | Through any candidate, outcome, or explanation that cites those assertions; otherwise after oracle capture of attribution evidence. |
+| Observation evidence state | `cross_transition_sut_state` where later used. | Recognition/production, drill, and outcome paths that use observations. | Recognition, production, drill, and outcome observation refs with task mode, dimension, correctness, scorer provenance, and separation from interpretation. | Through the last comparison, candidate, outcome, or explanation that cites the observation. |
+| Temporal eligibility assessment | `sut_transition_evidence` | Paths that use historical or recent evidence as current-authority basis. | Assessed evidence/basis relation, use target, scenario time, selected `>90 scenario days` rule result where applicable, temporal uncertainty, and no re-dating of historical facts. | Until production activation or candidate-support snapshot no longer needs it; oracle capture is sufficient afterward unless explanation directly cites the assessment. |
+| Dimension comparison state | `sut_transition_evidence`, with cited observations retained as state. | Calibration and production-candidate paths. | Recognition evidence relation, production evidence relation, target dimension, scoped comparison result, uncertainty, and no global skill/proficiency claim. | Until candidate formation or a candidate-support snapshot captures the basis; oracle capture is sufficient afterward unless explanation cites the comparison. |
+| Optional scoped interpretation or hypothesis | `sut_transition_evidence` or `cross_transition_sut_state` if later used. | Optional; required only if explicitly formed as SUT semantic state or materially used as candidate/activation basis. | Scope, epistemic status/uncertainty, evidence lineage, revision/supersession relation, and distinction from assertions, observations, candidates, trials, outcomes, and adaptations. | Same as its last candidate, activation, behavior, outcome, or explanation consumer. No record is required if the candidate is directly derived from comparison/evidence without an intervening hypothesis. |
+| Trial candidate state | `cross_transition_sut_state` when a candidate is formed. | Required on paths that form a candidate; absent on paths that withhold before candidate formation. | Candidate ID, material trial intent, trial-direction relation, source, provisional/evaluative purpose, support lineage, proposed scope, reversibility/correction path, lifecycle status, and activation-basis status. Non-activation disposition and generic candidate stale/current status are excluded. | Through proposal, activation, withholding/retirement, or last explanation-support use that references the candidate. |
+| Proposal intent and binding evidence | Proposal intent: `cross_transition_sut_state` until response/activation; binding: `sut_transition_evidence`. | Paths that surface a proposal. | Surfaced proposal relation, candidate relation, SUT material intent, user response relation, binding assessment, ambiguity/conflict status, activation-basis status, and ordering. Simulator realization metadata is not sole evidence that the proposal existed. | Proposal survives until binding/activation or retirement; binding evidence may be oracle-captured after activation. |
+| Activation assessment evidence | `sut_transition_evidence` | Paths that attempt activation. | Candidate relation, activation basis type, check results for scope, basis lineage, temporal/basis eligibility, user-governed constraints, reversibility, consequence, current applicability, retention basis, and non-adaptation boundary. | Until active-trial creation or non-activation disposition is recorded; oracle capture is sufficient afterward unless explanation cites it. |
+| Active scoped trial state | `cross_transition_sut_state` | Paths with activated production-focused or delayed-correction trials. | Active trial ID, activation time/order, preserved lineage to candidate and activation assessment, active scope, retained-state identity, current status, narrowing/retirement/supersession/conflict relations, and correction path. | Through later-use applicability, behavior disposition, outcome, and explanation-support uses that depend on the trial. |
+| Scoped user-governed correction instruction/control state | `cross_transition_sut_state` for the focused drill; `sut_transition_evidence` for applicability checks. | `D-002` and counterfactual drill-opt-in paths. | Explicit immediate-correction request relation, interpreted target, scope, authority/status origin, applicability, supersession/revocation relation if present, and distinction from active trials and outcomes. | Through the focused-drill behavior/outcome and any explanation-support use; applicability evidence may be captured after use. |
+| Direct correction disposition evidence | `sut_transition_evidence`; retained as state only if later candidate support uses it. | Focused-drill direct correction path. | Current-session behavior disposition ID, correction-event basis, context scope, timing/order, and explicit distinction from future trial state. | Until immediate behavior realization and any delayed-correction candidate formation that uses it; oracle capture is sufficient afterward unless explanation cites it. |
+| Later-use applicability evidence | `sut_transition_evidence` | Paths that later reuse an active trial. | Active trial relation, later context relations, applicability review result, narrowing/supersession/conflict result where applicable, selected behavior disposition relation, and pre-outcome ordering. | Until behavior disposition and outcome update; oracle capture is sufficient afterward unless explanation cites it. |
+| Behavior disposition state | `sut_transition_evidence`, with retained relation to any active trial it applies. | Drill, current-session correction, and later-use behavior paths. | SUT-selected behavior disposition ID, material intent, selected timing behavior, basis relations, and ordering before simulator realization. Simulator realization refs are not fields that prove the original disposition existed. | Until simulator realization and outcome update; oracle capture is sufficient afterward unless explanation cites it. |
+| Realization relation and retained simulator fact | SUT side: projection/relation over disposition; simulator side: fixture input/projection. | Paths where simulator realizes SUT proposal or disposition. | SUT proposal/disposition relation, simulator realization fact relation, fidelity/mismatch origin where delivered, and realized behavior descriptor only where later used by the SUT. | Until outcome update or explanation-support use. No independent `RealizationLinkState` object is required. |
+| Intervention-conditioned outcome state | `cross_transition_sut_state` | Paths that observe outcome after intervention. | Outcome record ID, outcome fact relations, active trial relation, behavior disposition relation, realized behavior relation, material context relations, co-intervention status, intervention-conditioned classification, and causal uncertainty. | Through final explanation-support use; oracle capture is sufficient afterward. |
+| Explanation support output | `sut_transition_evidence` generated at `DP-EXPLAIN`. | Canonical path and any path that reaches explanation. | Explanation support ID, user-facing claim relations, retained state relations, transition-basis relations, uncertainty markers, epistemic limitations, scope limitations, unsupported causal/generalization limits, and no hidden chain-of-thought dependency. | Until oracle capture completes. |
+| Non-activation disposition evidence | `sut_transition_evidence` | Paths that withhold, defer, request more evidence, ask clarification, retire, or narrow instead of forming or activating a candidate. | Disposition, affected candidate/proposed effect if any, basis relations, timing/order, and distinction from candidate state. | Until oracle capture or later candidate formation that uses the disposition. |
+| Unsupported durable-adaptation boundary evidence | `sut_transition_evidence` | Conditional; required only where a proposed or explained semantic effect would otherwise imply unsupported durable adaptation. | Proposed broader effect, supported selected-slice effect, unsupported boundary reason, scope limits, and relation to retained evidence. | Until oracle capture or explanation-support use. Absence of prohibited durable-adaptation state may be sufficient when no broader effect is proposed. |
 
 The minimum contract does not require each row above to be a separate table, class, document, or database collection. It requires that the effective SUT representation preserve the listed semantic identity and lineage.
+
+Later relations may reference earlier state objects, but later realization or response metadata must not be the sole evidence that the earlier SUT disposition or proposal already existed. Final aggregate object shape is insufficient without transition ordering, version history, or equivalent transition evidence.
+
+## Path Applicability
+
+The state contract is conditional on the path and checkpoint reached:
+
+| Requirement family | Canonical path | `CF-CALIBRATION-NO-SPLIT` | `CF-DRILL-OPT-IN` | `CF-RECENT-BASIS` |
+| --- | --- | --- | --- | --- |
+| Attribution and retained source facts | Required. | Required for delivered calibration facts. | Required for prefix facts needed to reach active delayed trial. | Required for recent-basis facts. |
+| Temporal eligibility | Required for historical/current-authority distinction. | Required where old history is presented. | Prefix-dependent. | Required for recent basis; recent practice must not be stale by blanket retention age. |
+| Recognition/production comparison | Required. | Required, but supports non-activation rather than production candidate. | Prefix-dependent. | Required only if the path continues to comparison pressure. |
+| Production-focused candidate/proposal/activation | Required. | Absent or non-activated with disposition evidence. | Prefix-dependent. | Conditional on path continuation. |
+| Active delayed-correction trial | Required after focused-drill direct correction and delayed-candidate activation. | Not reached. | Required as prefix state for opt-in/narrowing pressure. | Not pressured unless path continues. |
+| Later-use behavior and outcome | Required. | Not reached. | Not required except for narrowing/inapplicability evidence. | Not pressured unless path continues. |
+| Explanation support | Required if the path reaches `DP-EXPLAIN`. | Not required unless the path includes an explanation checkpoint. | Not required unless the path includes an explanation checkpoint. | Not required unless the path includes an explanation checkpoint. |
 
 ## ADR-005 Oracle Field Mapping
 
 | `ADR-005` field family | SLICE-002 classification | Minimum contract |
 | --- | --- | --- |
-| Run boundary | Derived inspection plus retained run namespace | Campaign/run/path/evaluation identifiers are mainly harness/oracle metadata. The SUT must maintain a run-scoped state namespace and any SUT-visible control refs it uses. |
-| Retention basis | Retained input/control fact plus SUT application state | `FC-RET-001` remains fixture-supplied, but the SUT must retain enough to show selected state is run-scoped, permitted for evaluation use, and discardable after trajectory. |
-| Event history | Retained input-fact references; projected event history view | Fixture event facts keep fixture provenance. SUT projections must not turn them into derived semantic conclusions. |
-| Attributed assertions | Independent SUT state for current-path attribution; retained fixture-origin state for initialized history | Current resume utterances require SUT-derived attribution. Fixture-initialized historical status remains marked as fixture-origin. |
-| Observations | Retained input-fact references plus independent derived comparison/outcome records where used | Raw item/correctness facts are fixture-origin; SUT-owned comparisons and outcome classifications are separate. |
-| Temporal judgments | Independent SUT transition state or equivalent transition log | The SUT owns current-authority eligibility and stale-basis assessment. Oracle may derive correctness from chronology and rule IDs. |
-| Dimension comparison | Independent SUT transition state or equivalent transition log | The scoped recognition/production comparison must be inspectable before candidate formation. |
-| Trial candidate | Independent SUT state | Candidate identity, material intent, source, scope, support lineage, and lifecycle status must persist until proposal, activation, withholding, retirement, or explanation as applicable. |
-| Proposal binding | Independent SUT state | Proposal intent, surfaced proposal, realization, response, and binding assessment must remain distinct from candidate and activation. |
-| Activation checks | Independent SUT transition state | Activation-check result sets must be retained or reconstructable from retained transition records without oracle-added conclusions. |
-| Active trial | Independent SUT state | Active trial identity must persist across the synthetic interaction boundary and through canonical and counterfactual later-use checks. |
-| Direct correction disposition | Independent SUT state | Current-session correction behavior must be inspectable and distinct from future trial state. |
-| Later-use applicability | Independent SUT transition state | Later behavior selection must record active trial ref, applicability review, disposition, and pre-outcome ordering. |
-| Realized behavior | SUT disposition is independent; simulator realization fact is retained input/projection | The SUT owns the intent or disposition. The simulator owns fidelity and realized-behavior facts. |
-| Outcome record | Independent SUT state | Intervention-conditioned classification and uncertainty must be retained with active trial, disposition, realization, outcome, and material-context refs. |
-| Explanation support | SUT-generated inspection output over retained state | It may be generated at `DP-EXPLAIN`; it must cite retained state IDs and must not require hidden chain-of-thought. |
+| Run boundary | `cross_transition_sut_state` for opaque SUT state boundary; harness/oracle metadata for campaign identity | Campaign/run/path/evaluation identifiers are mainly harness/oracle metadata. The SUT must maintain a run-scoped state boundary and any SUT-visible control relations it uses without receiving answer-key package identity as semantic evidence. |
+| Retention basis | Retained input/control fact plus `cross_transition_sut_state` application state | `FC-RET-001` remains fixture-supplied, but the SUT must retain enough to show selected state is run-scoped, permitted for evaluation use, and discardable after trajectory. |
+| Event history | Retained input-fact relations; projected event history view | Fixture event facts keep fixture provenance. SUT projections must not turn them into derived semantic conclusions, and must distinguish delivered, ingested, and used facts. |
+| Attributed assertions | `cross_transition_sut_state` for current-path attribution; retained fixture-origin state for initialized history | Current resume utterances require SUT-derived attribution. Fixture-initialized historical status remains marked as fixture-origin. |
+| Observations | Retained input-fact relations plus SUT-owned transition evidence for comparisons/outcomes where used | Raw item/correctness facts are fixture-origin; SUT-owned comparisons and outcome classifications are separate. |
+| Temporal judgments | `sut_transition_evidence` or equivalent transition log | The SUT owns current-authority eligibility and stale-basis assessment for a use target. Oracle may derive correctness from chronology and rule IDs. |
+| Dimension comparison | `sut_transition_evidence` or equivalent transition log | The scoped recognition/production comparison must be inspectable before candidate formation without becoming a global skill/proficiency state. |
+| Optional interpretation/hypothesis | Conditional `sut_transition_evidence` or `cross_transition_sut_state` | Required only if formed as SUT semantic state or materially used as explicit candidate/activation basis. It must expose scope, uncertainty, and evidence lineage. |
+| Trial candidate | `cross_transition_sut_state` when formed | Candidate identity, material intent, source, scope, support lineage, and lifecycle status persist through the last proposal, activation, retirement, or explanation-support consumer. Non-activation dispositions are separate. |
+| Proposal binding | Proposal intent as `cross_transition_sut_state`; binding as `sut_transition_evidence` | Proposal intent, surfaced proposal, user response, and binding assessment remain distinct from candidate and activation. Realization/response metadata cannot be the only proof the earlier proposal existed. |
+| Activation checks | `sut_transition_evidence` | Activation-check result sets must be retained or reconstructable from retained transition records without oracle-added conclusions until active trial creation or non-activation disposition. |
+| Active trial | `cross_transition_sut_state` | Active trial identity must persist across the synthetic interaction boundary and through canonical and counterfactual later-use checks that depend on it. |
+| Direct correction disposition | `sut_transition_evidence`, retained as state only if later candidate support uses it | Current-session correction behavior must be inspectable and distinct from future trial state. |
+| Later-use applicability | `sut_transition_evidence` | Later behavior selection must record active trial relation, applicability review, disposition relation, and pre-outcome ordering. |
+| Realized behavior | SUT disposition as transition evidence; simulator realization fact as fixture input/projection | The SUT owns the intent or disposition. The simulator owns fidelity and realized-behavior facts. The realization relation may be derived from preserved disposition and simulator fact references. |
+| Outcome record | `cross_transition_sut_state` | Intervention-conditioned classification and uncertainty must be retained with active trial, disposition, realization, outcome, and material-context relations until explanation-support use. |
+| Explanation support | `sut_transition_evidence` generated at `DP-EXPLAIN` | It must cite retained state/evidence relations and expose epistemic, scope, causal, and generalization limits without requiring hidden chain-of-thought. |
 | Failure artifacts | Oracle-only | Validity, hard-failure, obligation, aggregation, and claim-boundary classifications are not SUT semantic state. |
 | Claim-class result vector | Oracle-only | `PASS`, `OBLIGATION_FAIL`, `NOT_REACHED`, `HARD_FAIL`, and campaign aggregation are scoring artifacts. |
 | Completeness declarations | Fixture/oracle-only, except SUT-visible control facts may be retained as input facts | Exhaustiveness rules guide fixture/oracle interpretation; they must not become hidden SUT knowledge beyond declared SUT-visible controls. |
@@ -123,7 +171,7 @@ Lineage-preserving projections are allowed and expected. They are how this state
 
 A projection is valid only if it:
 
-- points to retained state or retained input facts by stable reference;
+- points to retained state, retained transition evidence, or retained input facts by stable reference;
 - preserves source provenance, chronology, semantic status origin, scope, lifecycle, and transition basis;
 - can be regenerated without changing the underlying semantic meaning;
 - does not add fixture-authored stale/current labels, trial recommendations, applicability verdicts, relevance rankings, or causal conclusions;
@@ -133,11 +181,11 @@ The `sut_state_reference` items in `ADR-005`, including `L-002` and `CF2-L-003`,
 
 ## Derived Inspection Facts
 
-The oracle may derive these facts from effective state without requiring them as independently persisted SUT state:
+The oracle may derive these facts from effective state and transition evidence without requiring them as cross-transition SUT state:
 
 - whether historical evidence was re-dated, refreshed, or rewritten;
 - whether a later behavior disposition was recorded before outcome facts;
-- whether proposal, response, activation, active trial, later use, outcome, and explanation refs form one valid lineage chain;
+- whether proposal, response, activation, active trial, later use, outcome, and explanation refs preserve the required binding, dependency, and lineage relations;
 - whether recognition and production evidence remained separate;
 - whether a projection is identity-preserving or a semantic copy;
 - whether a candidate, direct correction, active trial, durable adaptation, and explicit preference remained distinguishable;
@@ -160,31 +208,9 @@ Prohibited SUT-owned semantic state includes:
 - campaign aggregation results, run-validity classifications, replacement-policy decisions, and failure artifacts;
 - global user/profile conclusions such as real Japanese level, learning style, real personal memory, durable Zoey continuity, real voice behavior, or general correction efficacy.
 
-## Identity Across The Selected Trajectory
+## Required Identity, Binding, And Lineage Relations
 
-The selected canonical trajectory requires identity preservation through this chain:
-
-```text
-retained input facts
-    -> attributed assertions and temporal/comparison transition state
-    -> production-focused trial candidate
-    -> candidate-bound proposal
-    -> proposal realization and bound user acceptance
-    -> activation checks
-    -> active production-focused trial
-    -> focused-drill disposition, explicit drill request, and short-term outcome
-    -> direct current-session correction disposition
-    -> separate delayed-correction trial candidate
-    -> delayed-correction activation checks
-    -> active delayed-correction trial
-    -> later-use applicability review
-    -> later behavior disposition
-    -> simulator realization
-    -> intervention-conditioned outcome
-    -> explanation support refs
-```
-
-Identity rules:
+The selected canonical trajectory requires several relation types, not one giant trajectory object:
 
 - A trial candidate has its own identity before it is proposed or activated.
 - A candidate-bound proposal references the candidate; it does not replace the candidate.
@@ -195,6 +221,16 @@ Identity rules:
 - Later-use applicability reviews reference retained active trial state; they do not recreate it.
 - Outcome records reference the active trial, behavior disposition, realization, and material context under which the outcome was observed.
 - Explanation support cites retained identities rather than a retrospective narrative.
+
+The required relation families are:
+
+- dependency: candidate, activation, and outcome bases preserve relations to the evidence and transition results they depend on;
+- support lineage: comparison and optional hypothesis evidence can support a candidate without becoming the candidate;
+- proposal binding: user response binds to the surfaced proposal and candidate-specific intent;
+- transition ancestry: active trial state descends from candidate plus activation evidence;
+- applicability: later-use review evaluates the retained active trial in the later context;
+- intervention lineage: outcome state relates the active trial, SUT behavior disposition, simulator realization, and observed outcome;
+- explanation support: user-facing claims cite retained state or transition evidence and expose limits.
 
 For counterfactual paths:
 
@@ -208,6 +244,7 @@ This state contract does not support or require:
 
 - retrieval, memory search, relevance ranking, distractor filtering, or production context assembly;
 - final database schema, storage engine, serialization format, repository split, or runtime architecture;
+- final "Zoey Core" module boundary, inference gateway, model-routing policy, provider-selection policy, provider-side persistent inference policy, fallback policy, or external inference lifecycle contract;
 - real personal-memory custody, production retention policy, or durable Zoey continuity;
 - durable developmental adaptation, learned profile, adapter, embedding, summary store, or training artifact;
 - real voice, STT, TTS, avatar, Live2D, or embodied-presence behavior;
@@ -216,34 +253,38 @@ This state contract does not support or require:
 - statistical reliability, production readiness, general robustness, or full `SCN-001` pass;
 - external operations, actor assurance, authorization, provider reconciliation, or `SCN-002` operation safety.
 
-## Compatibility Red-Team
+## Boundary Red-Team
 
 | Accepted decision | Red-team pressure | State-contract response |
 | --- | --- | --- |
 | `ADR-001 R1` | The state contract could become a general Zoey memory architecture derived from one Japanese slice. | State is explicitly run-scoped, synthetic, fixture-bound, and non-durable. It preserves first-slice pressure without claiming full `SCN-001`, real continuity, Japanese pedagogy, or architecture generality. |
-| `ADR-002 R2` | The harness could satisfy transition-inside obligations by reconstructing retained trial state or handing the SUT a semantic copy. | Active trials, candidates, proposal bindings, activation checks, direct correction, later-use applicability, outcomes, and explanations require retained SUT identities or lineage-preserving projections to those identities. |
+| `ADR-002 R2` | The harness could satisfy transition-inside obligations by reconstructing retained trial state or handing the SUT a semantic copy. | Harness capture may observe state but cannot restore, reinject, or recreate required retained state. Active trials, candidates, proposal bindings, activation checks, direct correction, later-use applicability, outcomes, and explanations require SUT-owned state or transition evidence. |
 | `ADR-003 R2` | Direct correction, explicit drill preference, active scoped trial, stale history, and durable adaptation could collapse into one lifecycle enum. | The contract requires orthogonal state anchors for attribution, temporal eligibility, comparison, candidate, proposal, activation, active trial, direct correction, later-use applicability, outcome, and unsupported adaptation boundary. |
 | `ADR-004 R3` | Curated context and oracle fields could become the SUT's database schema or hidden answer key. | SUT-visible fixture facts may be retained only with fixture provenance. Answer keys, claim classes, branch policy, failure artifacts, campaign scores, and evaluator-only notes are fixture/oracle-only. |
-| `ADR-005 R2` | The oracle-visible checklist could be copied wholesale into independent state, or under-persisted so later behavior is narrative-only. | The mapping separates independent state from projections and derived inspection facts. Behavior-driving transitions retain identity; scoring, validity, aggregation, and claim-boundary facts remain oracle-only. |
+| `ADR-005 R2` | The oracle-visible checklist could be copied wholesale into cross-transition state, or under-persisted so later behavior is narrative-only. | The mapping separates cross-transition state, transition evidence, projections, derived inspection facts, and oracle-only facts. Behavior-driving transitions retain identity only to their required horizon; scoring, validity, aggregation, and claim-boundary facts remain oracle-only. |
+| Mechanism and topology non-assumptions | The state contract could define candidates, retained trial state, or explanation support as outputs of a specific local model chain, hosted model, provider session, prompt artifact, or future "Zoey Core" module. | Semantic roles are mechanism-neutral while preserving lineage. Candidate-producing mechanisms do not gain activation authority, computational artifacts are not automatically semantic state, and opaque mechanism-local memory cannot satisfy selected-slice persistence obligations. This is not an `EVAL-004` compatibility claim. |
 
 ## Proposed Register Effect
 
 If accepted, update `OPEN_QUESTIONS.md` as follows:
 
 - move `SLICE-002` to `Resolved` with outcome `Decision`, resolved by this ADR for the first `SCN-001` selected-slice milestone;
-- record that the selected state contract uses minimum run-scoped retained semantic state plus lineage-preserving projections, not a final schema or production memory architecture;
+- record that the selected state contract uses minimum run-scoped cross-transition state, SUT-owned transition evidence, and lineage-preserving projections, not a final schema or production memory architecture;
 - activate `DEP-001` as the next immediate decision frontier because the selected state/transitions are now known and dependency identity metadata is needed before the internal boundary can be finalized;
 - keep `SLICE-003` blocked until `DEP-001` resolves;
-- re-triage `SLICE-005` now that minimum state is known, but do not allow it to claim acceptance-gate sufficiency until evaluation-record and scoreability triggers are honored;
-- keep `EVAL-004` deferred until the selected slice prepares its first evaluation record, comparison, or compatibility claim;
-- keep `EVAL-005` deferred until the selected slice prepares final scoring or scenario-scoreability criteria;
-- keep `MEM-001`, `TIME-001`, `GROW-005`, `SURF`, `PROD`, `TRUST`, `CONT`, and `AUTH` questions deferred unless a later artifact introduces their trigger conditions.
+- re-triage `SLICE-005`, `EVAL-004`, and `EVAL-005` under their registered triggers; this ADR does not decide whether either evaluation question becomes a formal dependency of `SLICE-005`;
+- keep `EVAL-004` deferred unless a later artifact prepares a first evaluation record, comparison, or evaluated compatibility claim;
+- keep `EVAL-005` deferred unless a later artifact prepares final scoring or scenario-scoreability criteria;
+- keep `MEM-004` and `TRUST-001` deferred only while implementation does not retain, reuse, or route control-relevant prompt/model-response/checkpoint/profile artifacts derived from selected-slice semantic fixture state beyond the already accepted fixture/evaluation basis;
+- keep `MEM-001`, `TIME-001`, `GROW-005`, `SURF`, `PROD`, `CONT`, and `AUTH` questions deferred unless a later artifact introduces their trigger conditions.
 
 ## Next Frontier
 
 The recommended next frontier is `DEP-001`: minimum dependency identity metadata for the selected state and transitions.
 
-`DEP-001` should decide what stable reference metadata is required to connect input facts, derived transition state, candidates, active trials, behavior dispositions, outcomes, projections, and explanation support without building a full dependency graph, workflow engine, or production memory system.
+This ADR decides which semantic relationships must remain referentially reconstructable. It does not decide the common metadata shape of those references, whether relations are direct IDs, event ancestry, typed edges, composite keys, or another dependency representation.
+
+`DEP-001` should decide what stable reference metadata and relation semantics are required to connect input facts, transition evidence, candidates, active trials, behavior dispositions, outcomes, projections, and explanation support without building a full dependency graph, workflow engine, or production memory system.
 
 ## Reconsideration Triggers
 
