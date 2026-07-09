@@ -1,69 +1,83 @@
 # Governance Projection Process
 
-Document version: `V0.1.0`
+Document version: `V0.2.0`
 
 Status: `Draft`
 
-Date: 2026-07-09
+Date: 2026-07-10
 
 ## Purpose
 
 This document defines the minimal publication path from canonical `Zoey/meta` governance into a governed implementation repository.
 
-It is a process contract, not a final sync tool design.
+It is a process contract for the first projector and checker, not a service or plugin design.
 
-## Projection Flow
+## Projection As A Governance-Set Transaction
 
 ```text
-canonical meta governance
-    -> select standard/profile/integration versions
-    -> copy pinned governance snapshots
-    -> copy required governing source snapshots
-    -> write or update governance lock
-    -> preserve repo-owned CONFORMANCE.md
-    -> validate content digests
+1. Select complete standard, profile, and integration set.
+2. Derive active rule/revision set and governing-source closure.
+3. Stage every canonical snapshot outside the live governance directory.
+4. Compute digests and construct the complete new lock.
+5. Validate the staged set against its lock.
+6. Publish canonical snapshots.
+7. Publish the lock last as the new baseline marker.
+8. Run the separate local conformance audit.
 ```
+
+If step 8 fails, projection integrity remains valid but local conformance is `revalidation-required` or otherwise degraded. Promotion is blocked where the affected rules require it; projection does not roll back a coherent new canonical baseline.
 
 ## Projection Inputs
 
 - canonical `ENGINEERING_STANDARD.md`;
 - active profile files;
 - active integration contracts;
-- source documents cited by active rules;
+- exact governing source documents derived from active rule sources;
 - Codex `AGENTS.md` templates where Codex is used;
-- repository-local conformance ledger.
+- repository-local conformance index and optional exception register.
 
 ## Projection Outputs
 
 ```text
 governance/
     ENGINEERING_STANDARD.md
-    ACTIVE_PROFILE.md
-    CODEX_INTEGRATION.md
-    ZOEY_GOVERNANCE.lock
-    CONFORMANCE.md
+    profiles/
+        SCN001_SELECTED_SLICE.md
+    integrations/
+        CODEX_INTEGRATION.md
     sources/
         OPEN_QUESTIONS.md
         ADR-*.md
+    ZOEY_GOVERNANCE.lock
+    CONFORMANCE.md
+    EXCEPTIONS.md                  if an exception is active
 ```
 
-## Drift Check
+Projection initializes missing root or nested `AGENTS.md` files from templates. It records the seed template ID/version in the instantiated file and never overwrites later repo-owned guidance during routine synchronization.
 
-A governance drift check should verify:
+## Projection Integrity Check
 
-- local snapshot digests match the governance lock;
-- rule IDs and revisions in `CONFORMANCE.md` exist in active standard/profile/integration snapshots;
-- local evidence referenced by `CONFORMANCE.md` resolves;
-- no rule is marked `enforced` when its evidence or gate is missing;
-- repo-local `AGENTS.md` keeps required governance routing and does not weaken inherited active rules.
+A projection-integrity check verifies that:
+
+- all live canonical snapshots match the lock's algorithm and digests;
+- the lock's active profile/integration set matches projected directories;
+- locked rule IDs, revisions, and source artifacts resolve exactly once;
+- every governing source snapshot is derived from the active rule-source closure;
+- `CONFORMANCE.md` is declared by the lock but is not hashed as a canonical input.
+
+## Conformance Audit
+
+A separate conformance audit verifies that:
+
+- the applicability index completely covers the locked rule set;
+- evidence, gate, review, and exception references resolve;
+- actual promotion mechanisms meet the canonical minimums;
+- no rule is marked `enforced` without its required evidence;
+- root and path-scoped `AGENTS.md` retain required routing and monotonic specialization;
+- every governed Codex working-directory instruction chain fits its configured `project_doc_max_bytes` limit without relying on a personal override.
 
 ## Manual Edits
 
-Do not edit derived governance snapshots to change obligations. Change canonical governance in `Zoey/meta`, then re-project.
+Do not edit derived canonical snapshots to change obligations. Change canonical governance in `Zoey/meta`, then project a new governance set.
 
-Repo-local differences belong in:
-
-- `CONFORMANCE.md`;
-- repo-local `AGENTS.md`;
-- explicit engineering exceptions;
-- repo-local implementation docs.
+Repo-local differences belong in `CONFORMANCE.md`, `EXCEPTIONS.md`, repo-local `AGENTS.md`, or implementation documentation. They do not alter canonical source snapshots or governance-lock digests.

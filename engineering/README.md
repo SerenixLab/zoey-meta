@@ -11,6 +11,7 @@ Canonical artifacts:
 Templates and publication:
 
 - `templates/CONFORMANCE_TEMPLATE.md`: implementation-repo conformance ledger template.
+- `templates/EXCEPTION_TEMPLATE.md`: repository-local scoped engineering exception template.
 - `templates/GOVERNANCE_LOCK_TEMPLATE.md`: implementation-repo governance lock contract.
 - `publication/GOVERNANCE_PROJECTION.md`: minimal process for projecting canonical governance into implementation repos.
 - `integrations/codex/AGENTS_*_TEMPLATE.md`: starting `AGENTS.md` guidance for governed Codex work.

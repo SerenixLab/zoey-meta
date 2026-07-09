@@ -16,7 +16,7 @@ When editing `ENGINEERING_STANDARD.md` or `engineering/profiles/*`:
 - keep `ENG-*` rule entries as the normative surface;
 - attach binding obligations to rule IDs and rule revisions;
 - do not store local enforcement `Status` in canonical rules;
-- distinguish expected mechanism, test mode, promotion integration, local ledger status, and failure consequence;
+- distinguish eligible protection mechanism, review actor, test mode, minimum promotion enforcement, minimum promotion integration, local ledger status, and failure consequence;
 - avoid treating Markdown text alone as enforcement;
 - preserve the split between base standard, active profiles, integration contracts, templates, source snapshots, and local conformance ledgers.
 

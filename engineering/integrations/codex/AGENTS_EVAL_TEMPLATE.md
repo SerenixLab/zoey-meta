@@ -2,11 +2,11 @@
 
 Template ID: `ZOEY-CODEX-AGENTS-EVAL`
 
-Template version: `V0.2.0`
+Template version: `V0.3.0`
 
-Integration: `CODEX_INTEGRATION.md` `V0.1.0`
+Integration: `CODEX_INTEGRATION.md` `V0.2.0`
 
-Instantiation: starting nested evaluation guidance. Local specialization is allowed; inherited active rules must not be weakened.
+Instantiation: starting nested evaluation guidance. Replace this template metadata on first projection with its seed template ID/version and `Canonical template equality: not claimed`. Local specialization is allowed; inherited active rules must not be weakened.
 
 This directory is evaluation-owned implementation code.
 
