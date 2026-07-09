@@ -1,6 +1,6 @@
 # Zoey Engineering Standard
 
-Document version: `V0.1.0`
+Document version: `V0.1.1`
 
 Status: `Draft`
 
@@ -52,6 +52,16 @@ The strongest risks found in the current design baseline are:
 
 The engineering response is therefore not to pick a final framework early. It is to create mechanical guardrails around ownership, dependency direction, input safety, output selection, state evidence, relation inspection, test coverage, and claim language.
 
+## Engineering Layers
+
+This standard has two layers.
+
+The first layer is the general code-health floor. It applies to all non-throwaway first implementation work regardless of which selected-slice responsibility the code serves. Its job is to keep the project understandable, reviewable, debuggable, and hard to accidentally expand.
+
+The second layer is the selected-slice conformance profile. It applies specifically to the first `SCN-001` implementation under accepted `ADR-008 R2`. Its job is to prevent code from silently violating the SUT/evaluation boundary, fixture/oracle separation, selected-slice state contract, dependency identity contract, and claim boundaries.
+
+Both layers matter. A codebase can preserve the selected-slice boundary and still become hard to maintain. A codebase can be clean and still be invalid because it lets the harness, fixture, simulator, or oracle do SUT work.
+
 ## Normative Language
 
 `MUST` marks a binding rule for non-throwaway implementation work.
@@ -63,6 +73,66 @@ The engineering response is therefore not to pick a final framework early. It is
 `MUST NOT` marks a prohibited implementation shape unless a later accepted decision supersedes this standard.
 
 `Throwaway` means an experiment that is not used as selected-slice evidence, not presented as architecture-compatible implementation, not reused as the basis of the first implementation projects, and not used to support a milestone claim.
+
+## Enforcement Classes
+
+Every important engineering rule SHOULD be assigned one of these enforcement classes in the implementation repo's conformance ledger:
+
+| Class | Meaning |
+| --- | --- |
+| `static` | A static dependency, schema, lint, or build rule fails before tests run. |
+| `contract-test` | A test verifies a public contract, serialization shape, schema behavior, or boundary behavior. |
+| `negative-test` | A test deliberately attempts the prohibited behavior and expects rejection or failure. |
+| `review-gate` | The rule is checked through explicit code review because it is not yet mechanically enforceable. |
+| `unenforced-risk` | The rule is known but not currently enforced; the residual risk is documented. |
+
+Markdown alone does not make a rule protected. If a rule is only stated in this document, it is `review-gate` at best until the implementation repo records stronger enforcement.
+
+Preferred enforcement order:
+
+```text
+mechanically impossible
+    -> static check
+    -> contract/negative test
+    -> explicit review gate
+    -> documented unenforced risk
+```
+
+Rules that protect SUT/evaluation dependency direction, answer-bearing payload exclusion, SUT-visible reference safety, public-boundary behavior evidence, inspection passivity, and harness non-arbitration SHOULD become `static`, `contract-test`, or `negative-test` before they support selected-slice claims.
+
+## Conformance Ledger
+
+Each non-throwaway implementation repo SHOULD maintain a small conformance ledger. It may be a Markdown file, test manifest, CI note, or equivalent project-local artifact.
+
+The ledger SHOULD use this shape:
+
+```text
+Rule:
+Source:
+Applies To:
+Enforcement Class:
+Mechanism:
+Status:
+Residual Risk:
+Owner:
+Last Checked:
+```
+
+Example:
+
+```text
+Rule: SUT core has no dependency path to evaluation modules.
+Source: ADR-008 R2; ENGINEERING_STANDARD.md V0.1.1.
+Applies To: scn001_sut_core.
+Enforcement Class: static.
+Mechanism: implementation-selected import/dependency conformance tool.
+Status: enforced in local test/CI gate.
+Residual Risk: dynamic imports or generated code require review.
+Owner: implementation maintainer.
+Last Checked: YYYY-MM-DD.
+```
+
+The ledger is not busywork. It prevents standard rot: the project must be able to tell the difference between a rule that is actually enforced and a rule that is only intended.
 
 ## Scope
 
@@ -152,6 +222,43 @@ A refactor is not acceptable if it keeps final behavior but loses:
 - separation between SUT state and oracle-only facts;
 - passive inspection surface needed by the oracle.
 
+## Code-Health Floor
+
+The first implementation SHOULD stay small, explicit, and local. The goal is not to create a general framework; it is to make the selected-slice pressure executable without losing the accepted distinctions.
+
+Non-throwaway implementation SHOULD follow these rules:
+
+- modules and files should have one visible responsibility;
+- helpers should be local before they become shared;
+- shared helpers must not hide ownership boundaries;
+- abstractions should be introduced only after repeated concrete pressure appears;
+- tests should explain which boundary or behavior they protect;
+- failure messages should point to the violated contract or rule;
+- dead scaffolding should be removed or clearly marked throwaway;
+- broad names such as `manager`, `engine`, `context`, `memory`, `state`, `handler`, or `processor` should be avoided unless the responsibility is explicitly bounded;
+- generated code should be reviewed before it creates project structure, record families, or shared contracts;
+- documentation should explain current non-scope as clearly as current capability.
+
+Code-health failures do not automatically violate ADR-008, but they make boundary review weaker. A small confusing helper can become the first dependency leak. A broad DTO can become the first answer leak. A vague test can become the first overclaim.
+
+## Selected-Slice Conformance Profile
+
+The first implementation profile consists of the following mandatory conformance areas:
+
+| Area | Preferred enforcement |
+| --- | --- |
+| SUT has no direct or transitive dependency path to evaluation modules | `static` |
+| Evaluation full records cannot cross SUT public input | `static` or `contract-test` plus `negative-test` |
+| SUT-visible payloads reject unknown or prohibited fields | `contract-test` plus `negative-test` |
+| Evaluation adapters preserve role and state origin | `contract-test` plus `negative-test` |
+| Harness cannot call semantic decision-point commands as public SUT behavior input | `contract-test` plus `negative-test` |
+| Harness cannot choose among competing SUT outputs | `contract-test` plus `negative-test` |
+| SUT state access does not become retrieval or relevance ranking | `contract-test` or `review-gate` with explicit residual risk |
+| Inspection does not mutate or repair state | `contract-test` plus `negative-test` |
+| Reports and traces cannot claim acceptance before trigger questions resolve | `review-gate` plus documentation test where practical |
+
+If an implementation cannot enforce one of these areas mechanically yet, the conformance ledger MUST record the residual risk before the code is used as non-throwaway implementation.
+
 ## Project And Package Shape
 
 ### Minimum Shape
@@ -171,6 +278,18 @@ The dependency direction MUST be:
 scn001_eval -> scn001_sut_core public boundary
 scn001_sut_core -> no dependency on scn001_eval
 ```
+
+The first non-throwaway implementation repo MUST choose a language-appropriate dependency conformance mechanism before behavior implementation begins. The standard does not choose the tool. The implementation repo MUST record the chosen mechanism in its conformance ledger.
+
+The gate MUST cover direct and transitive dependency paths where the language/tooling can detect them:
+
+```text
+scn001_sut_core -> scn001_eval                      prohibited
+scn001_sut_core -> shared_contracts -> scn001_eval  prohibited
+scn001_eval.simulator -> scn001_sut_core.private    prohibited
+```
+
+If the language permits dynamic imports, generated imports, reflection, plugin loading, or runtime module lookup that the static tool cannot fully see, those mechanisms MUST be listed as residual risk and review-gated.
 
 The SUT core MUST NOT import, instantiate, call, configure, or depend on:
 
@@ -231,6 +350,15 @@ It MUST NOT contain:
 
 If a shared package starts to encode evaluation semantics, it MUST be split or the relevant open question/ADR must be revisited before the code is used as non-throwaway implementation.
 
+Before a shared package is introduced, the implementation plan SHOULD answer:
+
+- Why is this not local to SUT or evaluation?
+- Which side can import it?
+- Can it import anything?
+- Does it contain only SUT-safe contracts or lower-level primitives?
+- Does any public type name or field name carry evaluation vocabulary?
+- How is transitive contamination tested?
+
 ## Public Boundary Standard
 
 ### SUT Input
@@ -259,6 +387,10 @@ Role-preserving means the input keeps its accepted role:
 
 The evaluation adapter MAY change names, serialization, transport shape, or host-language representation. It MUST NOT perform SUT semantic transitions.
 
+SUT-visible payload projection SHOULD be allowlist-based. Unknown fields and explicitly prohibited fields SHOULD fail closed rather than be ignored.
+
+The implementation SHOULD test serialized payloads, not only in-memory objects, whenever serialization exists. A payload that would carry hidden evaluation metadata over JSON, files, message envelopes, logs, snapshots, or fixtures is still a boundary violation even if host-language types are clean.
+
 Examples:
 
 ```text
@@ -275,6 +407,30 @@ allowed:    L-002 fixture item -> opaque SUT-visible state handle
 prohibited: CF2-L-003 literal fixture/path ID -> SUT-visible state handle
 ```
 
+### Reserved Evaluation Vocabulary
+
+The following vocabulary is reserved for evaluation-owned records and MUST NOT appear in SUT public input fields, SUT-visible serialized payloads, SUT-visible state handles, or behavior-driving SUT state unless a later accepted decision explicitly permits the term as SUT-visible non-answer metadata:
+
+- `path`;
+- `bundle`;
+- `checkpoint`;
+- `decision_point`;
+- `claim_class`;
+- `oracle_rule`;
+- `score`;
+- `expected_transition`;
+- `branch`;
+- `canonical`;
+- `pressure`;
+- `validity`;
+- `pass`;
+- `fail`;
+- `answer_key`.
+
+This is not a ban on comments, documentation, test names, or evaluation-side records. It is a boundary-contract rule for values, field names, type names, and serialized forms that can affect SUT behavior or SUT-visible state.
+
+If a harmless domain word collides with reserved vocabulary, the implementation MUST either rename the SUT-visible contract or record an explicit exception with review evidence that it does not encode evaluation context.
+
 ### SUT Processing
 
 The harness MUST NOT call SUT internals by accepted semantic transition name.
@@ -288,6 +444,10 @@ execute_expected_transition("LATER_USE_APPLY_T12")
 ```
 
 The SUT MAY internally organize code around named transition functions. Those functions MUST NOT become harness commands that reveal the expected answer.
+
+Internal unit tests MAY call internal transition functions when testing local implementation details. Such tests MUST NOT count as selected-slice behavior evidence, architecture compatibility evidence, or milestone evidence.
+
+Any test, trace, demo, or report that claims selected-slice behavior compatibility MUST drive the SUT through the accepted public boundary. A result produced by calling an internal transition function is implementation evidence only.
 
 ### SUT State Access
 
@@ -391,7 +551,7 @@ Implementation MUST preserve the local relation semantics required by `ADR-007` 
 
 The representation may be fields, records, tables, logs, events, object references, or another inspectable structure.
 
-The oracle must be able to enumerate required local relations for inspected records without relying on private manual reasoning or retrospective narrative.
+The oracle MUST be able to enumerate required local relations for inspected records without relying on private manual reasoning or retrospective narrative.
 
 ### Time And Order
 
@@ -418,6 +578,14 @@ Fixture/oracle package records may be answer-bearing inside evaluation code. The
 It is invalid to pass a full answer-bearing object to SUT code with the claim that the SUT ignores hidden fields.
 
 The formal delivery path SHOULD make accidental full-record delivery fail loudly.
+
+Fixture projection tests SHOULD include:
+
+- full fixture item rejected by SUT input;
+- extra oracle field rejected by SUT input;
+- reserved evaluation vocabulary rejected where it appears in SUT-visible fields;
+- literal path-qualified fixture ID rejected as a SUT-visible state handle;
+- role-preserving projection accepted for the corresponding permitted input.
 
 ### Harness
 
@@ -466,6 +634,16 @@ Capture/reporting MUST NOT create missing SUT evidence after the fact and presen
 
 Reporting MAY produce bounded evidence reports and failure artifacts, but MUST NOT claim final milestone acceptance until `SLICE-005` resolves.
 
+### Logs, Snapshots, And Debug Traces
+
+Logs, snapshots, debug traces, and captured payloads are engineering artifacts, but they can become accidental state sources.
+
+Evaluation-only metadata MAY appear in evaluation logs and capture artifacts when needed for debugging or oracle work. It MUST NOT be re-ingested as SUT-visible input or used as behavior-driving SUT state.
+
+SUT-facing logs or snapshots MUST preserve the same visibility and state-origin rules as SUT input/output contracts when they are used for replay, debugging, or later execution.
+
+A replay or restore path MUST NOT promote evaluation capture into SUT state unless a later accepted decision explicitly defines that path.
+
 ## Testing Standard
 
 ### Test Philosophy
@@ -473,6 +651,25 @@ Reporting MAY produce bounded evidence reports and failure artifacts, but MUST N
 Tests must protect semantic boundaries, not only final examples.
 
 A test suite that checks only final user-facing wording is insufficient. The first implementation must make wrong ownership fail.
+
+### Evidence And Artifact Labels
+
+Implementation artifacts MUST use labels that match what they can support.
+
+Allowed labels before `EVAL-004`, `EVAL-005`, and `SLICE-005` resolve include:
+
+- `dev_trace`: exploratory or development execution trace;
+- `conformance_test`: test protecting a boundary, dependency, schema, or claim rule;
+- `oracle_unit_test`: test of oracle predicate logic outside formal campaign evidence;
+- `behavior_sample`: observed behavior useful for debugging or design review;
+- `replay_test`: deterministic replay of a known behavior path;
+- `implementation_note`: explanation of code behavior or limitation.
+
+The label `formal_campaign_record` MUST NOT be used until `EVAL-004` resolves the formal evaluation-record metadata contract.
+
+The labels `pass_evidence`, `score`, `scenario_score`, `accepted_slice`, `milestone_complete`, or equivalent MUST NOT be used until the relevant acceptance and scoreability questions resolve.
+
+Development traces MAY be useful evidence for debugging. They are not formal selected-slice pass evidence.
 
 ### Minimum Test Categories
 
@@ -508,6 +705,12 @@ Non-throwaway first implementation SHOULD include tests for:
 10. Claim boundary:
     reports and README text do not claim acceptance, scoring, production readiness, or broader scenario pass.
 
+11. Reserved vocabulary:
+    SUT-visible contracts and serialized payloads do not expose reserved evaluation vocabulary.
+
+12. Artifact labeling:
+    development traces, conformance tests, oracle unit tests, and behavior samples cannot be mistaken for formal campaign records or pass evidence.
+
 ### Negative Tests
 
 Each boundary-critical positive test SHOULD have at least one negative test.
@@ -517,6 +720,7 @@ Examples:
 - passing `CF2-L-003` as a SUT-visible handle should fail if it reveals evaluation context;
 - passing a full fixture item with hidden oracle fields should fail;
 - passing a full simulator realization record with canonical-match fields should fail;
+- passing a SUT-visible payload with reserved evaluation vocabulary should fail unless an explicit exception is recorded;
 - harness selecting the only canonical output among two SUT outputs should fail;
 - inspection that writes missing relation evidence should fail.
 
@@ -532,6 +736,19 @@ When nondeterministic model behavior is introduced, tests MUST distinguish:
 - formal milestone evidence.
 
 Formal nondeterministic campaign policy remains governed by accepted evaluation decisions and later acceptance-gate work. Ordinary implementation tests MUST NOT pretend to satisfy formal campaign acceptance unless the relevant evaluation questions have been resolved.
+
+### Conformance Before Behavior
+
+Boundary conformance tests SHOULD run before high-level behavior examples. A behavior test that passes after a boundary conformance failure is not meaningful selected-slice evidence.
+
+The implementation test suite SHOULD make these failures fast and obvious:
+
+- SUT imports evaluation module;
+- full fixture/oracle object crosses SUT input;
+- full simulator evaluation record crosses SUT input;
+- reserved evaluation vocabulary appears in SUT-visible serialized payload;
+- harness calls an expected transition selector;
+- inspection mutates state.
 
 ## Review Standard
 
@@ -562,6 +779,8 @@ For any non-throwaway change, reviewers SHOULD ask:
 - Does SUT state access become retrieval or relevance ranking?
 - Can the oracle inspect required evidence without private-state spelunking or repair?
 - Does the change preserve references, effective endpoint identity, order, and local relations?
+- Is the rule protected by static check, contract test, negative test, review gate, or only documented as risk?
+- Does the change add logs, snapshots, or traces that could later be re-ingested as SUT state?
 - Does any text overclaim acceptance, scoreability, production readiness, or continuity?
 - Does this change trigger `SLICE-005`, `EVAL-004`, `EVAL-005`, `DEP-003`, or another open question?
 
@@ -575,6 +794,9 @@ A review MUST block merge or promotion to non-throwaway implementation when it f
 - harness arbitrates among competing SUT outputs;
 - SUT pass depends on retrieval/context assembly excluded from the milestone;
 - inspection mutates or repairs SUT evidence;
+- a boundary-critical rule is marked enforced but has no actual check or review gate;
+- generated code creates broad DTOs or shared contracts that mix SUT and evaluation roles;
+- logs, snapshots, or replay artifacts can reintroduce evaluation-only metadata into SUT behavior;
 - implementation claims acceptance or scoring before the relevant question resolves.
 
 ## Documentation Standard
@@ -613,6 +835,8 @@ Generated code is especially suspect when it:
 - writes user-facing claims from final behavior without preserving evidence;
 - invents acceptance scoring or report metadata;
 - uses plausible comments instead of inspectable state.
+
+Generated code that creates public contracts, shared packages, fixture projections, simulator records, capture records, or inspection surfaces MUST receive explicit review before becoming non-throwaway implementation. The review must check reserved vocabulary, state-origin preservation, dependency direction, and claim boundary.
 
 ## Change Control
 
@@ -654,15 +878,20 @@ Before first implementation project creation, the engineering plan SHOULD answer
 
 - What are the SUT core and evaluation package names?
 - How is one-way dependency mechanically enforced?
+- What conformance ledger exists, and which rules are static, tested, review-gated, or currently unenforced?
+- Which architecture conformance tool or equivalent mechanism is selected?
 - What public SUT input, output, run lifecycle, and inspection seams exist?
 - What record families are evaluation-only?
 - How are SUT-visible fixture projections created?
+- Do SUT-visible projections reject unknown and prohibited fields?
 - How are SUT-visible simulator projections created?
 - How are opaque SUT state handles represented without leaking fixture path identity?
 - How does the SUT identify the proposal or disposition selected for simulator realization?
 - How is broad retrieval/context assembly prevented?
 - How is passive inspection kept read-only?
 - Which negative tests protect the boundary?
+- How are development traces labeled differently from formal evidence?
+- How are logs, snapshots, and replay artifacts prevented from reintroducing evaluation-only metadata?
 - What documentation text prevents overclaiming?
 
 ## Non-Scope
@@ -697,12 +926,15 @@ An implementation that appears to pass selected-slice behavior is suspect if any
 - Can a full fixture/oracle object reach SUT input?
 - Can a full simulator evaluation record reach SUT input?
 - Can fixture path, branch, claim class, score, expected transition, or canonical pressure leak through IDs?
+- Can reserved evaluation vocabulary appear in SUT-visible contract fields or serialized payloads?
 - Can evaluation adapt raw communication into scoped correction/control state before SUT processing?
 - Can evaluation adapt task observations into a recognition/production conclusion before SUT processing?
 - Can the harness pick the proposal or disposition that gets realized?
 - Can capture/reporting create the missing relation evidence after the fact?
 - Can inspection mutate state or repair lineage?
+- Can logs, snapshots, or replay artifacts carry evaluation-only metadata back into SUT behavior?
 - Can the SUT pass by broad memory retrieval or relevance ranking?
+- Can a rule be described as enforced without a static check, contract test, negative test, or explicit review gate?
 - Can report text claim milestone completion before `SLICE-005` resolves?
 - Can repeated exploratory runs be cherry-picked and presented as formal campaign evidence?
 
