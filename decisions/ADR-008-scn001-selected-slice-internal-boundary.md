@@ -4,7 +4,7 @@ Status: `Draft`
 
 Date: 2026-07-09
 
-Record revision: `R0`
+Record revision: `R1`
 
 Decision authority: project owner
 
@@ -26,21 +26,23 @@ Decision-Time Baselines:
 
 ## Decision
 
-For the first `SCN-001` selected slice, adopt a two-project minimum internal boundary:
+For the first `SCN-001` selected slice, adopt a two-domain minimum internal boundary:
 
-1. a selected-slice SUT core project that owns all behavior-driving semantic transitions, run-scoped effective state, transition evidence, lineage-preserving inspection projections, and public SUT boundary contracts;
-2. a selected-slice evaluation project that owns the harness, fixture/oracle package, simulator, capture, oracle scoring, and reporting.
+1. a selected-slice SUT core responsibility domain that owns the behavior-driving semantic transitions assigned to the SUT by `ADR-002` through `ADR-007`, run-scoped effective state, SUT-owned transition evidence, SUT-owned public input/output contracts, and public inspectability over selected-slice state and relations;
+2. a selected-slice evaluation responsibility domain that owns the harness, fixture/oracle package, simulator, capture, oracle evaluation, and reporting/output seams.
+
+The forced boundary is logical and directional: behavior-driving semantic ownership is separated from answer-bearing evaluation ownership. For the first implementation, this ADR recommends realizing that logical boundary as two code projects or packages because that is the smallest mechanically inspectable dependency direction that avoids services, processes, production storage, or product architecture. A single repository or workspace remains acceptable. A single deployable process remains acceptable. In-memory storage remains acceptable.
 
 The required dependency direction is one-way:
 
 ```text
-evaluation project -> SUT core public boundary
-SUT core -> no dependency on harness, fixture, oracle, simulator, capture, or reporting
+evaluation domain -> SUT core public boundary
+SUT core -> no dependency on harness, fixture, oracle, simulator, capture, reporting, branch policy, scoring, or evaluation-owned record types
 ```
 
-The SUT core may receive only declared SUT-visible fixture facts, SUT-visible fixture control facts, simulator realization facts, and lineage-preserving references or projections that expose state already owned by the SUT. It must not receive oracle-only metadata, hidden ground truth, answer keys, claim-class labels, branch policy, scoring rules as guidance, canonical path expectations, or acceptance results.
+The SUT core owns the semantic input/output contract it accepts and emits. The evaluation domain adapts fixture/oracle records into SUT-accepted input contracts and adapts SUT outputs/projections into capture, oracle, and report records. Fixture package record types, path IDs, bundle IDs, branch rules, oracle rule types, claim-class types, scoring labels, expected-transition identifiers, and answer-bearing package metadata are evaluation-owned and must not be imported by the SUT core or encoded in SUT-visible semantic input.
 
-This is the smallest boundary forced by accepted selected-slice behavior. A single repository or workspace is acceptable. A single deployable process is acceptable. In-memory storage is acceptable. The decision does not require services, a database, a graph engine, production adapters, a product UI, final runtime topology, or final Zoey architecture.
+The evaluation side may control when fixture facts are delivered and what the synthetic world does next, but it must not tell the SUT which semantic transition to perform, which retained SUT state is relevant, or which realized behavior matches the expected answer.
 
 Acceptance of this ADR would resolve `SLICE-003` for the first `SCN-001` selected-slice milestone only.
 
@@ -48,25 +50,106 @@ Acceptance of this ADR would resolve `SLICE-003` for the first `SCN-001` selecte
 
 `ADR-002` keeps the central transition chain inside the SUT: stale-history handling, attribution, dimension comparison, trial formation, proposal binding, activation checks, direct correction, later-use applicability, outcome update, and explanation support.
 
-`ADR-004` keeps context curated by the harness while requiring the SUT to perform semantic use of that context. The SUT therefore needs a public input boundary for curated facts and a public output boundary for effective state inspection.
+`ADR-004` keeps context curated by the harness while requiring the SUT to perform semantic use of that context. The SUT therefore needs an input boundary for curated facts and an inspection/output boundary for effective state and transition evidence. This does not make the harness a production retrieval or active cognitive-frame assembly system.
 
-`ADR-005` separates fixture inputs from oracle expectations. The implementation boundary must prevent oracle-only metadata from entering behavior-driving SUT state.
+`ADR-005` separates fixture inputs from oracle expectations. The implementation boundary must prevent oracle-only metadata, branch policy, expected outcomes, and answer-bearing fixture annotations from entering behavior-driving SUT state.
 
-`ADR-006` requires run-scoped cross-transition SUT state and SUT transition evidence, but explicitly avoids a final storage schema. The boundary therefore must surround semantic state ownership, not a database.
+`ADR-006` requires run-scoped cross-transition SUT state and SUT transition evidence, but explicitly avoids a final storage schema. The boundary therefore surrounds semantic ownership and inspectability, not a database or production memory system.
 
-`ADR-007` requires stable scoped references, effective endpoint identity, contemporaneous dependency-use evidence, and local relation semantics. The boundary therefore must preserve referenceability and relation inspection, but does not require a graph service.
+`ADR-007` requires stable scoped references, effective endpoint identity, contemporaneous dependency-use evidence, and local relation semantics. The boundary therefore must preserve referenceability and relation inspection, but does not require a graph service or global dependency engine.
 
-The minimum that satisfies all five pressures is a SUT core with a narrow public boundary, driven by a separate evaluation project that can hold answer-bearing fixture/oracle machinery.
+The minimum that satisfies these pressures is not a final Zoey core, final repository layout, service topology, storage engine, or production runtime. It is a selected-slice SUT responsibility domain with a narrow public boundary, driven by a separate evaluation responsibility domain that can hold answer-bearing fixture/oracle machinery without exposing it to SUT cognition.
+
+## Alternatives Considered
+
+| Option | Assessment | Decision |
+| --- | --- | --- |
+| Single selected-slice package with internal namespaces | Could be semantically sufficient if the language/build/test system mechanically prevents SUT imports of evaluation modules, prevents answer-bearing objects from crossing the SUT boundary, and provides inspectable SUT-visible projections. It is harder to audit casually and easier to regress through accidental imports or broad fixture DTOs. | Not the recommended first implementation shape, but not ruled out if it proves the same mechanical boundary. |
+| Two code projects or packages: SUT core and evaluation | Gives the simplest inspectable dependency direction while avoiding services, processes, production adapters, or final architecture. The SUT can be tested through its public boundary; evaluation can hold fixture/oracle/simulator/capture machinery. | Recommended realization of the forced logical boundary for the first implementation. |
+| Three-project split for SUT core, fixture/oracle package, and simulator/evaluation runner | May become useful if fixture/oracle visibility separation or simulator isolation is hard to enforce inside one evaluation project. Adds packaging overhead before proven necessary. | Deferred unless R1 constraints cannot be preserved with two projects. |
+| Ports-and-adapters boundary around SUT transitions | Directionally compatible and may describe the implementation style inside the two-domain split. It should not expand into production adapters or a general runtime boundary. | Allowed as an internal design pattern, not required by this ADR. |
+| Production-style services/stores/runtime adapters/product surfaces | Overbuilds the first selected slice and risks turning SCN-001-specific abstractions into general Zoey architecture before SCN-002 counter-pressure. | Rejected for this milestone. |
 
 ## Responsibility Map
 
 | Responsibility area | Owner | Required responsibility | Must not own |
 | --- | --- | --- | --- |
-| SUT core | SUT core project | Ingest SUT-visible facts, classify attribution where assigned to the SUT, retain run-scoped semantic state, perform selected-slice transitions, produce behavior dispositions, record transition evidence and local relations, expose lineage-preserving inspection projections, and produce explanation support. | Fixture path selection, oracle scoring, branch policy, hidden ground truth, claim-class results, run acceptance, product UI, production memory, retrieval, or simulator fidelity decisions. |
-| Harness | Evaluation project | Drive decision-point sequence, deliver curated bundles, enforce fixture delivery order, call SUT boundary operations, route SUT intents to simulator, collect exposed projections, and keep SUT run isolation. | SUT semantic conclusions, reconstruction of lost SUT state, activation checks, later-use applicability, or explanation support. |
-| Fixture/oracle | Evaluation project, with internal fixture/oracle separation | Define fixture package `SCN001-SSFO-V0.2.0`, SUT-visible payloads, SUT-visible control facts, oracle-only expectations, rule IDs, claim classes, path pressure, and validity/scoring predicates. | Behavior-driving SUT state, SUT-derived temporal/staleness judgments, trial selection, applicability verdicts, or causal conclusions. |
-| Simulator | Evaluation project | Realize SUT proposal intents and behavior dispositions into synthetic interaction facts, emit realization facts, fidelity/mismatch facts, and simulated outcome delivery gates. | Choosing the policy being tested, correcting SUT intent, supplying trial applicability, or proving semantic correctness. |
-| Capture/reporting | Evaluation project | Snapshot SUT projections, simulator facts, fixture facts, oracle results, invalidity reasons, failure artifacts, and bounded claim evidence with stable references. | SUT behavior-driving memory, post-hoc basis reconstruction as proof of SUT consumption, or acceptance gate decisions not yet accepted under `SLICE-005`. |
+| SUT core | SUT core domain/project | Accept SUT-safe input records, classify attribution where assigned to the SUT, retain run-scoped semantic state, perform selected-slice transitions, produce proposal intents and behavior dispositions, record SUT transition evidence and local relations, expose passive inspection surfaces over retained state/evidence, and produce explanation support. | Fixture path selection, oracle scoring, branch policy, hidden ground truth, claim-class results, run acceptance, product UI, production memory, retrieval, simulator fidelity decisions, or evaluation-owned record types. |
+| Harness | Evaluation domain/project | Drive fixture bundle delivery, enforce delivery order, call only SUT-safe public boundary operations, route SUT outputs to simulator, deliver permitted simulator projections back to SUT, collect passive inspection outputs, and keep SUT run isolation. | SUT semantic conclusions, expected-transition selection as SUT input, reconstruction of lost SUT state, activation checks, later-use applicability, explanation support, or relevance selection over retained SUT state. |
+| Fixture/oracle package | Evaluation domain/project, with mechanical SUT-visible/oracle-only separation | Define `SCN001-SSFO-V0.2.0`, SUT-visible payload projections, SUT-visible control facts, oracle-only expectations, rule IDs, claim classes, path pressure, branch policy, validity predicates, and scoring predicates. | Behavior-driving SUT state, SUT-derived temporal/staleness judgments, trial selection, applicability verdicts, causal conclusions, or broad fixture objects delivered directly to the SUT. |
+| Simulator | Evaluation domain/project | Realize SUT proposal intents and behavior dispositions into synthetic interaction facts; emit realization facts and permitted fidelity/mismatch facts. | Choosing the policy being tested, correcting SUT intent, supplying trial applicability, proving semantic correctness, or owning outcome delivery gates. |
+| Capture/reporting | Evaluation domain/project | Observe fixture deliveries, SUT outputs/projections, simulator facts, oracle results, invalidity reasons, failure artifacts, and bounded claim evidence with stable references. | SUT behavior-driving memory, post-hoc basis reconstruction as proof of SUT consumption, inspection-time repair of missing SUT state, or acceptance gate decisions not yet accepted under `SLICE-005`. |
+
+## Public Boundary Rules
+
+### No Expected-Transition Selectors
+
+Harness decision-point identifiers, checkpoint identifiers, path-stage names, claim-class IDs, expected-transition IDs, canonical-pressure labels, and semantic operation selectors remain evaluation-side.
+
+The SUT public boundary must not receive a call or payload whose meaning tells it which accepted semantic transition the oracle expects next. The harness may internally know that a bundle is associated with `DP-TRIAL-FORM`, `DP-LATER-USE`, or `DP-EXPLAIN`, but the SUT receives only permitted SUT-visible input facts, current interaction/control context, and opaque invocation/run references that do not encode the semantic answer.
+
+Valid public-boundary shapes may look conceptually like:
+
+```text
+ingest_sut_visible_inputs(input_batch)
+process_current_interaction()
+emit_available_outputs()
+inspect_state(read_only_query)
+```
+
+Invalid public-boundary shapes include:
+
+```text
+execute_decision_point("DP-TRIAL-FORM")
+run_transition("FORM_DELAYED_CORRECTION_TRIAL")
+execute_expected_transition("LATER_USE_APPLY_T12")
+```
+
+The SUT implementation may internally organize code around transition functions. The harness must not call those internal transition functions as the test answer.
+
+### SUT-Owned State Access
+
+The SUT owns access to its retained state. The harness must not choose, rank, filter, summarize, or semantically select among SUT-owned retained state in order to present the state most likely to produce the expected transition.
+
+Where `ADR-005` includes a SUT-state reference such as `L-002` or `CF2-L-003`, the reference is an opaque lineage-preserving handle to state already owned by the SUT under a pre-registered fixture delivery rule. It must not add applicability, relevance, trial choice, or policy meaning. The SUT remains responsible for resolving the handle, preserving identity, and deciding whether the referenced retained state is applicable to the supplied current context.
+
+The harness may deliver an accepted fixture-declared opaque reference. It may not perform hidden SUT-memory retrieval such as:
+
+```text
+select most relevant active trial for this checkpoint
+return delayed-correction trial because this is the later-use path
+filter SUT state down to only the expected trial
+```
+
+### Mechanical Fixture/Oracle Visibility Barrier
+
+The evaluation domain must construct a SUT-visible input representation that is structurally incapable, under the formal-run delivery path, of carrying oracle-only fields unless the boundary contract itself is violated.
+
+The harness delivery operation accepts and delivers the SUT-visible representation, not the full fixture/oracle record. Direct delivery of a full answer-bearing fixture/oracle object to the SUT is invalid even if application code claims to ignore the oracle fields.
+
+Valid mechanisms include separate types, explicit allowlist projections, schema-restricted payloads, typed accessors, serializers that omit oracle fields, or other inspectable representations. The formal run must capture the identity and content of the SUT-visible payload actually delivered so the oracle can distinguish package contents from delivered contents.
+
+### SUT-Safe Boundary Contract Ownership
+
+The SUT core owns the semantic input/output contracts accepted and emitted by its public boundary. The evaluation domain owns adaptation from fixture/oracle records into those SUT-safe contracts and adaptation from SUT outputs/projections into oracle/capture/reporting records.
+
+A future shared `scn001_boundary_contracts` package is allowed only as a lower-level SUT-safe dependency of both projects. It must contain no oracle-only fields, answer-bearing fixture metadata, path IDs, bundle IDs, branch policy, claim-class guidance, scoring results, canonical-pressure labels, expected-transition identifiers, or evaluation-owned record types that cause the SUT to depend transitively on evaluation packages.
+
+### Passive Inspection
+
+Inspection must be passive. An inspection call must not create, activate, narrow, repair, infer, or otherwise change behavior-driving semantic state or selected-slice transition evidence. Inspection projection generation must not run a cognitive reconstruction that writes missing lineage before returning the projection.
+
+A projection may expose or structurally normalize contemporaneously retained state and transition evidence. Oracle conclusions about persistence, dependency use, lifecycle responsibility, or semantic distinguishability must be derived from exposed state, order, relation, consumer-history, and capture evidence, not solely from a SUT-authored compliance flag.
+
+For example, this is insufficient by itself:
+
+```text
+retained_across_sessions = true
+used_for_later_disposition = true
+dependency_contemporaneous = true
+```
+
+Those labels may help readability only when backed by retained state, transition evidence, relation tuples, ordering, and consumer history required by `ADR-006` and `ADR-007`.
 
 ## What Crosses Each Boundary
 
@@ -74,10 +157,10 @@ The minimum that satisfies all five pressures is a SUT core with a narrow public
 
 Allowed crossings:
 
-- SUT-visible fixture facts with fixture provenance, roles, source, chronology, context labels, task-mode labels, task observations, affordance facts, and selected fixture control facts.
+- SUT-visible fixture facts with fixture provenance, roles, semantic source, chronology, context labels, task-mode labels, task observations, affordance facts, and selected SUT-visible fixture control facts.
 - SUT-visible communication events and user responses.
-- Simulator realization facts after the SUT has emitted a proposal intent or behavior disposition.
-- Lineage-preserving references or projections to SUT-owned state when the SUT needs to consume its own retained state through a harness-mediated decision point.
+- Declared SUT-visible simulator realization projections after the SUT has emitted a proposal intent or behavior disposition.
+- Accepted opaque lineage-preserving references to SUT-owned state when explicitly required by `ADR-005`, subject to the SUT-owned state access rule above.
 
 Prohibited crossings:
 
@@ -86,49 +169,78 @@ Prohibited crossings:
 - answer-bearing fixture annotations;
 - claim-class IDs or pass/fail labels as behavior guidance;
 - branch policy that reveals which proposal or behavior receives canonical continuation;
-- precomputed stale/current, best-trial, active-trial, applicability, causal, preference, or learning-style conclusions.
+- decision-point, checkpoint, path-stage, expected-transition, canonical-pressure, or semantic-operation selectors;
+- precomputed stale/current, best-trial, active-trial, applicability, canonical-intervention-match, causal, preference, or learning-style conclusions.
 
 ### SUT Core To Harness
 
 Allowed crossings:
 
 - proposal intents and behavior dispositions;
-- retained state anchors and transition evidence exposed through inspection projections;
+- retained state anchors and transition evidence exposed through passive inspection surfaces or lineage-preserving projections;
 - stable scoped references, effective endpoint identities, lifecycle/status/scope evidence, and local relation tuples required by `ADR-007`;
 - explanation support records with state references, uncertainty, scope limits, causal limits, and unsupported generalization limits;
-- non-activation dispositions where the SUT withholds, defers, requests more evidence, asks clarification, retires, narrows, or marks inapplicability.
+- non-activation dispositions such as withhold, defer, request more evidence, ask clarification, or retire a candidate where that selected-slice transition exists;
+- lifecycle transition evidence such as retirement, narrowing, supersession, or conflict where that selected-slice transition exists;
+- applicability assessment results such as applicable, not applicable, or unresolved for a declared use target.
 
-These outputs are evidence from effective SUT state. They are not final product telemetry, production audit records, or a final state schema.
+These outputs are evidence from effective SUT state and SUT transition evidence. They are not final product telemetry, production audit records, a final state schema, or acceptance evidence by themselves.
 
-### SUT Core To Simulator
+### SUT Output Routed By Harness To Simulator
 
-The simulator may receive only SUT-owned material intent or disposition records needed for realization:
+This is a data-flow relation through the evaluation domain, not a direct project dependency.
+
+The SUT emits material intent or disposition records through its public output boundary. The harness may route only the needed SUT-owned proposal/disposition references and material payload to the simulator:
 
 - candidate-bound proposal intent;
 - drill correction disposition;
 - direct current-session correction disposition;
 - later-use behavior disposition.
 
-The simulator must not receive oracle expectations or be allowed to select the correction policy. Simulator realization output may later cross back to the SUT as a simulator fact with provenance.
+The SUT core must not import, instantiate, call, configure, or depend on the evaluation simulator. The simulator must not call private SUT internals.
+
+The simulator receives no oracle expectations and does not select the correction policy. It emits realization facts about what synthetic behavior was produced from the SUT's requested intent/disposition.
+
+### Simulator Projection Back To SUT
+
+Only the declared SUT-visible projection of a simulator realization fact may return to the SUT.
+
+That projection may include:
+
+- the prior SUT proposal/disposition reference;
+- what was actually realized;
+- simulator provenance;
+- material mismatch or fidelity information required by a later SUT transition, where permitted by the fixture contract.
+
+The following remain evaluation-side:
+
+- canonical intervention-premise match;
+- branch-gate outcomes;
+- run-validity classifications;
+- claim pressure;
+- scoring labels;
+- delivery decisions;
+- oracle conclusions about whether the realized behavior satisfied the expected answer.
 
 ### Fixture/Oracle To Harness
 
 The fixture/oracle package may give the harness:
 
-- fixture manifests and bundle membership;
+- full fixture manifests and bundle membership;
 - SUT-visible payload projections;
 - branch gates and delivery policy;
 - oracle-only predicates, rule IDs, claim classes, expected pressure, validity criteria, and scoring logic.
 
-The harness must preserve access separation when delivering inputs to the SUT. Holding both fixture and oracle material in the evaluation project is allowed only if the SUT boundary receives the SUT-visible projection, not the answer-bearing package.
+The harness must preserve access separation when delivering inputs to the SUT. Holding both fixture and oracle material in the evaluation project is allowed only if the formal SUT delivery path uses the SUT-visible projection, not the answer-bearing package record.
 
 ### Capture/Reporting From SUT, Fixture, Simulator, And Oracle
 
 Capture/reporting may collect:
 
 - SUT projections and transition evidence;
-- fixture fact references and delivered bundle evidence;
-- simulator realization facts;
+- the SUT-visible fixture payloads actually delivered;
+- fixture package records on the evaluation side;
+- simulator realization facts and SUT-visible simulator projections;
 - oracle-derived inspection facts;
 - run-validity classifications, hard failures, obligation failures, and bounded claim evidence.
 
@@ -136,7 +248,7 @@ Capture/reporting may not become an alternate state source for later SUT transit
 
 ## Minimal Project And Module Shape
 
-The recommended minimum shape is:
+The recommended minimum first-implementation shape is:
 
 ```text
 selected-slice-workspace/
@@ -155,46 +267,163 @@ selected-slice-workspace/
     reporting/
 ```
 
-`scn001_sut_core/boundary` exports the callable SUT boundary and SUT-visible input/output contracts. The evaluation project may depend on these exports.
+`scn001_sut_core/boundary` exports the callable SUT boundary and SUT-safe input/output contracts. The evaluation project may depend on these exports.
 
 `scn001_sut_core/state`, `transitions`, `relations`, and `inspection` may be separate modules, namespaces, files, or internal packages. The split is responsibility guidance, not a final module API.
 
-`scn001_eval/fixture` must distinguish SUT-visible fixture payload from oracle-only annotations. This may be represented as separate files, modules, views, serializers, or typed accessors.
+`scn001_eval/fixture` must produce SUT-visible payloads through the mechanical visibility barrier above. The evaluation project may retain full answer-bearing fixture/oracle records internally, but those records must not cross into the SUT public boundary.
 
 `scn001_eval/oracle` may depend on fixture, simulator output, capture, and SUT inspection projections. The SUT core must not depend on oracle.
 
-No third shared package is required for R0. If implementation friction makes shared types necessary, a later narrow `scn001_boundary_contracts` package is allowed only if it contains no oracle-only fields, no answer-bearing fixture metadata, no branch policy, no claim-class guidance, and no scoring results.
+No third shared package is required. If implementation friction makes shared types useful, a narrow `scn001_boundary_contracts` package is allowed only under the SUT-safe boundary contract ownership rule above.
 
-## Required Interfaces Before First Implementation
+## Boundary-Facing Contracts Before First Implementation
 
-The first implementation should define these interfaces or equivalent contracts before behavior work begins:
+The first implementation should define these seams or equivalent contracts before behavior work begins:
 
-| Interface | Owner | Minimum purpose |
+| Seam | Owner | Minimum purpose |
 | --- | --- | --- |
-| SUT run lifecycle | SUT core | Start an isolated synthetic run with SUT-visible run controls and evaluation-only retention basis. |
-| Fixture fact ingestion | SUT core public boundary | Accept declared SUT-visible fixture facts while preserving fixture provenance and distinguishing delivered, ingested, retained, and used facts. |
-| Decision-point execution | SUT core public boundary | Execute named selected-slice transition responsibilities without receiving oracle-only path expectations as behavior input. |
-| Proposal and disposition output | SUT core public boundary | Emit proposal intents and behavior dispositions before simulator realization and outcome delivery. |
-| Simulator realization input/output | Evaluation project | Accept SUT proposal/disposition refs and emit realization facts with fidelity/mismatch metadata. |
-| Inspection projection | SUT core public boundary | Expose lineage-preserving projections over retained SUT state and transition evidence, including scoped references, effective endpoint identity, ordering, status, scope, and local relations. |
-| Oracle input capture | Evaluation project | Capture fixture deliveries, SUT projections, simulator facts, and oracle-derived inspection facts without modifying SUT state. |
-| Fixture visibility projection | Evaluation project | Produce SUT-visible bundle payloads from the fixture/oracle package while excluding oracle-only fields. |
-| Oracle scoring contract | Evaluation project | Evaluate captured effective state against accepted hard-invariant and positive-obligation predicates. |
-| Report artifact contract | Evaluation project | Produce bounded evidence reports and failure artifacts that cite stable refs without becoming SUT input. |
+| SUT run lifecycle | SUT core | Start an isolated synthetic run with permitted SUT-visible run controls and retention-control facts while keeping campaign, path, and evaluation metadata outside behavior-driving SUT input. |
+| SUT-safe input ingestion | SUT core public boundary | Accept declared SUT-visible fixture facts, communication events, user responses, and permitted simulator projections while preserving provenance and distinguishing delivered, ingested, retained, and used facts. |
+| Current interaction processing | SUT core public boundary | Process currently available SUT-visible input and retained SUT state without receiving expected-transition selectors or oracle-only path expectations. |
+| SUT output emission | SUT core public boundary | Emit proposal intents, behavior dispositions, applicability results, lifecycle transitions, non-activation dispositions, and explanation support as applicable. |
+| Harness simulator routing seam | Evaluation domain | Route SUT proposal/disposition outputs to simulator without creating a SUT dependency on simulator. |
+| Simulator realization seam | Evaluation domain | Accept SUT proposal/disposition refs and emit realization facts plus permitted fidelity/mismatch facts; no outcome delivery gates. |
+| Fixture visibility projection | Evaluation domain | Produce structurally SUT-safe bundle payloads from the fixture/oracle package while excluding oracle-only fields. |
+| Capture observation seam | Evaluation domain | Capture fixture deliveries, SUT projections, simulator facts, and oracle-derived inspection facts without modifying SUT state. |
+| Passive inspection surface | SUT core public boundary | Expose lineage-preserving views over retained SUT state and transition evidence, including scoped references, effective endpoint identity, ordering, status, scope, and local relations. |
+| Oracle evaluation seam | Evaluation domain | Evaluate captured effective state against accepted hard-invariant and positive-obligation predicates without becoming SUT input. This names a seam, not the final formal evaluation record. |
+| Reporting/output seam | Evaluation domain | Produce bounded evidence reports and failure artifacts that cite stable refs without becoming SUT input. This names a seam, not the final acceptance report or scoreability contract. |
 
-These contracts may be plain in-memory interfaces, function signatures, files, structs, records, or test harness adapters. They need not be network APIs.
+These seams may be plain in-memory interfaces, function signatures, files, structs, records, or test harness adapters. They need not be network APIs.
+
+This ADR does not authorize the first formal evaluation record, behavior-configuration comparison, final scoreability criteria, or final acceptance report. Before implementation creates a formal evaluation record, comparison, or evaluated compatibility claim, `EVAL-004` must be re-triaged under the register. Before final scoring or scenario-scoreability criteria are defined, `EVAL-005` must be re-triaged. Before the final done gate is accepted, `SLICE-005` must resolve.
+
+## Boundary Walkthroughs
+
+These examples are illustrative boundary checks, not required API names.
+
+### Production Candidate And Proposal
+
+```text
+evaluation fixture
+  recognition observation facts
+  production observation facts
+  fixed affordance facts
+        |
+        | SUT-safe input projection
+        v
+SUT core
+  ingests facts
+  creates comparison transition evidence
+  creates production-focused candidate
+  creates candidate-bound proposal intent
+        |
+        | SUT proposal output
+        v
+evaluation harness
+  routes proposal intent to simulator
+        |
+        v
+simulator
+  realizes surfaced proposal wording
+        |
+        | SUT-visible realization projection
+        v
+SUT core
+  ingests realization fact
+        |
+        | evaluation branch policy remains evaluation-side
+        v
+evaluation harness
+  delivers user response only if branch policy permits
+        |
+        | SUT-safe user-response event
+        v
+SUT core
+  assesses response binding
+  performs activation checks
+```
+
+Boundary checks:
+
+- the harness never calls `form_production_trial` or `execute_decision_point("DP-TRIAL-FORM")`;
+- the SUT never receives the canonical candidate, claim class, path-stage, or expected transition;
+- simulator realization does not prove semantic correctness;
+- branch policy decides delivery evaluation-side, not inside the simulator or SUT.
+
+### Direct Correction To Delayed-Correction Candidate
+
+```text
+evaluation harness
+  delivers raw user correction communication and context facts
+        |
+        v
+SUT core
+  creates scoped correction/control state
+  creates current-session behavior disposition
+        |
+        | disposition output
+        v
+evaluation harness
+  routes disposition to simulator
+        |
+        v
+simulator
+  produces realization fact
+        |
+        | SUT-visible realization projection
+        v
+SUT core
+  consumes permitted realization fact
+  uses retained drill evidence, scoped correction state, and current-session disposition
+  creates delayed-correction candidate if supported
+  records contemporaneous ancestry/support relations
+```
+
+Boundary checks:
+
+- the harness does not tell the SUT to form a delayed-correction trial;
+- capture cannot later add candidate ancestry as proof if the SUT did not preserve it contemporaneously;
+- direct current-session correction remains distinct from future active trial state.
+
+### Focused-Drill Counterfactual
+
+```text
+SUT core
+  already owns retained active delayed-correction trial
+        |
+evaluation harness
+  delivers focused drill context and explicit immediate-correction opt-in
+        |
+        | optional opaque fixture-declared state ref, if required by ADR-005
+        v
+SUT core
+  resolves its own retained state
+  performs applicability assessment for current use target
+  marks delayed-correction trial not applicable for this focused-drill use
+  emits immediate-correction disposition where supported
+```
+
+Boundary checks:
+
+- the harness does not send `applicable = false`;
+- the harness does not select "the relevant delayed-correction trial" from SUT state based on oracle expectation;
+- any fixture-declared state reference is an opaque handle to already-owned SUT state;
+- applicability remains a SUT transition, not branch policy.
 
 ## Boundary Invariants
 
-The internal boundary is accepted only if all of the following remain true:
+The internal boundary is acceptable only if all of the following remain true:
 
-- The SUT core owns semantic transitions required by `ADR-002`; the harness cannot satisfy them by fixture labels or reconstruction.
+- The SUT core owns selected-slice semantic transitions required by `ADR-002`; the harness cannot satisfy them by fixture labels, expected-transition calls, or reconstruction.
 - The harness supplies curated context under `ADR-004`; the SUT core does not claim retrieval, memory search, relevance ranking, or context assembly.
-- Fixture/oracle metadata remains separated under `ADR-005`; answer-bearing material cannot enter SUT behavior-driving state.
+- Fixture/oracle metadata remains separated under `ADR-005`; answer-bearing material cannot enter SUT behavior-driving state or SUT-visible semantic scope.
 - The SUT core preserves `ADR-006` state classifications and retention horizons; oracle-visible fields are not copied wholesale into SUT state.
 - The SUT core preserves `ADR-007` stable scoped references, effective endpoint identity, contemporaneous dependency-use evidence, and local typed relation semantics.
 - Simulator outputs are facts about realization, not evidence that the SUT selected a semantically correct policy.
 - Capture/reporting can cite and score state, but cannot create the missing basis that the SUT failed to retain.
+- Inspection is passive and cannot repair missing state, missing relations, or missing consumer history.
 
 ## Explicit Non-Decisions
 
@@ -216,19 +445,23 @@ This ADR does not decide:
 
 | Risk | Boundary response |
 | --- | --- |
-| Overbuild into production architecture | The boundary is project/responsibility only: SUT core plus evaluation project. It permits one process, in-memory state, no database, no services, no product UI, no runtime adapter architecture, and no final module split. |
-| Answer leakage from fixture/oracle | The evaluation project may hold oracle material, but only SUT-visible fixture projections cross into the SUT. Oracle-only path labels, expected outcomes, branch policy, claim classes, and answer metadata remain outside SUT cognitive input. |
+| Overbuild into production architecture | The boundary is responsibility/project scoped only. It permits one repository, one process, in-memory state, no database, no services, no product UI, no runtime adapter architecture, and no final module split. |
+| Unproven two-project necessity | The forced decision is the two-domain ownership boundary. Two projects/packages are the recommended first implementation realization because they make one-way dependency easiest to inspect; a single package is valid only if it mechanically proves the same import and visibility constraints. |
+| Expected-transition leakage | Decision-point, checkpoint, path-stage, expected-transition, and semantic-operation selectors remain evaluation-side and cannot be SUT public behavior input. |
+| Harness-selected memory | The harness cannot choose, rank, filter, or summarize SUT-owned retained state. Fixture-declared opaque refs expose state already owned by the SUT and do not decide applicability. |
+| Answer leakage from fixture/oracle | The formal delivery path uses structurally SUT-visible payloads. Full answer-bearing fixture/oracle records must not cross the SUT boundary, even if code promises to ignore hidden fields. |
 | Retrospective dependency reconstruction | Capture/reporting may add oracle-derived inspection relations, but those cannot prove SUT consumption unless contemporaneous SUT transition records or effective state already preserved the dependency use and order required by `ADR-007`. |
-| Premature production memory | SUT state is run-scoped, synthetic, and evaluation-retained only. Cross-transition persistence means surviving the evaluated trajectory, not becoming real Zoey memory. |
-| Simulator policy substitution | Simulator receives SUT intent/disposition and reports what was realized. It cannot choose the correction policy or repair a wrong SUT decision into the canonical answer. |
+| Direct simulator dependency | SUT outputs are routed by the harness; the SUT cannot import, call, configure, or depend on the simulator. |
+| Simulator policy substitution | Simulator receives SUT intent/disposition and reports what was realized. It cannot choose correction policy, repair wrong SUT decisions, own outcome delivery gates, or report canonical intervention matches to the SUT. |
 | Fixture-curated context becomes retrieval | Harness-curated bundle delivery is explicitly not retrieval, search, ranking, distractor filtering, or active context assembly. |
 | Oracle-visible fields become SUT schema | SUT core must expose required semantic distinctions, but implementation representation remains open. Oracle score, validity, claim, and branch metadata stay evaluation-side. |
+| Inspection becomes self-report | Inspection is passive. Compliance labels do not prove retention or dependency use without exposed retained state, transition evidence, ordering, relations, and consumer history. |
 
-## Unresolved Risks Before Acceptance
+## Remaining Risks Before Acceptance
 
-- The exact language, framework, and test runner are still undecided; this ADR only constrains dependency direction and responsibility ownership.
-- The first implementation may discover that shared boundary types are useful. If introduced, they must be audited for oracle leakage before acceptance evidence is trusted.
-- The fixture/oracle package must enforce visibility separation mechanically enough that accidental answer-bearing fields cannot be passed to the SUT during formal runs.
+- The exact language, framework, and test runner are still undecided; this ADR only constrains ownership, dependency direction, and boundary semantics.
+- The first implementation may discover that a shared boundary-contract package is useful. If introduced, it must be audited as a SUT-safe lower-level dependency before acceptance evidence is trusted.
+- The fixture/oracle package must implement the SUT-visible representation barrier strongly enough that accidental full-record delivery is invalid under formal runs.
 - `EVAL-004` may later require richer behavior-configuration metadata for formal evaluation records; this ADR does not pre-solve that metadata.
 - `SLICE-005` may require stricter report or claim evidence than this boundary alone provides.
 - `DEP-003` remains open; if runtime maintenance semantics enter the first milestone, this boundary may need revision.
@@ -238,12 +471,13 @@ This ADR does not decide:
 Upon acceptance, update `OPEN_QUESTIONS.md` as follows:
 
 - move `SLICE-003` to `Resolved` with outcome `Decision`, resolved by this ADR for the first `SCN-001` selected-slice milestone;
-- record that the accepted minimum internal boundary is a two-project SUT core and evaluation project split with one-way evaluation-to-SUT dependency and strict SUT-visible versus oracle-only data separation;
+- record that the accepted minimum internal boundary is a two-domain SUT core and evaluation split, recommended as two code projects/packages for the first implementation, with one-way evaluation-to-SUT dependency and strict SUT-visible versus oracle-only data separation;
 - record that the boundary preserves transition-inside SUT responsibilities from `ADR-002`, curated fixture context from `ADR-004`, fixture/oracle separation from `ADR-005`, state/projection responsibilities from `ADR-006`, and dependency identity/effective endpoint rules from `ADR-007`;
 - keep `DEP-003` `Open` and non-active unless runtime maintenance semantics block implementation;
-- re-triage `SLICE-005` as the likely next acceptance-gate frontier, without resolving final done criteria;
-- keep `EVAL-004` deferred unless the next artifact prepares a first evaluation record, comparison, or evaluated compatibility claim;
-- keep `EVAL-005` deferred unless the next artifact prepares final scoring or scenario-scoreability criteria.
+- re-triage `SLICE-005`, `EVAL-004`, and `EVAL-005` according to the exact next artifact rather than assuming a single next frontier;
+- activate `EVAL-004` before any artifact prepares a first formal evaluation record, behavior-configuration comparison, or evaluated compatibility claim;
+- activate or otherwise resolve `EVAL-005` before any artifact defines final scoring or scenario-scoreability criteria;
+- activate or otherwise resolve `SLICE-005` before any artifact claims the first selected-slice milestone is done.
 
 No other question automatically activates merely because this ADR is accepted.
 
@@ -252,9 +486,11 @@ No other question automatically activates merely because this ADR is accepted.
 Reconsider or supersede this ADR if:
 
 - implementation cannot preserve fixture/oracle separation without a stronger physical package, process, or repository boundary;
-- SUT-visible contracts accidentally encode branch, path, claim-class, scoring, canonical-pressure, expected-transition, or hidden answer metadata;
-- oracle inspection cannot verify SUT-owned state and dependency relations through public projections without reading private SUT internals in a way that changes behavior;
-- the simulator must choose behavior policy for the SUT to complete the path;
+- SUT-visible contracts accidentally encode branch, path, claim-class, scoring, canonical-pressure, expected-transition, checkpoint, decision-point, semantic-operation, or hidden answer metadata;
+- oracle inspection cannot verify SUT-owned state and dependency relations through passive public projections without reading private SUT internals in a way that changes behavior;
+- the harness must tell the SUT which semantic transition to perform for the path to pass;
+- the harness must choose, rank, filter, or summarize retained SUT state for the SUT to complete later-use behavior;
+- the simulator must choose behavior policy or own outcome delivery gates for the SUT to complete the path;
 - capture/reporting becomes necessary input to later SUT transitions;
 - the selected slice introduces real production memory, retrieval, model/runtime trust boundaries, maintenance triggers, external operations, product surfaces, or full `SCN-001` pass claims;
 - `SLICE-005`, `EVAL-004`, `EVAL-005`, or `DEP-003` requires a broader boundary to make first-milestone claims scoreable.
