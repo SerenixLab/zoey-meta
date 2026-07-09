@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.17`
+Document version: `V0.2.18`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -89,6 +89,7 @@ The Open Question Index is authoritative for question status, trigger, dependenc
 - `PROD`: product workflow pressure
 - `TRUST`: inference/runtime trust-boundary pressure
 - `CONT`: continuity and recovery pressure
+- `REPO`: workspace and repository-boundary pressure
 
 ## Entry Format
 
@@ -166,6 +167,7 @@ Pending trigger checks before the next artifact claims evaluation-record suffici
 - `SLICE-005`
 - `EVAL-004`
 - `EVAL-005`
+- `REPO-001`
 - selected-slice trigger checks for `MEM`, `GROW`, `AUTH`, `SURF`, `INIT`, `PROD`, `LEG`, `TRUST`, and `CONT`.
 
 `EVAL-001` and `EVAL-003` are resolved by accepted `ADR-004 R3`. The first `SCN-001` milestone uses harness-curated fixture context, excludes retrieval/context-assembly claims, and accepts nondeterministic runs only through formal milestone campaigns with hard invariant gates, bounded variance, outcome-independent run selection, claim-class aggregation, and run-validity controls.
@@ -185,6 +187,8 @@ Pending trigger checks before the next artifact claims evaluation-record suffici
 `SLICE-005` has moved from `Blocked` to `Open` because accepted `ADR-008 R2` resolves the internal-boundary prerequisite. It is not active unless acceptance-gate drafting becomes the active frontier. `EVAL-004` remains deferred and triggers before the first evaluation record, comparison, or compatibility claim. `EVAL-005` remains deferred and triggers before final scoring or scenario-scoreability criteria are defined.
 
 No open question currently blocks first implementation project creation under the accepted selected-slice boundary. Legacy reading, non-committing experiments, document review, fixture sketching, and rough implementation exploration may continue as long as they do not claim selected-slice pass evidence, first evaluation-record sufficiency, final acceptance-gate sufficiency, runtime-maintenance sufficiency, production readiness, or broader `SCN-001` evidence.
+
+`REPO-001` is deferred and does not block governed SCN-001 workbench creation. It triggers before the first durable repository is created under `projects/` or before workbench implementation is proposed for extraction into a durable Zoey system-project boundary.
 
 ## Active Questions
 
@@ -245,6 +249,7 @@ No active question is currently registered.
 | `CONT-001` | Deferred | A milestone intends to claim continuity across restore, migration, disconnection, or state loss | - | SCM | What minimum restore-gap handling is required before claiming continuity after state loss or migration? |
 | `CONT-002` | Deferred | Selected milestone proposes retaining real authoritative personal state or durable personal history as Zoey continuity rather than disposable fixture/test state | - | T, SCM, CONT | What minimum user-controlled custody and recoverability evidence is required before the milestone may treat retained state as durable Zoey continuity? |
 | `TRUST-001` | Deferred | Selected slice proposes sending personal or retained semantic state to an inference runtime, model, service, or process across a materially different trust boundary | `EVAL-006`, `MEM-002` | T, SCM, TRUST | What trust-boundary and destination-use policy governs which selected-slice state may enter each inference or processing destination? |
+| `REPO-001` | Deferred | Before first durable repo creation under `projects/`, or before workbench implementation is proposed for extraction into a durable system-project boundary | `SLICE-003` | T, SCM, REPO | What evidence and decision basis justify treating a responsibility boundary as a durable Zoey system-project repository, and what implementation may be extracted from a scenario-provisional workbench without carrying scenario-specific coupling into the durable boundary? |
 
 ## Category Guide
 
@@ -261,6 +266,7 @@ No active question is currently registered.
 | Legacy | Extraction, rewrite/archive decisions, provenance, selected-slice blockers. | Preserving Iris/Yuki as active authorities. |
 | Trust Boundaries And Inference | Inference destinations, runtime trust boundaries, external processing, destination-use limits. | General model selection or performance preferences. |
 | Product | User-facing workflows, inspection UX, privacy controls, V0 non-scope. | Marketing, wishlists, or visual design. |
+| Repository Boundaries | Durable system-project repositories, workbench-to-project extraction, workspace role claims. | Scenario workbench creation already allowed by active selected-slice decisions. |
 
 ## Working Assumption Index
 

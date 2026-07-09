@@ -23,7 +23,9 @@ This repo is not responsible for:
 - copied legacy projects;
 - experimental scratch work.
 
-Implementation projects should live in separate repositories under `Zoey/projects/` and reference this repo by document and decision.
+Workspace-level repository roles are defined in `../WORKSPACE.md`.
+
+Durable Zoey system projects live under `Zoey/projects/` only after an accepted responsibility-boundary basis exists. Governed scenario or milestone implementation may begin in `Zoey/workbenches/` when the durable system-project boundary is not yet justified.
 
 ## Current Documents
 

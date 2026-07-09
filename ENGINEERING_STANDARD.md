@@ -1,6 +1,6 @@
 # Zoey Engineering Standard
 
-Document version: `V0.4.0`
+Document version: `V0.4.1`
 
 Status: `Draft`
 
@@ -11,7 +11,7 @@ Release context:
 - `SYSTEM_THESIS.md` `V0.3.1`
 - `CANONICAL_SCENARIOS.md` `V0.2.2`
 - `STATE_AND_CONTROL_MODEL.md` `V0.4.1`
-- `OPEN_QUESTIONS.md` `V0.2.17`
+- `OPEN_QUESTIONS.md` `V0.2.18`
 - accepted ADRs through `decisions/ADR-008-scn001-selected-slice-internal-boundary.md` `R2`
 
 Rule-level governing sources are listed on each rule. The release context is not a substitute for rule-level source references.
@@ -382,6 +382,56 @@ Failure consequences:
 - claim-blocking
 
 Review question: can this repository prove which governance and source snapshots it consumes without a sibling checkout or conversation memory?
+
+### ENG-BASE-REPO-001 - Repository Role And Architecture Claim Declaration
+
+Rule revision: `R1`
+
+Governing sources:
+
+- this standard
+- `OPEN_QUESTIONS.md`
+
+Scope: every governed non-throwaway implementation repository or workbench.
+
+Applies when: a governed implementation repository or workbench is created, renamed, moved, used for claim-bearing work, or proposed for extraction into a durable system-project repository.
+
+Rule: each governed implementation repository declares its workspace/repository role, permitted architecture claim, and governance lock reference. Repository placement, age, milestone success, code volume, reuse, or renaming does not strengthen the declared architecture claim.
+
+Forbidden shapes:
+
+- treating a workbench as a durable Zoey system-project boundary because the milestone succeeds;
+- using a scenario or milestone name as sufficient justification for durable placement under `projects/`;
+- duplicating governance baseline prose as an authority parallel to `governance/ZOEY_GOVERNANCE.lock`;
+- extracting workbench implementation into a durable system-project boundary without the applicable responsibility-boundary decision.
+
+Required checks:
+
+- repository guidance declares repository role and permitted architecture claim;
+- repository guidance points to `governance/ZOEY_GOVERNANCE.lock` as the governance baseline authority;
+- durable project creation or workbench-to-project extraction checks the applicable open-question trigger.
+
+Expected mechanisms:
+
+- structural
+- manual-review
+
+Expected test modes:
+
+- contract
+
+Promotion integration:
+
+- local
+
+Minimum claim-support enforcement: claim-bearing work identifies the repository role, permitted architecture claim, and governance lock reference.
+
+Failure consequences:
+
+- promotion-blocking
+- claim-blocking
+
+Review question: what repository role and architecture claim does this work rely on, and is a stronger claim blocked by an open question?
 
 ### ENG-BASE-CONFORMANCE-001 - Conformance Evidence Must Resolve
 
@@ -1134,7 +1184,7 @@ Rule revision: `R1`
 
 Governing sources:
 
-- `OPEN_QUESTIONS.md V0.2.17`
+- `OPEN_QUESTIONS.md V0.2.18`
 - this standard
 
 Scope: docs, tests, reports, traces, demos, README text, and review language.
@@ -1183,7 +1233,7 @@ Rule revision: `R1`
 
 Governing sources:
 
-- `OPEN_QUESTIONS.md V0.2.17`
+- `OPEN_QUESTIONS.md V0.2.18`
 - `ADR-004 R3`
 - `ADR-005 R2`
 
@@ -1229,7 +1279,7 @@ Rule revision: `R1`
 
 Governing sources:
 
-- `OPEN_QUESTIONS.md V0.2.17`
+- `OPEN_QUESTIONS.md V0.2.18`
 - this standard
 
 Scope: implementation work that crosses unresolved governance frontiers.
@@ -1245,7 +1295,7 @@ Forbidden shapes:
 
 Required checks:
 
-- review asks whether the change triggers `SLICE-005`, `EVAL-004`, `EVAL-005`, `DEP-003`, `MEM-*`, `TRUST-*`, `PROD-*`, `SURF-*`, `CONT-*`, or `LEG-*`.
+- review asks whether the change triggers `SLICE-005`, `EVAL-004`, `EVAL-005`, `DEP-003`, `REPO-001`, `MEM-*`, `TRUST-*`, `PROD-*`, `SURF-*`, `CONT-*`, or `LEG-*`.
 
 Expected mechanisms:
 

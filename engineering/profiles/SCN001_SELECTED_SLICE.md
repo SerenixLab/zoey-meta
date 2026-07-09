@@ -1,16 +1,16 @@
 # SCN-001 Selected-Slice Engineering Profile
 
-Profile version: `V0.2.0`
+Profile version: `V0.2.1`
 
 Status: `Draft`
 
 Date: 2026-07-09
 
-Base standard: `ENGINEERING_STANDARD.md` `V0.4.0`
+Base standard: `ENGINEERING_STANDARD.md` `V0.4.1`
 
 Decision basis:
 
-- `OPEN_QUESTIONS.md` `V0.2.17`
+- `OPEN_QUESTIONS.md` `V0.2.18`
 - `decisions/ADR-002-scn001-system-under-test-boundary.md` `R2`
 - `decisions/ADR-003-scn001-selected-slice-trial-time-contract.md` `R2`
 - `decisions/ADR-004-scn001-first-milestone-evaluation-policy.md` `R3`
@@ -48,6 +48,58 @@ evaluation-context concepts prohibited by ADR-007 R3 and ADR-008 R2.
 Known-key scanners for strings such as `expected_transition`, `oracle_rule_id`, `claim_class`, `canonical_match`, or `branch_policy` may be useful as defence in depth. Passing a lexical scanner is not proof of evaluation-context separation.
 
 ## Rule Catalogue
+
+### ENG-CLAIM-WORKBENCH-001 - Scenario-Provisional Workbench Boundary
+
+Rule revision: `R1`
+
+Governing sources:
+
+- `ADR-001 R1`
+- `ADR-008 R2`
+- `OPEN_QUESTIONS.md`
+- `ENG-BASE-REPO-001 R1`
+
+Scope: first `SCN-001` selected-slice implementation repository or workbench.
+
+Applies when: creating, documenting, moving, promoting, or making claims about the first selected-slice implementation workspace.
+
+Rule: the first `SCN-001` selected-slice implementation is a governed scenario-provisional workbench unless a later accepted responsibility-boundary decision says otherwise. Workbench placement does not make the implementation throwaway and does not weaken active conformance obligations. The ADR-008 SUT/evaluation split is a selected-slice responsibility boundary, not a durable Zoey system-project repository boundary.
+
+Forbidden shapes:
+
+- placing `scn001-selected-slice` under `projects/` as a durable Zoey system-project repo without a `REPO-001` resolution or equivalent accepted decision;
+- claiming the workbench defines final Zoey repository layout, final module split, general Zoey core, general memory architecture, general growth architecture, permanent evaluation architecture, full `SCN-001` pass, or milestone acceptance;
+- treating milestone success, code maturity, age, reuse, or renaming as sufficient promotion into `projects/`;
+- weakening selected-slice conformance because the repository is a workbench.
+
+Required checks:
+
+- workbench README declares repository role, governance classification, permitted architecture claim, governance lock reference, and denied claims;
+- workbench-to-project extraction checks the `REPO-001` trigger before creating durable project claims;
+- local conformance ledger keeps selected-slice rules active for non-throwaway workbench code.
+
+Expected mechanisms:
+
+- structural
+- manual-review
+
+Expected test modes:
+
+- contract
+
+Promotion integration:
+
+- local
+
+Minimum claim-support enforcement: claim-bearing workbench artifacts cite the scenario-provisional claim boundary and do not claim durable system-project status.
+
+Failure consequences:
+
+- promotion-blocking
+- claim-blocking
+
+Review question: does this artifact treat the workbench as governed scenario-provisional implementation rather than a durable Zoey system-project boundary?
 
 ### ENG-CONF-IMPORT-001 - SUT Has No Evaluation Dependency
 
@@ -968,7 +1020,7 @@ Rule revision: `R1`
 
 Governing sources:
 
-- `OPEN_QUESTIONS.md V0.2.17`
+- `OPEN_QUESTIONS.md V0.2.18`
 - `ADR-004 R3`
 - `ADR-005 R2`
 - `ENG-CLAIM-001 R1`
