@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.16`
+Document version: `V0.2.17`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -155,17 +155,17 @@ Do not include:
 
 ## Active Decision Frontier
 
-Current milestone: define the minimum internal boundary forced by the accepted selected-slice behavior, state, fixture/oracle, and dependency identity contracts.
+Current milestone: first implementation project creation is unblocked by the accepted selected-slice internal boundary.
 
 Active questions:
 
-- `SLICE-003`
+- none
 
-Pending re-triage queue after the current active frontier is resolved:
+Pending trigger checks before the next artifact claims evaluation-record sufficiency, final scoring, acceptance-gate sufficiency, runtime maintenance, production scope, trust boundaries, or broader slice evidence:
 
+- `SLICE-005`
 - `EVAL-004`
 - `EVAL-005`
-- `SLICE-005`
 - selected-slice trigger checks for `MEM`, `GROW`, `AUTH`, `SURF`, `INIT`, `PROD`, `LEG`, `TRUST`, and `CONT`.
 
 `EVAL-001` and `EVAL-003` are resolved by accepted `ADR-004 R3`. The first `SCN-001` milestone uses harness-curated fixture context, excludes retrieval/context-assembly claims, and accepts nondeterministic runs only through formal milestone campaigns with hard invariant gates, bounded variance, outcome-independent run selection, claim-class aggregation, and run-validity controls.
@@ -178,66 +178,17 @@ Pending re-triage queue after the current active frontier is resolved:
 
 `GROW-001` and `TIME-002` are resolved by accepted `ADR-003`. `TIME-001` remains deferred for scheduler, reminder, due-state, expiry, background temporal-maintenance, and full longitudinal-clock semantics.
 
-`SLICE-003` is active because the selected slice now has accepted decisions for first-slice selection, system-under-test boundary, selected-slice trial/time semantics, evaluation policy, fixture/oracle contract, state contract, and dependency identity. The next blocking decision is the minimum internal boundary that preserves those contracts without prematurely deciding final production architecture.
+`SLICE-003` is resolved by accepted `ADR-008 R2`. The first `SCN-001` milestone has a minimum internal boundary: a two-domain SUT core and evaluation split, recommended as two code projects/packages for the first implementation, with one-way evaluation-to-SUT dependency, strict SUT-visible versus oracle-only data separation, role-preserving/state-origin-safe input adaptation, SUT-selected realization outputs, bounded retained-state access, and public passive inspection.
 
-`DEP-003` has moved from `Blocked` to `Open` because accepted `ADR-007 R3` satisfies its registered trigger that selected state/dependency types are known. It is not active unless runtime maintenance semantics block the `SLICE-003` boundary decision.
+`DEP-003` has moved from `Blocked` to `Open` because accepted `ADR-007 R3` satisfies its registered trigger that selected state/dependency types are known. It is not active unless runtime maintenance semantics block implementation under the accepted selected-slice boundary.
 
-`SLICE-005`, `EVAL-004`, and `EVAL-005` have been re-triaged after `ADR-007` acceptance and remain non-active until their concrete triggers occur. `SLICE-005` waits for internal-boundary pressure and acceptance-gate drafting pressure. `EVAL-004` triggers before the first evaluation record, comparison, or compatibility claim. `EVAL-005` triggers before final scoring or scenario-scoreability criteria are defined.
+`SLICE-005` has moved from `Blocked` to `Open` because accepted `ADR-008 R2` resolves the internal-boundary prerequisite. It is not active unless acceptance-gate drafting becomes the active frontier. `EVAL-004` remains deferred and triggers before the first evaluation record, comparison, or compatibility claim. `EVAL-005` remains deferred and triggers before final scoring or scenario-scoreability criteria are defined.
 
-No other open question currently blocks progress. Legacy reading, non-committing experiments, document review, fixture sketching, and rough implementation exploration may continue as long as they do not claim final architecture compatibility, selected-slice pass evidence, first evaluation-record sufficiency, or final acceptance-gate sufficiency.
+No open question currently blocks first implementation project creation under the accepted selected-slice boundary. Legacy reading, non-committing experiments, document review, fixture sketching, and rough implementation exploration may continue as long as they do not claim selected-slice pass evidence, first evaluation-record sufficiency, final acceptance-gate sufficiency, runtime-maintenance sufficiency, production readiness, or broader `SCN-001` evidence.
 
 ## Active Questions
 
-### SLICE-003
-
-Status: `Active`
-
-Question: What minimum internal boundary is forced by selected-slice behavior?
-
-Why It Matters: Accepted `ADR-001` through `ADR-007` now define the first selected slice, the system-under-test boundary, curated-context evaluation policy, fixture/oracle contract, selected-slice state contract, and dependency identity contract. Implementation now needs a minimum internal boundary that preserves those contracts and lets the first projects be created without prematurely deciding final repository layout, service topology, storage engine, runtime split, or production architecture.
-
-Source / Pressure: `STATE_AND_CONTROL_MODEL.md`; `CANONICAL_SCENARIOS.md` `SCN-001`; `ADR-002`; `ADR-004`; `ADR-005`; `ADR-006`; `ADR-007`.
-
-Blocks: first implementation project creation, minimum architecture boundary, ownership split between SUT/harness/oracle/simulator responsibilities, and any implementation claim that selected-slice behavior preserves accepted state and dependency contracts.
-
-Does Not Block: thesis/scenario/state-model review, legacy inventory, fixture review, evaluation-record sketching, acceptance-gate sketching, document review, engineering-standard drafting, or explicitly throwaway experiments that do not claim final architecture compatibility.
-
-Depends On: `SLICE-002`, resolved by `ADR-006`; `DEP-001`, resolved by `ADR-007`; `EVAL-002`, resolved by `ADR-005`; `EVAL-006`, resolved by `ADR-002`; `EVAL-001` and `EVAL-003`, resolved by `ADR-004`; `GROW-001` and `TIME-002`, resolved by `ADR-003`.
-
-Applies When / Decision Trigger: selected-slice state and dependency identity contracts are accepted and the next artifact would create implementation projects, modules, package boundaries, ownership boundaries, SUT/harness/oracle/simulator seams, storage-facing abstractions, or architecture claims.
-
-Known Options:
-
-- Single selected-slice package with internal SUT/harness/oracle/simulator namespaces.
-- Two-project split separating implementation/SUT core from evaluation harness and fixtures.
-- Three-project split separating SUT core, fixture/oracle package, and simulator/evaluation runner.
-- Ports-and-adapters boundary around SUT semantic transitions with fixture/oracle and simulator as external test drivers.
-- Overbroad production architecture split into services, persistent stores, runtime adapters, and product surfaces; likely premature unless narrower options cannot preserve accepted contracts.
-
-Decision Criteria:
-
-- preserves the `ADR-002` transition-inside SUT boundary and prevents fixture/oracle answer metadata from entering SUT-owned behavior state;
-- preserves `ADR-004` curated-context and nondeterminism policy without turning the harness into production retrieval or acceptance infrastructure;
-- preserves `ADR-005` fixture/oracle package, simulator realization facts, oracle-only scoring, run-validity controls, and bounded claim language;
-- preserves `ADR-006` state/evidence/projection responsibilities without deciding final storage schema or production memory architecture;
-- preserves `ADR-007` stable scoped references, effective-state identity, contemporaneous dependency-use evidence, and local typed relation semantics without requiring a full graph engine;
-- is small enough to create the first implementation projects while leaving `SLICE-005`, `EVAL-004`, `EVAL-005`, `DEP-003`, production surfaces, trust boundaries, durable memory, and runtime maintenance to their proper triggers.
-
-Evidence Needed:
-
-- responsibility map for SUT core, fixture package, oracle/scoring, simulator realization, run harness, and reporting/capture;
-- boundary map showing which records, facts, relations, and projections cross each boundary and which remain oracle-only;
-- minimal project/module/package shape with explicit non-decisions for storage, services, product surfaces, runtime adapters, and production memory;
-- examples showing the canonical and counterfactual paths crossing the proposed boundary without answer leakage or retrospective dependency reconstruction;
-- list of interfaces/contracts that must exist before first implementation and which are intentionally deferred.
-
-Working Assumptions / Fixtures: `ADR-001` through `ADR-007` are accepted; first-slice architecture is synthetic and selected-slice scoped; no final production database, general dependency graph, retrieval system, workflow engine, product surface, real continuity, durable adaptation, or full `SCN-001` claim is being decided.
-
-Decision Authority: project owner.
-
-Needed By: before creating the first implementation projects and before `SLICE-005`, `EVAL-004`, `EVAL-005`, or implementation claims of selected-slice architecture sufficiency.
-
-Resolution Shape: selected-slice minimum internal-boundary ADR.
+No active question is currently registered.
 
 ## Open Question Index
 
@@ -245,8 +196,8 @@ Resolution Shape: selected-slice minimum internal-boundary ADR.
 | --- | --- | --- | --- | --- | --- |
 | `SLICE-001` | Resolved | Accepted by `ADR-001` | - | S1, S2, SCM | Choose first vertical slice: `SCN-001` or `SCN-002`. |
 | `SLICE-002` | Resolved | Accepted by `ADR-006 R2` | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-002`, `EVAL-003`, `GROW-001`, `TIME-002` | SCM, S1, S2 | What minimum persistent state is required for the selected slice? |
-| `SLICE-003` | Active | After selected-slice state, dependency identity, and eval pressure are known | `SLICE-002`, `DEP-001`, `EVAL-002`, `EVAL-006` | SCM | What minimum internal boundary is forced by selected-slice behavior? |
-| `SLICE-005` | Blocked | After selected-slice oracle, system-under-test boundary, trial/time semantics, and acceptance semantics are known | `EVAL-002`, `EVAL-003`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2 | What acceptance gate says the first slice is done? |
+| `SLICE-003` | Resolved | Accepted by `ADR-008 R2` | `SLICE-002`, `DEP-001`, `EVAL-002`, `EVAL-006` | SCM | What minimum internal boundary is forced by selected-slice behavior? |
+| `SLICE-005` | Open | After selected-slice internal boundary is accepted and acceptance-gate drafting becomes active | `EVAL-002`, `EVAL-003`, `EVAL-006`, `GROW-001`, `TIME-002`, `SLICE-003` | S1, S2 | What acceptance gate says the first slice is done? |
 | `MEM-001` | Deferred | Selected slice proposes retaining personal state | `SLICE-001` | T, SCM | What retention bases and transient defaults does the selected slice need? |
 | `MEM-002` | Deferred | Selected slice proposes reusing retained state across purposes | `MEM-001` | T, SCM | What permitted-use rule prevents silent repurposing into personalization, initiative, adaptation, training, or external inference? |
 | `MEM-003` | Deferred | Selected slice proposes retaining personal evidence | `MEM-001` | SCM | What granularity rule chooses raw content, excerpt, structured observation, or summary? |
@@ -363,6 +314,22 @@ Resolved Against / Scope: first `SCN-001` milestone uses a minimum selected-slic
 Supersedes / Split From: none.
 
 Future Trigger: material change to selected-slice state/evidence semantics, inability of `DEP-001`, `SLICE-003`, `SLICE-005`, `EVAL-004`, or `EVAL-005` to preserve the accepted state/projection boundary, or a later milestone claiming broader persistence, production memory, durable adaptation, retrieval/context assembly, or full `SCN-001` evidence than `ADR-006` permits.
+
+Date: 2026-07-09
+
+### SLICE-003
+
+Outcome: `Decision`
+
+Decision Authority / Accepted By: project owner by accepting `ADR-008 R2`.
+
+Resolution Artifact: `decisions/ADR-008-scn001-selected-slice-internal-boundary.md`.
+
+Resolved Against / Scope: first `SCN-001` selected-slice milestone uses a two-domain minimum internal boundary: a selected-slice SUT core responsibility domain and a selected-slice evaluation responsibility domain. The first implementation is recommended to realize that logical boundary as two code projects/packages with one-way evaluation-to-SUT dependency. The accepted boundary requires strict SUT-visible versus oracle-only data separation, role-preserving and state-origin-safe input adaptation, SUT-selected realization outputs, bounded retained-state access through identity resolution and local relation closure, simulator realization through harness transport, and passive public inspection. It does not decide final repository layout, service topology, storage engine, product surface, runtime adapter, inference gateway, production memory architecture, acceptance gate, behavior-configuration metadata contract, scoreability criteria, runtime maintenance triggers, or full `SCN-001` pass evidence.
+
+Supersedes / Split From: none.
+
+Future Trigger: material change to selected-slice internal-boundary semantics, inability of `SLICE-005`, `EVAL-004`, or `EVAL-005` to preserve the accepted SUT/evaluation separation, implementation needing evaluator semantic promotion into SUT inputs, harness arbitration among competing SUT outputs, general retrieval/context assembly, private-internal inspection as score evidence, production services, production memory, model/runtime trust-boundary architecture, runtime maintenance semantics under `DEP-003`, or broader `SCN-001` evidence than `ADR-008` permits.
 
 Date: 2026-07-09
 
@@ -572,6 +539,6 @@ The register is acceptable only if:
 
 ## Next Decision Step
 
-Prepare the minimum internal-boundary decision for `SLICE-003` under accepted `ADR-001` through `ADR-007`.
+Create the first implementation projects or packages under accepted `ADR-008 R2`, unless the next artifact instead drafts an acceptance gate, formal evaluation record, final scoring/scoreability criteria, runtime maintenance semantics, production surface, trust boundary, or broader milestone claim.
 
-Define the smallest project/module/responsibility boundary that preserves the accepted selected-slice SUT boundary, trial/time semantics, curated-context policy, fixture/oracle contract, selected-slice state contract, and dependency identity contract. The decision should identify SUT core, harness, fixture/oracle, simulator, capture/reporting, and implementation-facing contracts without deciding final production services, storage engines, product surfaces, runtime adapters, full dependency graph, workflow engine, production memory schema, runtime maintenance triggers, or acceptance gate.
+If the next artifact drafts an acceptance gate, activate `SLICE-005`. If it prepares the first formal evaluation record, comparison, or compatibility claim, activate `EVAL-004`. If it defines final scoring or scenario-scoreability criteria, activate `EVAL-005`. Keep `DEP-003` non-active unless runtime maintenance semantics block implementation.
