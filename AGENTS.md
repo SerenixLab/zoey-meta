@@ -14,10 +14,18 @@ Before changing governance documents:
 When editing `ENGINEERING_STANDARD.md` or `engineering/profiles/*`:
 
 - keep `ENG-*` rule entries as the normative surface;
-- attach binding obligations to rule IDs;
-- distinguish mechanism, test mode, status, and failure consequence;
+- attach binding obligations to rule IDs and rule revisions;
+- do not store local enforcement `Status` in canonical rules;
+- distinguish expected mechanism, test mode, promotion integration, local ledger status, and failure consequence;
 - avoid treating Markdown text alone as enforcement;
-- preserve the split between base standard, active profile, Codex guidance templates, and future local conformance ledgers.
+- preserve the split between base standard, active profiles, integration contracts, templates, source snapshots, and local conformance ledgers.
+
+When editing `engineering/integrations/codex/*`:
+
+- keep Codex-specific discovery behavior out of the tool-neutral base standard;
+- preserve monotonic instruction specialization: nested guidance may strengthen or specialize inherited rules, not weaken them;
+- route Codex through `ZOEY_GOVERNANCE.lock` and `CONFORMANCE.md` before full governance documents;
+- cite exact `ENG-*` rule IDs in templates where practical.
 
 When reviewing selected-slice implementation guidance:
 
