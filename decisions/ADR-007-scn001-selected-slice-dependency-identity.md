@@ -4,7 +4,7 @@ Status: `Draft`
 
 Date: 2026-07-09
 
-Record revision: `Draft`
+Record revision: `R1`
 
 Decision authority: project owner
 
@@ -33,11 +33,12 @@ The selected slice requires stable references and typed local relations sufficie
 
 The minimum contract is:
 
-1. every oracle-material selected-slice fact, SUT-owned transition evidence record, retained state anchor, lineage-preserving projection, and oracle-visible evaluation record must have an inspectable stable reference within its declared scope;
-2. references must carry enough origin, scope, lifecycle, visibility, and ordering metadata to distinguish fixture facts, SUT-owned semantic state, SUT-owned transition evidence, projections, derived inspection facts, and oracle-only records;
-3. required relationships must be represented as typed relation semantics: `source`, `basis`, `support`, `binding`, `transition_ancestry`, `applicability`, `realization`, `outcome`, `explanation_support`, `supersession`, `retirement`, `narrowing`, and `conflict`;
-4. the relation set may be represented as fields, event records, append-only transition records, tables, documents, object links, logs, or another inspectable representation, provided the oracle can enumerate the required local relations for each inspected record;
-5. oracle-only rule IDs, claim-class outcomes, branch policy, scoring labels, answer keys, and hidden expected answers must not be embedded in SUT-owned semantic state.
+1. every selected-slice fact, SUT-owned transition evidence record, retained state anchor, lineage-preserving projection, and oracle-visible record that must be related, cited, compared, captured, projected, or reported must have an inspectable stable scoped reference;
+2. references must carry enough scope-instance, origin, exposure, responsibility, status-provenance, material-scope, and ordering metadata to distinguish fixture facts, SUT-owned semantic state, SUT-owned transition evidence, projections, derived inspection facts, and oracle-only records;
+3. core required relationships must be represented as typed local relation semantics: `source`, `basis`, `support`, `binding`, `transition_ancestry`, `applicability`, `projection_of`, `realization`, `outcome`, and `explanation_support`;
+4. conditional lifecycle relationships must be represented when the selected-slice transition exists: `supersession`, `retirement`, `narrowing`, and `conflict`;
+5. the relation set may be represented as fields, event records, append-only transition records, tables, documents, object links, logs, or another inspectable representation, provided the oracle can enumerate the required local relations and participant roles for each inspected record;
+6. oracle-only rule IDs, claim-class outcomes, branch policy, scoring labels, answer keys, and hidden expected answers must not be embedded in SUT-owned semantic state.
 
 For this ADR, "dependency identity" means minimum referenceability and relation semantics for selected-slice evidence. It does not mean dependency injection, package management, runtime component wiring, build dependencies, graph database design, task orchestration, or production memory architecture.
 
@@ -52,36 +53,80 @@ References need only be stable within the scope where they are inspected.
 | Transition scope | A transition record has stable references to its basis, result, created order, and produced/updated state anchors. | Workflow-step identity, retry orchestration, locks, queues, or scheduler state. |
 | Reporting scope | Failure artifacts and bounded milestone claims can reference observed state/evidence, rule IDs, and claim classes. | General analytics schema or reusable reporting platform. |
 
-Run-local identifiers are acceptable. They must not be silently reused in a way that causes two distinct semantic records in the same run to appear identical.
+Run-local identifiers are acceptable, but a non-global reference must resolve to the specific scope instance in which its local identifier is unique. A scope class such as `run`, `package`, or `checkpoint` is insufficient by itself.
+
+The minimum scoped identity rule is:
+
+```text
+scoped reference = scope instance identity + local reference identity
+```
+
+An implementation may encode this as a composite key, opaque scoped reference, event ancestry, path-qualified identifier, document-relative pointer, or another inspectable representation. It must not silently reuse identifiers in a way that causes two distinct semantic records in the same scope instance to appear identical.
+
+A reference scope must remain resolvable for at least the complete lifetime of every required relation, oracle capture, projection, branch checkpoint, and reporting reference that cites it.
 
 ## Common Reference Envelope
 
-The following fields are the minimum reference envelope for any oracle-material record. Names are illustrative; equivalent representations are allowed.
+The following fields are the minimum reference envelope for any referenceable selected-slice record. Names are illustrative; equivalent representations are allowed.
 
 | Field | Required meaning | Notes |
 | --- | --- | --- |
-| `ref_id` | Stable identifier within the declared reference scope. | May be opaque. Need not be globally unique outside scope. |
+| `scoped_ref` | Resolvable stable reference for this record. | May be globally opaque or composed from `scope_instance_ref` plus `local_ref_id`. |
+| `local_ref_id` | Stable local identifier within the declared scope instance. | May be opaque. Need not be globally unique outside scope. |
 | `ref_kind` | Semantic family of the referenced item. | Examples: `fixture_fact`, `transition_evidence`, `state_anchor`, `projection`, `simulator_fact`, `oracle_record`. |
-| `ref_scope` | Scope in which the reference is stable. | Examples: package, run, path, bundle, checkpoint, report. |
-| `origin_role` | Who originated the semantic content. | Values must distinguish at least fixture, SUT, simulator, harness, and oracle. |
-| `visibility_class` | Whether the content was SUT-visible, SUT-owned, projection-only, derived-inspection, or oracle-only. | This prevents hidden oracle-answer metadata from entering SUT state. |
-| `lifecycle_class` | Current `ADR-006` classification where applicable. | At minimum: cross-transition SUT state, SUT transition evidence, lineage-preserving projection, derived inspection fact, fixture/oracle-only. |
-| `created_order_ref` | Inspectable order marker for when the record or relation was created or observed. | May use scenario time, run sequence number, event order, transition order, or equivalent governed ordering from `ADR-003` and `ADR-005`. |
-| `status_origin` | Whether a status or conclusion was fixture-declared, SUT-derived, simulator-produced, or oracle-derived. | Required where stale/current, active/inactive, applicable/inapplicable, bound/unbound, pass/fail, or similar status could be confused. |
-| `scope_subject_ref` | Actor, synthetic user, scenario path, task scope, trial scope, or run scope to which the record applies. | May be inherited from an enclosing run or bundle if unambiguous. |
-| `material_value_ref` | Pointer, excerpt, structured value, or fingerprint sufficient to identify the material payload inspected. | Full raw content is not required when the accepted fixture/oracle contract permits a structured value or stable handle. |
+| `reference_scope_class` | Class of scope in which the reference is stable. | Examples: package, run, path, bundle, checkpoint, report. |
+| `scope_instance_ref` | Specific package, run, path, bundle, checkpoint, report, or composite scope instance in which `local_ref_id` is unique. | Required when `scoped_ref` is not globally unique by itself. |
+| `record_origin_role` | Who created the record, semantic classification, transition result, projection, or oracle record. | Must distinguish at least fixture, SUT, simulator, harness, and oracle. This is not the same as semantic source actor. |
+| `accessibility` | Which parties may inspect or use the record. | Must distinguish at least SUT-accessible, oracle-accessible, both, and oracle-only where material. |
+| `adr006_responsibility` | `ADR-006` responsibility class for the record at a material order point or interval. | May be explicit, inherited, or reconstructed from transition history. Final current class alone is insufficient when responsibility changed over the run. |
+| `created_order_marker` | Inspectable creation order for the record or transition. | Must identify an ordering domain and value or an explicit predecessor/happens-before relation where relative order is material. |
+| `scope_refs` | Material scope dimensions for this record. | May be one inspectable composite scope reference or multiple typed scope relations. Must preserve independently material dimensions such as actor, domain/activity, task mode, behavior dimension, trial scope, path, run, and use target. |
+| `material_payload_ref` | Pointer, excerpt, structured value, or accepted projection sufficient to inspect the material semantic payload. | A fingerprint alone is insufficient when the oracle must inspect semantic intent, scope, status, uncertainty, or classification meaning. |
+| `material_integrity_ref` | Optional fingerprint or integrity handle. | Useful for identity/integrity checks, but not a substitute for inspectable semantic content where semantic scoring is required. |
 
 Records may inherit common metadata from an enclosing run, package, bundle, or retention-basis record if the inheritance relation is inspectable. The contract does not require duplicating all fields on every row, object, or event.
+
+Semantic source is represented by `source` relations, not by `record_origin_role`. For example, a fixture-authored communication event can have `record_origin_role = fixture` while its `source` relation points to the synthetic user; a SUT-derived attributed assertion can have `record_origin_role = SUT` while preserving the same semantic source actor through its source relation and transition ancestry.
+
+Status provenance attaches to the individual status assertion, assessment, or transition result whose provenance matters. A single record-global status origin is insufficient when materially different statuses are created by different transitions.
+
+## Ordering Domains
+
+Scenario time and transition order are separate selected-slice pressures.
+
+Scenario time supports chronology and stale/current authority under `ADR-003`. It is not sufficient by itself to prove material intra-session ordering, such as proposal intent before proposal realization, user response before binding assessment, binding assessment before activation, or behavior disposition before simulator realization and outcome update.
+
+Every order marker must identify its ordering domain. Records whose relative ordering is material to an accepted obligation must use comparable order markers within the same domain or preserve an explicit predecessor/happens-before relation.
+
+The minimum ordering contract is:
+
+- source facts may carry occurrence time, observation time, and delivered order where those differ;
+- SUT transition records must preserve transition creation order in a domain comparable to other material transitions in the same run/path/checkpoint;
+- relation assertions must preserve the order at which the relation was created or became effective when that order is material;
+- oracle capture order may be separate from source occurrence order and SUT transition order;
+- a scenario-day marker such as `D0` is insufficient where several material transitions occur within the same scenario day and their relative order is required by `ADR-005` or `ADR-006`.
 
 ## Minimum Record Contracts
 
 | Record family | Minimum identity/reference metadata | Required relation families |
 | --- | --- | --- |
-| Selected-slice facts | Common envelope; fixture item or SUT fact reference; source actor or source system where applicable; occurrence/order time; role label; fixture/package or SUT-origin marker; material payload handle. | `source`, plus `basis` when used by a SUT transition. |
-| SUT transition evidence | Common envelope; transition kind; producing SUT responsibility; input basis refs; result/status; created order; affected state refs; uncertainty or limitation marker where relevant. | `basis`, `support`, `binding`, `transition_ancestry`, `applicability`, `outcome`, or `explanation_support` as applicable to the transition. |
-| State anchors | Common envelope; state kind; retained state identity; lifecycle status; run/retention-basis scope; created-by transition ref; current effective version or status; correction path where required. | `source` or `transition_ancestry`; lifecycle relations including `supersession`, `retirement`, `narrowing`, and `conflict` where applicable. |
-| Lineage-preserving projections | Common envelope; projection target refs; projection rule or view identity; generated order; proof that the projection adds no fixture-authored semantic conclusion. | Projection-to-target relation plus all underlying relations needed to reconstruct lineage. |
-| Oracle-visible records | Common envelope; observed SUT/fixture/simulator refs; oracle rule or claim-class refs where applicable; capture order; outcome or failure classification; SUT visibility set to oracle-only unless explicitly delivered as a SUT-visible fixture/control fact. | `explanation_support`, `outcome`, or failure/support refs used for reporting. Must not become SUT-owned semantic state. |
+| Selected-slice facts | Common envelope; fixture item or SUT fact reference; semantic source relation where applicable; occurrence/order time; role label; record-origin role; material payload handle. | `source`, plus `basis` when used by a SUT transition. |
+| SUT transition evidence | Common envelope; transition kind; producing SUT responsibility; input basis refs; result/status assertion provenance; transition creation order; affected state refs; uncertainty or limitation marker where relevant. | The relation obligation map below decides required `basis`, `support`, `binding`, `transition_ancestry`, `applicability`, `realization`, `outcome`, or `explanation_support` relations for each selected transition. |
+| State anchors | Common envelope; state kind; retained state identity; lifecycle status assertions; run/retention-basis scope; created-by transition ref; current effective version or status; correction path where required. | `source` or `transition_ancestry`; conditional lifecycle relations including `supersession`, `retirement`, `narrowing`, and `conflict` only where the selected transition exists. |
+| Lineage-preserving projections | Common envelope; projection target refs; projection rule or view identity; generated order; proof that the projection adds no fixture-authored semantic conclusion. | `projection_of` to retained state, retained transition evidence, or retained input facts, plus all underlying relations needed to reconstruct lineage. |
+| Oracle-visible records | Common envelope; observed SUT/fixture/simulator refs; oracle rule or claim-class refs where applicable; capture order; outcome or failure classification; accessibility set to oracle-only unless explicitly delivered as a SUT-visible fixture/control fact. | `explanation_support`, `outcome`, or failure/support refs used for reporting. Must not become SUT-owned semantic state. |
+
+## Referenceability Trigger
+
+A record or fact requires its own stable reference when it must be:
+
+- a relation endpoint;
+- distinguished from another same-kind item;
+- cited across transition, projection, capture, branch, or reporting boundaries;
+- correlated across lineage-preserving projections, replay branches, or oracle captures;
+- referenced by a failure artifact, obligation result, claim-support record, bounded milestone claim, or report.
+
+A purely recomputable oracle predicate that is never independently referenced may remain an ephemeral computation associated with its rule ID and input references. This ADR does not require a stable record ID for every oracle boolean, intermediate assertion, or scoring step.
 
 ## Required Relation Tuple
 
@@ -90,30 +135,73 @@ Each required relation must be inspectable with at least:
 - `relation_kind`;
 - `from_ref`;
 - `to_ref`;
-- `created_order_ref`;
+- `target_role` or participant/use role when the relation kind can involve several participants;
+- `created_order_marker`;
 - `asserted_by_role`;
-- `relation_scope` or use target when the relation is not globally applicable;
-- `status` when the relation can be active, inactive, disputed, superseded, retired, narrowed, or conflicting.
+- `relation_use_scope_refs` or use target when the relation is not globally applicable;
+- relation-specific assertion status where current/withdrawn/disputed/superseded distinction is required.
 
-Equivalent embedded fields are valid if the oracle can recover the same tuple. No graph-wide reachability, transitive closure, global topological sort, or generic graph API is required.
+The default orientation is:
+
+```text
+dependent or assessment record -> referenced source, basis, participant, predecessor, target, or limitation
+```
+
+For example, a temporal assessment points to the assessed evidence; a candidate points to its support; an active trial points to its candidate and activation assessment; an outcome record points to active trial, disposition, realization, and observed facts.
+
+Equivalent embedded fields are valid if the oracle can recover the same tuple, orientation, target role, order, and scope. No graph-wide reachability, transitive closure, global topological sort, or generic graph API is required.
+
+Where a selected-slice relationship is an assessment or classification involving several participants, the SUT-owned assessment/record is the relation anchor. Required relation tuples connect that anchor to each participant with a declared participant/use role.
+
+Generic relation status must not replace required typed semantic relations. Narrowing, retirement, supersession, and conflict must be represented by their typed relation semantics when those selected-slice transitions exist, not solely by setting a generic status on another relation.
+
+## Selected-Slice Relation Obligation Map
+
+The selected-slice minimum relation obligations are:
+
+| Selected-slice record or transition | Minimum required relation semantics |
+| --- | --- |
+| Communication event such as `C-002`, `D-002`, or `V-003` | `source` to the synthetic user or applicable source actor; material scope refs for path, activity, task mode, and behavior dimension where material. |
+| SUT-derived attributed assertion | `source` to the source actor; `basis` or `transition_ancestry` to the communication event the SUT attributed. |
+| Temporal eligibility assessment | `basis` to assessed evidence, chronology facts or order markers, and declared use target. |
+| Dimension comparison | `basis` to recognition observation and production observation; material scope refs for target dimension and task mode. |
+| Production-focused candidate | `support` to the dimension comparison and any optional scoped hypothesis used; `basis` to material input facts only where directly consumed by candidate formation. |
+| Candidate-bound proposal intent | `transition_ancestry` to the candidate it represents; material payload sufficient to inspect proposal intent. |
+| Proposal realization view/fact | `realization` to the proposal intent and simulator realization fact, with participant role distinguishing proposal from realization. |
+| Binding assessment | Role-qualified `binding` relations to candidate, surfaced proposal, actual user response, and material intent where needed. |
+| Activation assessment | `basis` to candidate, binding assessment where applicable, temporal/control inputs, and activation checks. |
+| Active trial | `transition_ancestry` to candidate and activation assessment. |
+| Scoped correction/control event such as `D-002` or `V-003` | `source` to user; material scope refs for interpreted target, activity/task mode, correction timing, and status/authority origin. |
+| Direct current-session correction disposition | `basis` to `V-003` scoped correction/control event and current context; must remain distinct from future trial state. |
+| Delayed-correction candidate | `transition_ancestry` to direct correction disposition; `support` to material scoped drill/correction evidence such as `D-002`, `D-004`, and `V-003` context where used. |
+| Active delayed-correction trial | `transition_ancestry` to delayed-correction candidate and activation assessment. |
+| Later-use applicability assessment | Role-qualified `applicability` relations to retained active trial and declared later use target/context. |
+| Later behavior disposition | `basis` to applicability assessment and applicable active trial. |
+| Simulator realization fact/view | `realization` to the prior SUT proposal or behavior disposition and simulator fact. |
+| Intervention-conditioned outcome record | Role-qualified `outcome` relations to active trial, behavior disposition, realization, material context, observed facts, co-intervention status, and uncertainty. |
+| Explanation support | `explanation_support` to retained behavior-change lineage, outcome, scope limitations, epistemic uncertainty, causal limitations, and unsupported generalization limits. |
+| Lineage-preserving projection | `projection_of` to the retained state, transition evidence, or retained input fact it exposes. |
+| Non-activation disposition | `basis` to insufficient/conflicting evidence or unresolved control condition; no candidate retirement relation exists if no candidate was formed. |
+| Conditional supersession/retirement/narrowing/conflict | Required only when the SUT represents that selected-slice transition/result; must preserve old and new target/scope/history as applicable. |
 
 ## Required Relation Semantics
 
 | Relation kind | Minimum semantics | Selected-slice examples | Must not mean |
 | --- | --- | --- | --- |
-| `source` | Connects a fact, assertion, observation, control event, simulator fact, or projection to the actor/system/package that originated its semantic content. | Current utterance attributed to synthetic user; fixture observation from package; simulator realization fact from simulated dependency. | The source is authoritative for SUT-owned conclusions merely because it exists. |
+| `source` | Connects a fact, assertion, observation, control event, or simulator fact to the actor/system/package that originated its semantic content. | Current utterance attributed to synthetic user; fixture observation from package; simulator realization fact from simulated dependency. | The source is authoritative for SUT-owned conclusions merely because it exists, or a substitute for projection lineage. |
 | `basis` | Identifies material input facts or prior transition evidence consumed by a SUT transition for a declared use target. | Temporal eligibility basis over old `H-002`; comparison basis over recognition and production observations; activation-check basis. | A vague retrospective explanation or all available context. |
 | `support` | Indicates evidence that supports a candidate, interpretation, disposition, outcome classification, or explanation without becoming that supported object. | Dimension comparison supports production-focused candidate; direct correction supports delayed-correction candidate. | Proof of causal truth, durable preference, or automatic activation. |
-| `binding` | Connects a surfaced proposal, its candidate-specific intent, and the user response/acceptance assessment. | User response binds to `P-001R` proposal before production-focused activation. | User response binds directly to an invisible candidate or hidden intended policy. |
+| `binding` | Uses a binding assessment as the anchor record and role-qualified participant relations to candidate, surfaced proposal, material intent where needed, and actual user response. | Binding assessment points to `P-001R`, the production-focused candidate, and the user acceptance before activation. | User response binds directly to an invisible candidate, hidden intended policy, or wrong proposal. |
 | `transition_ancestry` | Preserves lineage between state created by a transition and the predecessor candidate, assessment, correction, or prior state it descends from. | Active trial descends from candidate plus activation evidence; delayed-correction candidate descends from direct correction disposition. | A generic history note or reconstruction after state loss. |
-| `applicability` | Records a SUT-owned assessment that retained state applies, does not apply, narrows, or conflicts in a later context. | Later-use review applies delayed-correction trial; `CF-DRILL-OPT-IN` marks it inapplicable, narrowed, or superseded. | Fixture-provided relevance ranking or hidden oracle applicability answer. |
+| `applicability` | Uses an applicability assessment as the anchor record and role-qualified participant relations to retained state and declared current use target/context. It records applicable, not applicable, or unresolved use. | Later-use review applies delayed-correction trial to spontaneous production; `CF-DRILL-OPT-IN` marks it not applicable for a focused drill with explicit immediate-correction opt-in. | Fixture-provided relevance ranking, hidden oracle applicability answer, automatic narrowing, or automatic conflict. |
+| `projection_of` | Connects a lineage-preserving projection to the same underlying retained state, transition evidence, or retained input fact it exposes. | `L-002` projection points to the same active delayed-correction trial as `CF2-L-003`. | Semantic source, transition ancestry, or a substitute for lost target state. |
 | `realization` | Connects a SUT proposal or behavior disposition to simulator realization facts and fidelity/mismatch origin. | SUT direct-correction disposition realized by simulated response; proposal wording fidelity checked against SUT intent. | Simulator output as sole evidence that the prior SUT disposition existed. |
-| `outcome` | Connects observed outcome facts to active trial, behavior disposition, realization, material context, and uncertainty. | Intervention-conditioned outcome references active trial, disposition, realization, co-intervention status, and outcome fact. | Causal proof, long-term efficacy, global preference, or durable learning. |
-| `explanation_support` | Connects user-facing explanation claims to retained state/evidence, transition basis, uncertainty, and excluded claim boundaries. | `DP-EXPLAIN` cites active trial, applicability, outcome, and limitation refs. | Hidden chain-of-thought, fabricated support, or oracle-only answer keys. |
-| `supersession` | Marks one state, interpretation, candidate, trial, or control meaning as replaced by a later one while preserving history. | Later scoped correction supersedes a prior candidate or trial scope. | Deleting or rewriting the old record. |
-| `retirement` | Marks a state, candidate, trial, or disposition as no longer active/effective, with basis and order preserved. | Candidate withheld or retired after conflict/insufficiency; active trial retired after correction. | Erasure, expiration machinery, or production forgetting. |
-| `narrowing` | Marks a state/trial/control meaning as still related but with reduced scope. | Delayed-correction trial narrowed away from focused drill after explicit drill opt-in. | A new unrelated rule or broad preference. |
-| `conflict` | Records that two facts, states, controls, candidates, or applicability assessments cannot both be accepted for the same use target without resolution. | Immediate-correction drill opt-in conflicts with broad delayed-correction use in that drill context. | Automatic failure, automatic winner selection, or general contradiction engine. |
+| `outcome` | Uses an outcome record as the anchor and role-qualified participant relations to active trial, behavior disposition, realization, material context, observed outcome facts, co-intervention status, and uncertainty. | Intervention-conditioned outcome points to active trial, disposition, realization, co-intervention facts, and outcome observations. | Causal proof, long-term efficacy, global preference, or durable learning. |
+| `explanation_support` | Connects explanation support to retained state/evidence, behavior-change lineage, transition basis, scope limitations, epistemic uncertainty, causal limitations, and unsupported generalization limits. | `DP-EXPLAIN` cites active trial, applicability, outcome, behavior-change lineage, and semantic limitation refs. | Hidden chain-of-thought, fabricated support, oracle-only answer keys, or oracle claim-class machinery treated as SUT-owned semantic support. |
+| `supersession` | A later state or control meaning replaces an earlier one for the same relevant semantic/use target while preserving the earlier record. | A later explicit correction replaces an earlier same-target control meaning. | Deleting or rewriting the old record, or treating differently scoped evidence as automatically superseded. |
+| `retirement` | An existing candidate, trial, or other lifecycle-bearing state becomes no longer active/effective, with basis and order preserved. | Existing candidate or active trial retired after a valid later transition. | Withholding before candidate formation, erasure, expiry machinery, or production forgetting. |
+| `narrowing` | A transition relation between a narrower effective semantic state/scope and the prior broader state whose history remains preserved. | If the implementation narrows delayed-correction use away from a focused drill, the narrowing transition points to the prior trial/scope and the narrower effective scope. | Simple inapplicability, a new unrelated rule, or broad preference. |
+| `conflict` | An explicit unresolved relation among materially co-applicable states or controls that cannot simultaneously govern the same declared use target without further resolution. | Two same-target correction controls that both claim current applicability and cannot both govern. | Different scope, automatic failure, automatic winner selection, or a general contradiction engine. |
 
 ## Lifecycle Classification Inspectability
 
@@ -122,10 +210,12 @@ Equivalent embedded fields are valid if the oracle can recover the same tuple. N
 At each material inspection point, the oracle must be able to determine:
 
 - whether a record is SUT-owned state, SUT transition evidence, a lineage-preserving projection, a derived inspection fact, or fixture/oracle-only;
-- whether the status was fixture-declared, SUT-derived, simulator-produced, or oracle-derived;
+- whether each material status assertion or classification was fixture-declared, SUT-derived, simulator-produced, harness-captured, or oracle-derived;
 - which later SUT consumer, if any, required the record to remain cross-transition state;
 - when a record stopped being behavior-driving state and remained only transition evidence, if that reclassification occurs;
 - which relations preserve source, basis, support, ancestry, applicability, realization, outcome, and explanation lineage after reclassification.
+
+Where responsibility classification changes over a run, the oracle must be able to associate the classification with the relevant order interval or reclassification transition. A final current classification is insufficient to prove prior cross-transition retention.
 
 This may be explicit metadata, a transition log, version history, or an oracle-reconstructable relation set. The implementation does not need a universal lifecycle engine, TTL scheduler, dependency invalidation service, or background maintainer.
 
@@ -149,11 +239,13 @@ The SUT must not hold as behavior-driving semantic state:
 
 Oracle records may reference SUT state and transition evidence after capture, but those references do not make oracle conclusions part of SUT state.
 
+`record_origin_role`, `accessibility`, `adr006_responsibility`, and relation kinds are metadata for inspection and boundary preservation. They are not themselves behavior-driving semantic evidence unless a separate accepted selected-slice contract makes a specific SUT-visible control fact available to the SUT.
+
 ## Minimum Closure Rules
 
 The selected slice requires local relation closure only.
 
-For each inspected candidate, proposal, active trial, applicability assessment, behavior disposition, outcome record, projection, or explanation-support record, the oracle must be able to enumerate the directly required source, basis, support, binding, ancestry, applicability, realization, outcome, lifecycle, and explanation-support relations named by this ADR and `ADR-006`.
+For each inspected candidate, proposal, active trial, applicability assessment, behavior disposition, outcome record, projection, or explanation-support record, the oracle must be able to enumerate the directly required source, basis, support, binding, transition-ancestry, applicability, projection-of, realization, outcome, lifecycle, and explanation-support relations named by this ADR and `ADR-006`, including endpoint participant/use roles where material.
 
 The implementation is not required to:
 
@@ -178,7 +270,7 @@ This dependency identity contract does not require or decide:
 - retrieval, memory search, relevance ranking, distractor filtering, or context assembly;
 - final database schema, storage engine, serialization format, repository split, service boundary, or internal module boundary;
 - model, prompt, agent, provider, runtime, tool, or inference-destination identity beyond optional provenance refs when already captured elsewhere;
-- behavior-configuration metadata required by `EVAL-004`;
+- the full behavior-configuration metadata contract required by `EVAL-004`; this ADR may reference already-declared campaign, run, fixture, or behavior-configuration IDs but does not define the first formal evaluation record;
 - acceptance scoring or scenario-scoreability criteria required by `SLICE-005` and `EVAL-005`;
 - background maintenance triggers, expiry, revocation propagation, capability degradation handling, external refresh, or manual review queues required by `DEP-003`;
 - real personal continuity, durable developmental adaptation, real voice/avatar behavior, Japanese pedagogy quality, statistical reliability, production readiness, or full `SCN-001` pass.
@@ -202,7 +294,7 @@ This dependency identity contract does not require or decide:
 | Lifecycle relations could become a workflow engine. | `supersession`, `retirement`, `narrowing`, and `conflict` are semantic history relations, not tasks, queues, retries, approvals, or background jobs. |
 | Basis/support relations could become retrieval or context assembly. | The harness still curates context under `ADR-004`; this ADR only records which delivered facts or retained state the SUT used. |
 | State anchors could become production memory architecture. | Identity is run-scoped and fixture-bound unless a later ADR deliberately expands it. Durable personal memory and real continuity remain out of scope. |
-| Oracle records could leak answer metadata into the SUT. | `visibility_class`, `origin_role`, and `status_origin` must distinguish SUT-visible facts from oracle-only rules, labels, scores, and expected answers. |
+| Oracle records could leak answer metadata into the SUT. | `accessibility`, `record_origin_role`, `adr006_responsibility`, status assertion provenance, and typed `source` relations must distinguish SUT-accessible facts from oracle-only rules, labels, scores, and expected answers. |
 | Model/runtime provenance could become semantic authority. | Producing-mechanism refs are optional provenance unless separately required; they do not make a candidate active, true, applicable, or supported. |
 
 ## Register Effect
@@ -210,7 +302,7 @@ This dependency identity contract does not require or decide:
 Upon acceptance, update `OPEN_QUESTIONS.md` as follows:
 
 - move `DEP-001` to `Resolved` with outcome `Decision`, resolved by this ADR for the first `SCN-001` selected-slice milestone;
-- record that the selected slice uses stable scoped references and local typed relation semantics for source, basis, support, binding, transition ancestry, applicability, realization, outcome, explanation support, supersession, retirement, narrowing, and conflict;
+- record that the selected slice uses stable scoped references and local typed relation semantics for source, basis, support, binding, transition ancestry, applicability, projection-of, realization, outcome, explanation support, supersession, retirement, narrowing, and conflict;
 - record that this does not decide a full dependency graph, workflow engine, production memory schema, retrieval/context-assembly system, behavior-configuration metadata, acceptance gate, runtime maintenance triggers, or final internal module boundary;
 - re-triage `SLICE-003` as the recommended next active frontier because selected state and dependency identity are now known;
 - re-triage `DEP-003`; this ADR supplies relation types but introduces no expiry, revocation, capability degradation, external refresh, or manual-review trigger;
