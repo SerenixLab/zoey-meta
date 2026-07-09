@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.15`
+Document version: `V0.2.16`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -155,17 +155,16 @@ Do not include:
 
 ## Active Decision Frontier
 
-Current milestone: define the minimum dependency identity metadata required by the accepted selected-slice state contract.
+Current milestone: define the minimum internal boundary forced by the accepted selected-slice behavior, state, fixture/oracle, and dependency identity contracts.
 
 Active questions:
 
-- `DEP-001`
+- `SLICE-003`
 
 Pending re-triage queue after the current active frontier is resolved:
 
 - `EVAL-004`
 - `EVAL-005`
-- `SLICE-003`
 - `SLICE-005`
 - selected-slice trigger checks for `MEM`, `GROW`, `AUTH`, `SURF`, `INIT`, `PROD`, `LEG`, `TRUST`, and `CONT`.
 
@@ -175,65 +174,70 @@ Pending re-triage queue after the current active frontier is resolved:
 
 `SLICE-002` is resolved by accepted `ADR-006 R2`. The first `SCN-001` milestone has a minimum selected-slice state contract that distinguishes run-scoped cross-transition SUT state, SUT-owned transition evidence, lineage-preserving projections, derived inspection facts, and fixture/oracle-only facts without deciding a final storage schema or production memory architecture.
 
+`DEP-001` is resolved by accepted `ADR-007 R3`. The first `SCN-001` milestone has a minimum dependency identity contract using stable scoped references, effective-state identity for mutable/lifecycle-bearing relation endpoints, contemporaneous dependency-use evidence, and typed local relation semantics without deciding a full dependency graph, workflow engine, production memory schema, retrieval/context-assembly system, or final internal module boundary.
+
 `GROW-001` and `TIME-002` are resolved by accepted `ADR-003`. `TIME-001` remains deferred for scheduler, reminder, due-state, expiry, background temporal-maintenance, and full longitudinal-clock semantics.
 
-`DEP-001` is active because the accepted state contract now identifies the selected state and transition relationships that must remain referentially reconstructable, but does not decide the minimum dependency identity metadata or relation representation needed to preserve them.
+`SLICE-003` is active because the selected slice now has accepted decisions for first-slice selection, system-under-test boundary, selected-slice trial/time semantics, evaluation policy, fixture/oracle contract, state contract, and dependency identity. The next blocking decision is the minimum internal boundary that preserves those contracts without prematurely deciding final production architecture.
 
-`SLICE-005`, `EVAL-004`, and `EVAL-005` have been re-triaged after `ADR-006` acceptance and remain non-active until their concrete triggers occur. `SLICE-005` waits for dependency identity metadata and acceptance-gate drafting pressure. `EVAL-004` triggers before the first evaluation record, comparison, or compatibility claim. `EVAL-005` triggers before final scoring or scenario-scoreability criteria are defined.
+`DEP-003` has moved from `Blocked` to `Open` because accepted `ADR-007 R3` satisfies its registered trigger that selected state/dependency types are known. It is not active unless runtime maintenance semantics block the `SLICE-003` boundary decision.
+
+`SLICE-005`, `EVAL-004`, and `EVAL-005` have been re-triaged after `ADR-007` acceptance and remain non-active until their concrete triggers occur. `SLICE-005` waits for internal-boundary pressure and acceptance-gate drafting pressure. `EVAL-004` triggers before the first evaluation record, comparison, or compatibility claim. `EVAL-005` triggers before final scoring or scenario-scoreability criteria are defined.
 
 No other open question currently blocks progress. Legacy reading, non-committing experiments, document review, fixture sketching, and rough implementation exploration may continue as long as they do not claim final architecture compatibility, selected-slice pass evidence, first evaluation-record sufficiency, or final acceptance-gate sufficiency.
 
 ## Active Questions
 
-### DEP-001
+### SLICE-003
 
 Status: `Active`
 
-Question: What minimum dependency identity metadata does the selected slice require?
+Question: What minimum internal boundary is forced by selected-slice behavior?
 
-Why It Matters: Accepted `ADR-006` decides which selected-slice state, transition evidence, projections, and semantic relationships must remain reconstructable, but deliberately does not decide the reference metadata or relation semantics needed to connect them. The next artifact must define enough identity metadata for implementation and inspection without building a general dependency graph, workflow engine, or production memory system.
+Why It Matters: Accepted `ADR-001` through `ADR-007` now define the first selected slice, the system-under-test boundary, curated-context evaluation policy, fixture/oracle contract, selected-slice state contract, and dependency identity contract. Implementation now needs a minimum internal boundary that preserves those contracts and lets the first projects be created without prematurely deciding final repository layout, service topology, storage engine, runtime split, or production architecture.
 
-Source / Pressure: `STATE_AND_CONTROL_MODEL.md`; `CANONICAL_SCENARIOS.md` `SCN-001`; `ADR-002`; `ADR-003`; `ADR-005`; `ADR-006`.
+Source / Pressure: `STATE_AND_CONTROL_MODEL.md`; `CANONICAL_SCENARIOS.md` `SCN-001`; `ADR-002`; `ADR-004`; `ADR-005`; `ADR-006`; `ADR-007`.
 
-Blocks: `SLICE-003` minimum internal boundary, `DEP-003` maintenance-trigger decisions, `SLICE-005` acceptance gate, and any implementation claim that selected-slice state/evidence relationships are inspectably preserved.
+Blocks: first implementation project creation, minimum architecture boundary, ownership split between SUT/harness/oracle/simulator responsibilities, and any implementation claim that selected-slice behavior preserves accepted state and dependency contracts.
 
-Does Not Block: thesis/scenario/state-model review, legacy inventory, non-committing prototypes, fixture review, evaluation-record sketching, acceptance-gate sketching, document review, or explicitly throwaway experiments that do not claim final dependency identity sufficiency.
+Does Not Block: thesis/scenario/state-model review, legacy inventory, fixture review, evaluation-record sketching, acceptance-gate sketching, document review, engineering-standard drafting, or explicitly throwaway experiments that do not claim final architecture compatibility.
 
-Depends On: `SLICE-002`, resolved by `ADR-006`; `EVAL-002`, resolved by `ADR-005`; `EVAL-006`, resolved by `ADR-002`; `GROW-001` and `TIME-002`, resolved by `ADR-003`.
+Depends On: `SLICE-002`, resolved by `ADR-006`; `DEP-001`, resolved by `ADR-007`; `EVAL-002`, resolved by `ADR-005`; `EVAL-006`, resolved by `ADR-002`; `EVAL-001` and `EVAL-003`, resolved by `ADR-004`; `GROW-001` and `TIME-002`, resolved by `ADR-003`.
 
-Applies When / Decision Trigger: `ADR-006` is accepted and the next artifact would define reference identity, relation edges, event ancestry, lineage metadata, support relations, basis references, or dependency metadata for the selected-slice state contract.
+Applies When / Decision Trigger: selected-slice state and dependency identity contracts are accepted and the next artifact would create implementation projects, modules, package boundaries, ownership boundaries, SUT/harness/oracle/simulator seams, storage-facing abstractions, or architecture claims.
 
 Known Options:
 
-- Minimal typed-reference metadata: define only IDs, relation kinds, source/basis relation, lifecycle relation, and ordering fields needed by `ADR-006`.
-- Event-ancestry metadata: use transition ancestry as the primary identity mechanism, with projections deriving relation views.
-- Composite-key lineage: represent relationships through composite identifiers tied to run, path, event, state anchor, and transition.
-- Full dependency graph: expressive but likely too broad for the first selected slice unless narrower options cannot preserve required lineage.
+- Single selected-slice package with internal SUT/harness/oracle/simulator namespaces.
+- Two-project split separating implementation/SUT core from evaluation harness and fixtures.
+- Three-project split separating SUT core, fixture/oracle package, and simulator/evaluation runner.
+- Ports-and-adapters boundary around SUT semantic transitions with fixture/oracle and simulator as external test drivers.
+- Overbroad production architecture split into services, persistent stores, runtime adapters, and product surfaces; likely premature unless narrower options cannot preserve accepted contracts.
 
 Decision Criteria:
 
-- preserves `ADR-006` state/evidence relationships without deciding a final schema, storage engine, or general dependency graph;
-- lets oracle inspection distinguish source facts, SUT-owned transition evidence, cross-transition state, lineage-preserving projections, and oracle-derived facts;
-- preserves ordering, basis, scope, status origin, lifecycle, and behavior-change lineage enough for `ADR-005` obligations and `ADR-006` explanation-basis closure;
-- prevents generic affirmative summaries or fixture-authored verdicts from replacing SUT-owned comparison, temporal, activation, applicability, disposition, and outcome lineage;
-- supports candidate/proposal/response/activation/active-trial/later-use/outcome/explanation relationships while keeping candidate, activation, non-activation, direct correction, and durable-adaptation boundaries distinct;
-- remains small enough to support the first selected slice while leaving `SLICE-003`, `SLICE-005`, `EVAL-004`, and `EVAL-005` for their proper triggers.
+- preserves the `ADR-002` transition-inside SUT boundary and prevents fixture/oracle answer metadata from entering SUT-owned behavior state;
+- preserves `ADR-004` curated-context and nondeterminism policy without turning the harness into production retrieval or acceptance infrastructure;
+- preserves `ADR-005` fixture/oracle package, simulator realization facts, oracle-only scoring, run-validity controls, and bounded claim language;
+- preserves `ADR-006` state/evidence/projection responsibilities without deciding final storage schema or production memory architecture;
+- preserves `ADR-007` stable scoped references, effective-state identity, contemporaneous dependency-use evidence, and local typed relation semantics without requiring a full graph engine;
+- is small enough to create the first implementation projects while leaving `SLICE-005`, `EVAL-004`, `EVAL-005`, `DEP-003`, production surfaces, trust boundaries, durable memory, and runtime maintenance to their proper triggers.
 
 Evidence Needed:
 
-- minimum reference metadata table for input facts, attributed assertions, temporal assessments, comparisons, candidates, proposals, bindings, activation assessments, active trials, scoped correction/control events, behavior dispositions, simulator realizations, outcomes, explanation support, projections, and oracle-derived reports;
-- relation-kind list distinguishing source, basis, support, binding, transition ancestry, applicability, realization, outcome, explanation-support, supersession, retirement, narrowing, and conflict relations;
-- examples showing how `ADR-006` lifecycle-relative state/evidence classification is preserved without losing the original transition or allowing harness reconstruction;
-- examples showing what metadata is intentionally not required, including full graph traversal, workflow orchestration, production memory schema, retrieval ranking, and generalized dependency maintenance;
-- mapping from required `ADR-006` relation families to minimum identity fields sufficient for first-slice oracle inspection.
+- responsibility map for SUT core, fixture package, oracle/scoring, simulator realization, run harness, and reporting/capture;
+- boundary map showing which records, facts, relations, and projections cross each boundary and which remain oracle-only;
+- minimal project/module/package shape with explicit non-decisions for storage, services, product surfaces, runtime adapters, and production memory;
+- examples showing the canonical and counterfactual paths crossing the proposed boundary without answer leakage or retrospective dependency reconstruction;
+- list of interfaces/contracts that must exist before first implementation and which are intentionally deferred.
 
-Working Assumptions / Fixtures: `ADR-001` through `ADR-006` are accepted; first-slice dependency identity metadata is synthetic and selected-slice scoped; no final production database, general dependency graph, retrieval system, workflow engine, real continuity, durable adaptation, or full `SCN-001` claim is being decided.
+Working Assumptions / Fixtures: `ADR-001` through `ADR-007` are accepted; first-slice architecture is synthetic and selected-slice scoped; no final production database, general dependency graph, retrieval system, workflow engine, product surface, real continuity, durable adaptation, or full `SCN-001` claim is being decided.
 
 Decision Authority: project owner.
 
-Needed By: before `SLICE-003`, `SLICE-005`, `DEP-003`, and implementation claims of selected-slice dependency identity sufficiency.
+Needed By: before creating the first implementation projects and before `SLICE-005`, `EVAL-004`, `EVAL-005`, or implementation claims of selected-slice architecture sufficiency.
 
-Resolution Shape: selected-slice minimum dependency identity metadata contract or short ADR.
+Resolution Shape: selected-slice minimum internal-boundary ADR.
 
 ## Open Question Index
 
@@ -241,16 +245,16 @@ Resolution Shape: selected-slice minimum dependency identity metadata contract o
 | --- | --- | --- | --- | --- | --- |
 | `SLICE-001` | Resolved | Accepted by `ADR-001` | - | S1, S2, SCM | Choose first vertical slice: `SCN-001` or `SCN-002`. |
 | `SLICE-002` | Resolved | Accepted by `ADR-006 R2` | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-002`, `EVAL-003`, `GROW-001`, `TIME-002` | SCM, S1, S2 | What minimum persistent state is required for the selected slice? |
-| `SLICE-003` | Blocked | After selected-slice state/eval pressure is known | `SLICE-002`, `DEP-001`, `EVAL-002`, `EVAL-006` | SCM | What minimum internal boundary is forced by selected-slice behavior? |
+| `SLICE-003` | Active | After selected-slice state, dependency identity, and eval pressure are known | `SLICE-002`, `DEP-001`, `EVAL-002`, `EVAL-006` | SCM | What minimum internal boundary is forced by selected-slice behavior? |
 | `SLICE-005` | Blocked | After selected-slice oracle, system-under-test boundary, trial/time semantics, and acceptance semantics are known | `EVAL-002`, `EVAL-003`, `EVAL-006`, `GROW-001`, `TIME-002` | S1, S2 | What acceptance gate says the first slice is done? |
 | `MEM-001` | Deferred | Selected slice proposes retaining personal state | `SLICE-001` | T, SCM | What retention bases and transient defaults does the selected slice need? |
 | `MEM-002` | Deferred | Selected slice proposes reusing retained state across purposes | `MEM-001` | T, SCM | What permitted-use rule prevents silent repurposing into personalization, initiative, adaptation, training, or external inference? |
 | `MEM-003` | Deferred | Selected slice proposes retaining personal evidence | `MEM-001` | SCM | What granularity rule chooses raw content, excerpt, structured observation, or summary? |
 | `MEM-004` | Deferred | Selected slice proposes creating or reusing a control-relevant derived artifact | `MEM-001`, `MEM-002` | SCM | What common minimum lineage and permitted-use contract must any control-relevant derived artifact satisfy, and what extension is required for the first artifact type introduced? |
 | `MEM-005` | Deferred | A milestone proposes exposing user-facing memory or retained-state correction controls | `MEM-001` | T, SCM | What user-visible distinctions are required between correction, revocation, deletion, forgetting, redaction, retirement, and supersession? |
-| `DEP-001` | Active | After `SLICE-002` identifies selected state/transitions | `SLICE-002` | SCM | What minimum dependency identity metadata does the selected slice require? |
+| `DEP-001` | Resolved | Accepted by `ADR-007 R3` | `SLICE-002` | SCM | What minimum dependency identity metadata does the selected slice require? |
 | `DEP-002` | Deferred | Selected slice can produce insufficient non-circular support or non-convergence | `DEP-001` | SCM | What minimum V0 detection condition identifies insufficient non-circular support or control non-convergence, and how does the affected domain select lifecycle state? |
-| `DEP-003` | Blocked | After selected state/dependency types are known | `DEP-001` | SCM | Which runtime maintenance triggers are required: expiry, revocation, capability degradation, external refresh, or manual review? |
+| `DEP-003` | Open | After selected state/dependency types are known | `DEP-001` | SCM | Which runtime maintenance triggers are required: expiry, revocation, capability degradation, external refresh, or manual review? |
 | `DEP-004` | Deferred | Selected slice has component operations or grouped state | `SLICE-002` | S2, SCM | What component/group status model is required without building a full workflow engine? |
 | `TIME-001` | Deferred | Scheduler, reminders, due state, expiry, background temporal maintenance, or full longitudinal governed-clock semantics enter active milestone scope | `SLICE-001` | S1, S2, SCM | What governed-clock contract is needed for reproducible expiry, freshness, due state, and longitudinal time? |
 | `TIME-002` | Resolved | Accepted by `ADR-003` Decision B | `EVAL-006` | S1, S2, SCM | What minimal selected-slice chronology and staleness contract supports stale-history handling, trial-basis freshness, and later-session ordering without designing a general governed-clock system? |
@@ -359,6 +363,22 @@ Resolved Against / Scope: first `SCN-001` milestone uses a minimum selected-slic
 Supersedes / Split From: none.
 
 Future Trigger: material change to selected-slice state/evidence semantics, inability of `DEP-001`, `SLICE-003`, `SLICE-005`, `EVAL-004`, or `EVAL-005` to preserve the accepted state/projection boundary, or a later milestone claiming broader persistence, production memory, durable adaptation, retrieval/context assembly, or full `SCN-001` evidence than `ADR-006` permits.
+
+Date: 2026-07-09
+
+### DEP-001
+
+Outcome: `Decision`
+
+Decision Authority / Accepted By: project owner by accepting `ADR-007 R3`.
+
+Resolution Artifact: `decisions/ADR-007-scn001-selected-slice-dependency-identity.md`.
+
+Resolved Against / Scope: first `SCN-001` milestone uses a minimum selected-slice dependency identity contract. The contract defines stable scoped references, effective-state identity for mutable and lifecycle-bearing relation endpoints, contemporaneous dependency-use evidence, conditional reference metadata, separated reference namespace / semantic scope / evaluation context, and local typed relations for source, basis, support, binding, transition ancestry, applicability, projection-of, realization, outcome, explanation support, supersession, retirement, narrowing, and conflict. It does not decide a full dependency graph, workflow engine, production memory schema, retrieval/context-assembly system, runtime maintenance mechanism, acceptance gate, behavior-configuration metadata contract, or final internal module boundary.
+
+Supersedes / Split From: none.
+
+Future Trigger: material change to selected-slice dependency identity semantics, inability of `SLICE-003`, `SLICE-005`, `EVAL-004`, or `EVAL-005` to preserve accepted dependency identity evidence, activation of runtime maintenance semantics under `DEP-003`, or a later milestone claiming broader dependency, retrieval, production memory, durable adaptation, or full `SCN-001` evidence than `ADR-007` permits.
 
 Date: 2026-07-09
 
@@ -552,6 +572,6 @@ The register is acceptable only if:
 
 ## Next Decision Step
 
-Prepare the minimum dependency identity metadata contract for `DEP-001` under accepted `ADR-001` through `ADR-006`.
+Prepare the minimum internal-boundary decision for `SLICE-003` under accepted `ADR-001` through `ADR-007`.
 
-Define the minimum reference metadata and relation semantics needed to preserve the selected state/evidence relationships from `ADR-006`: source, basis, support, binding, transition ancestry, applicability, realization, outcome, explanation-support, supersession, retirement, narrowing, and conflict relations. Preserve the accepted SUT boundary, selected-slice trial/time semantics, curated-context policy, fixture/oracle contract, and state contract without building a full dependency graph, workflow engine, production memory schema, or final internal module boundary.
+Define the smallest project/module/responsibility boundary that preserves the accepted selected-slice SUT boundary, trial/time semantics, curated-context policy, fixture/oracle contract, selected-slice state contract, and dependency identity contract. The decision should identify SUT core, harness, fixture/oracle, simulator, capture/reporting, and implementation-facing contracts without deciding final production services, storage engines, product surfaces, runtime adapters, full dependency graph, workflow engine, production memory schema, runtime maintenance triggers, or acceptance gate.

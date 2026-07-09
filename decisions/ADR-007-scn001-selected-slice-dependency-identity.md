@@ -1,14 +1,16 @@
 # ADR-007: SCN-001 Selected-Slice Dependency Identity Contract
 
-Status: `Draft`
+Status: `Accepted`
 
 Date: 2026-07-09
+
+Accepted: 2026-07-09
 
 Record revision: `R3`
 
 Decision authority: project owner
 
-Resolved question IDs on acceptance: `DEP-001`
+Resolved question IDs: `DEP-001`
 
 Decision-Time Baselines:
 
@@ -23,7 +25,7 @@ Decision-Time Baselines:
 - `decisions/ADR-005-scn001-selected-slice-fixture-oracle-contract.md` `R2`
 - `decisions/ADR-006-scn001-selected-slice-state-contract.md` `R2`
 
-Post-decision register state on acceptance: `OPEN_QUESTIONS.md` should record `DEP-001` as resolved by this ADR for the first `SCN-001` selected-slice milestone, re-triage `SLICE-003` as the recommended next frontier, move `DEP-003` from `Blocked` to at least `Open`, and re-triage `SLICE-005`, `EVAL-004`, and `EVAL-005` without automatically resolving or expanding them.
+Post-decision register state: `OPEN_QUESTIONS.md` `V0.2.16` records `DEP-001` as resolved by this ADR, activates `SLICE-003` as the recommended next frontier, moves `DEP-003` from `Blocked` to `Open`, and re-triages `SLICE-005`, `EVAL-004`, and `EVAL-005` without automatically resolving or expanding them.
 
 ## Decision
 
