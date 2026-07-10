@@ -1,14 +1,16 @@
 # ADR-009: SCN-001 First Selected-Slice Milestone Completion Gate
 
-Status: `Proposed`
+Status: `Accepted`
 
 Date: 2026-07-10
+
+Accepted: 2026-07-10
 
 Record revision: `R4`
 
 Decision authority: project owner
 
-Candidate resolution question ID: `SLICE-005`
+Resolved question IDs: `SLICE-005`
 
 Decision-Time Baselines:
 
@@ -25,10 +27,13 @@ Decision-Time Baselines:
 - `decisions/ADR-007-scn001-selected-slice-dependency-identity.md` `R3`
 - `decisions/ADR-008-scn001-selected-slice-internal-boundary.md` `R2`
 
-Proposed register effect: while this ADR remains proposed, `OPEN_QUESTIONS.md`
-`V0.2.19` makes `SLICE-005` the active decision frontier. Project-owner
-acceptance would resolve `SLICE-005` for the first synthetic `SCN-001`
-selected-slice workbench milestone only.
+Post-decision register state: `OPEN_QUESTIONS.md` `V0.2.20` records
+`SLICE-005` as resolved by this ADR for the first synthetic `SCN-001`
+selected-slice workbench milestone, records the all-five conjunctive
+`P -> D -> A` completion contract, leaves `EVAL-004` and `EVAL-005` deferred
+until their concrete triggers occur, keeps `DEP-003` open and non-active, and
+returns the current implementation frontier to governed selected-slice work
+with no active blocking question.
 
 ## Decision
 
@@ -68,10 +73,9 @@ produce a milestone pass. Claim-class evidence eligibility may be tracked and
 reviewed independently as formal progress, but no individual class or proper
 subset of classes establishes first selected-slice milestone completion.
 
-Acceptance of this ADR would resolve `SLICE-005`. It would define the
-completion contract, not declare that any implementation, behavior
-configuration, campaign, completion determination, or milestone has already
-passed or been accepted.
+This ADR resolves `SLICE-005`. It defines the completion contract; it does
+not declare that any implementation, behavior configuration, campaign,
+completion determination, or milestone has already passed or been accepted.
 
 ## Why All Five Claim Classes Are Mandatory
 
@@ -1106,9 +1110,9 @@ Use of an LLM, multiple models, deterministic logic, local inference, hosted
 inference, agents, or a hybrid cognitive mechanism inside the tested
 implementation does not by itself strengthen or expand this claim boundary.
 
-## Register Effect If Accepted
+## Register Effect
 
-Project-owner acceptance of this ADR would update `OPEN_QUESTIONS.md` to:
+Acceptance of this ADR updates `OPEN_QUESTIONS.md` to:
 
 - move `SLICE-005` to `Resolved` with outcome `Decision` for the first
   synthetic `SCN-001` selected-slice workbench milestone;
