@@ -1,6 +1,6 @@
 # Zoey Open Questions
 
-Document version: `V0.2.18`
+Document version: `V0.2.19`
 
 Thesis baseline: `SYSTEM_THESIS.md` `V0.3.1`
 
@@ -156,15 +156,14 @@ Do not include:
 
 ## Active Decision Frontier
 
-Current milestone: first implementation project creation is unblocked by the accepted selected-slice internal boundary.
+Current milestone: define the first synthetic `SCN-001` selected-slice workbench milestone completion contract before candidate/proposal implementation grows further.
 
 Active questions:
 
-- none
+- `SLICE-005`
 
 Pending trigger checks before the next artifact claims evaluation-record sufficiency, final scoring, acceptance-gate sufficiency, runtime maintenance, production scope, trust boundaries, or broader slice evidence:
 
-- `SLICE-005`
 - `EVAL-004`
 - `EVAL-005`
 - `REPO-001`
@@ -184,7 +183,9 @@ Pending trigger checks before the next artifact claims evaluation-record suffici
 
 `DEP-003` has moved from `Blocked` to `Open` because accepted `ADR-007 R3` satisfies its registered trigger that selected state/dependency types are known. It is not active unless runtime maintenance semantics block implementation under the accepted selected-slice boundary.
 
-`SLICE-005` has moved from `Blocked` to `Open` because accepted `ADR-008 R2` resolves the internal-boundary prerequisite. It is not active unless acceptance-gate drafting becomes the active frontier. `EVAL-004` remains deferred and triggers before the first evaluation record, comparison, or compatibility claim. `EVAL-005` remains deferred and triggers before final scoring or scenario-scoreability criteria are defined.
+`SLICE-005` is now `Active` because acceptance-gate drafting is the current decision frontier. Proposed `ADR-009 R1` defines a conjunctive completion contract requiring all five `ADR-005 R2` claim classes, applicable engineering promotion gates, complete formal evidence artifacts, and explicit project-owner acceptance. The draft does not itself resolve `SLICE-005` or establish milestone completion.
+
+`EVAL-004` remains deferred and triggers before the first evaluation record, comparison, or compatibility claim. `EVAL-005` remains deferred and triggers before final scoring or scenario-scoreability criteria are defined. Proposed `ADR-009 R1` requires both separately triggered decisions to resolve before the first actual formal milestone acceptance that depends on their contracts; it does not absorb or prematurely resolve them.
 
 No open question currently blocks first implementation project creation under the accepted selected-slice boundary. Legacy reading, non-committing experiments, document review, fixture sketching, and rough implementation exploration may continue as long as they do not claim selected-slice pass evidence, first evaluation-record sufficiency, final acceptance-gate sufficiency, runtime-maintenance sufficiency, production readiness, or broader `SCN-001` evidence.
 
@@ -192,7 +193,23 @@ No open question currently blocks first implementation project creation under th
 
 ## Active Questions
 
-No active question is currently registered.
+### SLICE-005
+
+- `Status`: `Active`
+- `Question`: What conjunctive acceptance gate says the first synthetic `SCN-001` selected-slice workbench milestone is complete?
+- `Why It Matters`: Candidate, proposal, activation, later-use, outcome, and explanation implementation will otherwise encode an implicit definition of done. The gate must prevent partial success, engineering conformance, oracle output, or a favorable subset of runs from being mistaken for milestone completion.
+- `Source / Pressure`: `SCN-001`; `ADR-002 R2`; `ADR-003 R2`; `ADR-004 R3`; `ADR-005 R2`; `ADR-006 R2`; `ADR-007 R3`; `ADR-008 R2`; `ENG-CLAIM-001`; `ENG-CLAIM-002`; selected-slice claim-boundary rules.
+- `Blocks`: accepted first selected-slice milestone completion contract; any `milestone_complete`, accepted-slice, or equivalent completion claim.
+- `Does Not Block`: continued governed implementation, fixture encoding, oracle development, engineering-gate strengthening, non-claiming development runs, or evidence-pipeline preparation that does not create reserved formal artifacts before their governing triggers resolve.
+- `Depends On`: `EVAL-002`, `EVAL-003`, `EVAL-006`, `GROW-001`, `TIME-002`, `SLICE-003`.
+- `Applies When / Decision Trigger`: active now because the project owner selected acceptance-gate drafting as the next frontier before candidate/proposal implementation grows further.
+- `Known Options`: conjunctive all-class completion; partial or staged class completion under separately named capability claims; weighted or aggregate score. Proposed `ADR-009 R1` selects conjunctive all-class completion and rejects weighted, averaged, or substitutable completion for this milestone.
+- `Decision Criteria`: preserve every accepted hard invariant; require each mandatory claim class to satisfy all applicable positive obligations across its complete mandatory path/run set; preserve accepted invalid-run handling; require applicable engineering promotion gates and formal evidence artifacts; keep `EVAL-004` and `EVAL-005` separate; require explicit project-owner acceptance; keep the completion claim strictly synthetic and selected-slice bounded.
+- `Evidence Needed`: `ADR-004 R3` formal campaign and failure semantics; `ADR-005 R2` claim-class/path/obligation matrix, invalidity criteria, aggregation rules, and bounded claim language; current implementation/conformance evidence showing where implicit completion assumptions would otherwise enter; review of proposed `ADR-009 R1` against accepted SUT, state, dependency, and internal boundaries.
+- `Working Assumptions / Fixtures`: `SCN001-SSFO-V0.2.0` remains the governing fixture/oracle package; all five currently defined claim classes are proposed as mandatory and non-substitutable; no current implementation or development result is formal milestone evidence.
+- `Decision Authority`: project owner.
+- `Needed By`: before any formal first selected-slice milestone completion claim or owner acceptance; preferably before candidate/proposal implementation expands the implicit completion surface.
+- `Resolution Shape`: accepted ADR defining the conjunctive completion predicate, mandatory claim classes, path/run completeness, failure semantics, engineering/evidence prerequisites, owner authority, bounded claim language, register effect, and explicit non-scope without absorbing `EVAL-004` or `EVAL-005`.
 
 ## Open Question Index
 
@@ -201,7 +218,7 @@ No active question is currently registered.
 | `SLICE-001` | Resolved | Accepted by `ADR-001` | - | S1, S2, SCM | Choose first vertical slice: `SCN-001` or `SCN-002`. |
 | `SLICE-002` | Resolved | Accepted by `ADR-006 R2` | `SLICE-001`, `EVAL-006`, `EVAL-001`, `EVAL-002`, `EVAL-003`, `GROW-001`, `TIME-002` | SCM, S1, S2 | What minimum persistent state is required for the selected slice? |
 | `SLICE-003` | Resolved | Accepted by `ADR-008 R2` | `SLICE-002`, `DEP-001`, `EVAL-002`, `EVAL-006` | SCM | What minimum internal boundary is forced by selected-slice behavior? |
-| `SLICE-005` | Open | After selected-slice internal boundary is accepted and acceptance-gate drafting becomes active | `EVAL-002`, `EVAL-003`, `EVAL-006`, `GROW-001`, `TIME-002`, `SLICE-003` | S1, S2 | What acceptance gate says the first slice is done? |
+| `SLICE-005` | Active | Acceptance-gate drafting is the current frontier after accepted `ADR-008 R2` | `EVAL-002`, `EVAL-003`, `EVAL-006`, `GROW-001`, `TIME-002`, `SLICE-003` | S1, S2 | What conjunctive acceptance gate says the first synthetic selected-slice workbench milestone is complete? |
 | `MEM-001` | Deferred | Selected slice proposes retaining personal state | `SLICE-001` | T, SCM | What retention bases and transient defaults does the selected slice need? |
 | `MEM-002` | Deferred | Selected slice proposes reusing retained state across purposes | `MEM-001` | T, SCM | What permitted-use rule prevents silent repurposing into personalization, initiative, adaptation, training, or external inference? |
 | `MEM-003` | Deferred | Selected slice proposes retaining personal evidence | `MEM-001` | SCM | What granularity rule chooses raw content, excerpt, structured observation, or summary? |
@@ -545,6 +562,6 @@ The register is acceptable only if:
 
 ## Next Decision Step
 
-Create the first implementation projects or packages under accepted `ADR-008 R2`, unless the next artifact instead drafts an acceptance gate, formal evaluation record, final scoring/scoreability criteria, runtime maintenance semantics, production surface, trust boundary, or broader milestone claim.
+Review proposed `ADR-009 R1` and either accept, revise, or reject its conjunctive first selected-slice milestone completion contract. While the draft is under review, governed implementation and governance-checker strengthening may continue, but no implementation, oracle result, development run, or engineering-conformance result may be described as milestone completion.
 
-If the next artifact drafts an acceptance gate, activate `SLICE-005`. If it prepares the first formal evaluation record, comparison, or compatibility claim, activate `EVAL-004`. If it defines final scoring or scenario-scoreability criteria, activate `EVAL-005`. Keep `DEP-003` non-active unless runtime maintenance semantics block implementation.
+If work begins preparing the first formal evaluation record, comparison, or compatibility claim, activate `EVAL-004`. If work begins defining final scoring or scenario-scoreability criteria, activate `EVAL-005`. Both must resolve before the first actual formal milestone acceptance that depends on their contracts. Keep `DEP-003` non-active unless runtime maintenance semantics block implementation.
