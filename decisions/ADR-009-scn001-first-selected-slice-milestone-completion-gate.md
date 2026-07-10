@@ -4,7 +4,7 @@ Status: `Proposed`
 
 Date: 2026-07-10
 
-Record revision: `R3`
+Record revision: `R4`
 
 Decision authority: project owner
 
@@ -119,12 +119,44 @@ remain reserved to `EVAL-004`, `EVAL-005`, and any separately required linked
 evaluation-governance decision. This ADR requires the basis components and
 their lifecycle semantics; it does not prescribe their storage representation.
 
+### Completion Artifact Dependency Direction
+
+The completion artifacts have one semantic dependency direction:
+
+```text
+completion evidence package P
+        |
+        v
+completion-eligibility determination D
+        |
+        v
+project-owner disposition A
+```
+
+`P` is the frozen evidence subject. `D` references and evaluates `P` together
+with the other bound completion-basis components and records the eligibility
+result. `A` references `D`, performs the acceptance-time basis-freshness control
+required by this ADR, and records the project-owner disposition.
+
+The completion evidence package must not use the identity or result of `D`, the
+owner disposition `A`, or a later post-acceptance claim-standing disposition as
+evidence that the package is complete or that any eligibility conjunct passes.
+The eligibility-conjunct result belongs to `D`, not to `P`.
+
+A convenience review, archive, or transport bundle may contain or reference
+`P`, `D`, `A`, and later claim-standing records. The identity of that enclosing
+bundle is not part of `D`'s completion basis merely because it carries those
+artifacts. If a later contract separately makes the enclosing bundle itself a
+bound completion-basis artifact, that is a new artifact dependency and must not
+recreate a recursive `P -> D -> P` or equivalent self-certifying closure.
+
 A behavior-configuration revision may therefore participate in more than one
-completion determination. For example, one package or claim artifact may be
-ineligible while a corrected package or claim over the same unchanged behavior
-and evaluation evidence supports a later eligible determination. Correcting a
-report does not retroactively change SUT behavior; changing the completion
-basis creates or supersedes the corresponding completion determination.
+completion determination. For example, one evidence package or claim artifact
+may be insufficient while a corrected package or claim over the same unchanged
+behavior and evaluation evidence supports a later eligible determination.
+Correcting a report does not retroactively change SUT behavior; changing the
+completion basis creates or supersedes the corresponding completion
+determination.
 
 An unreferenced `completion_eligible = true` assertion, SUT-authored milestone
 status, package-generator self-description, or owner assumption is
@@ -208,21 +240,32 @@ it does not satisfy or waive that downstream mandatory claim class.
 
 ### Mandatory Obligation-Map Closure
 
-Conjunctive completion across five classes is sufficient only if the accepted
-fixture/oracle obligation map itself is complete for the bounded milestone.
-Completion eligibility therefore requires every positive obligation required
-for this bounded milestone by the accepted fixture/oracle and governing
-selected-slice decisions to be:
+Conjunctive completion across five classes is sufficient only if the
+package-local positive-obligation catalogue and authoritative claim-class
+obligation map are closed for the bounded milestone.
 
-- assigned to at least one mandatory claim class; or
-- explicitly excluded from this milestone by an accepted governing source that
-  correspondingly narrows the permitted completion claim.
+For `SCN001-SSFO-V0.2.0`, every applicable positive-obligation ID in the
+`ADR-005 R2` package-local Positive Obligations catalogue must be assigned by
+the authoritative `ADR-005 R2` Claim-Class Obligation Map to at least one
+mandatory claim class. An obligation may appear in more than one class/path
+where the authoritative map explicitly does so; that is not ambiguity when the
+map's class/path aggregation semantics remain inspectable.
 
-A required positive obligation that is unmapped, multiply represented in a way
-that leaves its authoritative aggregation ambiguous, or silently absent because
-it lacks a claim-class assignment is an evaluation/completion-contract defect.
-It prevents eligibility until the authoritative mapping or governing exclusion
-is corrected or superseded through the accepted decision process.
+An applicable package-local positive obligation that is unmapped, silently
+omitted from the authoritative map, or represented in a way that leaves its
+class/path aggregation unresolved is an evaluation/completion-contract defect.
+It prevents eligibility until the fixture/oracle contract is corrected or
+superseded through the accepted decision process.
+
+Separately, if an accepted governing selected-slice source introduces or
+reveals a required positive capability obligation that is not represented in
+the authoritative package-local Positive Obligations catalogue, the
+fixture/oracle contract is incomplete for completion purposes. The project must
+correct or supersede the fixture/oracle contract before eligibility. ADR-009
+does not turn every normative sentence in ADR-002 through ADR-008 into a new
+implicit `OBL-*` item; it requires the accepted fixture/oracle capability-
+obligation catalogue to remain complete against the selected-slice sources it
+claims to evaluate.
 
 Evidence from a path required by one claim class cannot substitute for a
 different required path or claim class. Additional exploratory, development,
@@ -492,9 +535,23 @@ Engineering evidence has two revision scopes:
 1. campaign-bearing implementation evidence must cover the exact SUT
    implementation/build and exact evaluation, harness, oracle, simulator, and
    behavior-affecting revisions used by the formal campaign;
-2. package-and-claim evidence must cover the exact evidence-package,
-   capture/reporting, governance projection, claim artifact, and acceptance-
-   preparation revisions bound to the completion determination.
+2. evidence-subject and claim evidence must cover the exact frozen completion
+   evidence package `P`, capture/reporting and governance-projection revisions,
+   exact proposed bounded claim, and other claim-bearing artifacts bound to the
+   completion determination.
+
+Engineering conformance or claim-support results that are produced by
+inspecting the exact frozen package `P` may be detached attestations referenced
+by `D`. They need not be inserted into `P` as required contents when doing so
+would change the exact package revision they attest. A conformance result over
+`P` must identify the exact subject-package revision or identity it inspected;
+a result over a predecessor package cannot be reused merely because a later
+package added the result itself.
+
+Campaign-bearing engineering evidence and any prerequisite engineering records
+that exist before `P` is frozen may remain inside or be stably referenced by
+`P`. The package-level engineering and claim-support determination over the
+exact frozen `P` is an eligibility input recorded or referenced by `D`.
 
 A post-campaign report or claim-only correction does not by itself require a
 new behavioral campaign when it does not materially change the behavior or
@@ -552,6 +609,14 @@ a review of the exact claim-bearing artifacts and evidence boundary, not a
 substitute for formal run scoring, engineering conformance, completion-
 eligibility determination, or project-owner acceptance.
 
+Before owner acceptance, the exact bounded completion claim is a pre-reviewed
+inactive claim payload. Claim closure may review the payload prospectively,
+including its acceptance-dependent wording and evidence ceiling, but the claim
+must not be published or represented as a current completed-milestone fact
+until an effective `ACCEPTED` disposition activates that exact claim identity.
+A report that presents the inactive payload as already true before acceptance
+is claim-bearing and is subject to the applicable `CLAIM_INVALID` controls.
+
 The final owner disposition is not permitted to redefine the normative claim
 payload after this review. Owner-disposition identity consistency is governed
 by the Completion Authority And Owner Disposition section so that acceptance
@@ -590,13 +655,11 @@ is `INELIGIBLE`.
 
 ## Required Completion Evidence Package
 
-The evidence package bound to a completion determination and presented for
-owner disposition must be bounded to one behavior-configuration revision and
-its bound evaluation configuration. It must include, directly or through stable
-inspectable references:
+The completion evidence package `P` is the frozen evidence subject evaluated by
+a completion determination. It must be bounded to one behavior-configuration
+revision and its bound evaluation configuration. It must include, directly or
+through stable inspectable references:
 
-- the completion-determination identity and every component of its bound
-  completion basis;
 - the accepted `SLICE-005`, `EVAL-004`, and `EVAL-005` resolution artifacts;
 - the accepted ADR and fixture/oracle baselines governing the campaign;
 - the exact behavior-configuration identity, bound evaluation-configuration
@@ -605,7 +668,7 @@ inspectable references:
 - the formal-evidence universe, record authority, manifest, or equivalent
   accepted completeness basis used for configuration-history closure;
 - the evidence cutoff or equivalent resolvable record boundary against which
-  eligibility was evaluated;
+  the package's formal-evidence closure statements were assembled;
 - campaign pre-registration for the presented campaign;
 - the configuration-level formal campaign lineage required by the Formal
   Campaign Integrity And Configuration-History Closure section, including
@@ -621,18 +684,21 @@ inspectable references:
   supersession outcomes;
 - run-level hard-invariant results and claim-class positive-obligation result
   vectors;
-- the authoritative mandatory positive-obligation to claim-class mapping and
-  an obligation-map closure statement showing that no required bounded-
-  milestone positive obligation is orphaned or silently omitted;
+- the authoritative `ADR-005 R2` package-local Positive Obligations catalogue,
+  authoritative mandatory positive-obligation to claim-class map, and an
+  obligation-map closure statement showing that every applicable package-local
+  positive-obligation ID is represented by the authoritative map;
+- any accepted source-contract review or fixture/oracle correction showing that
+  no selected-slice positive capability obligation required for the bounded
+  claim remains unrepresented in the package-local positive-obligation
+  catalogue;
 - checkpoint, effective-state, transition-basis, relation, realization,
   outcome, and explanation-support evidence required by `ADR-005 R2`;
 - failure, correction, reclassification, supersession, and `CLAIM_INVALID`
   artifacts where applicable;
-- the exact bound engineering-governance lock/projection identity and the exact
-  applicable engineering conformance result;
-- verified promotion-enforcement, promotion-integration, and claim-support
-  evidence for the campaign-bearing revisions and the package/claim-bearing
-  revisions defined by this ADR;
+- the exact bound engineering-governance lock/projection identity;
+- campaign-bearing engineering conformance evidence and prerequisite
+  engineering records that exist before the package is frozen;
 - every active engineering exception material to an applicable promotion-
   bearing or claim-bearing rule, with its required residual-risk and
   consequence record;
@@ -644,34 +710,60 @@ inspectable references:
 - a configuration-history closure statement showing that no unresolved prior
   formal campaign or valid formal hard-invariant failure attributable to the
   tested behavior-configuration identity in the bound evidence universe and
-  cutoff disqualifies the presented revision;
-- an eligibility-conjunct result record that references the evidence supporting
-  each completion predicate conjunct, identifies the determining evaluation or
-  governance actor/mechanism, records `ELIGIBLE` or `INELIGIBLE`, and records
-  unresolved blockers;
+  package evidence boundary disqualifies the presented revision;
 - every additional configuration-identity, comparison, scoreability,
-  unresolved-question, fixture-assumption, scoring, record-authority,
-  completeness-basis, or disposition artifact required by the accepted
-  `EVAL-004`, `EVAL-005`, or separately accepted linked evaluation-governance
-  contracts;
-- the maximum bounded claim supported and the stronger claims explicitly
+  unresolved-question, fixture-assumption, scoring, record-authority, or
+  completeness-basis artifact required to be part of the evidence subject by
+  the accepted `EVAL-004`, `EVAL-005`, or separately accepted linked
+  evaluation-governance contracts;
+- the exact pre-reviewed inactive bounded completion claim payload and identity,
+  the maximum bounded claim supported, and the stronger claims explicitly
   excluded.
 
-Required records must be reference-resolvable and free of unresolved material
-contradiction under the accepted evaluation contracts. Material contradiction
-includes incompatible behavior/evaluation identities, contradictory pass and
-failure classifications for the same authoritative obligation result,
-unresolved references required for claim support, or other cross-record
-conflicts that prevent the completion predicate from being evaluated. Reviewer
-disagreement alone is not automatically a record inconsistency; it is handled
-through the applicable review or owner-disposition process.
+`P` must not include the completion determination's identity or eligibility
+result as evidence required to make `P` complete. It must not include the owner
+disposition or later claim-standing result as evidence required for package
+completeness. Those are downstream artifacts in the `P -> D -> A` dependency
+direction.
 
-This section identifies evidence families and closure obligations required for
-completion. It does not define the exact behavior/evaluation configuration-
+Required package records must be reference-resolvable and free of unresolved
+material contradiction under the accepted evaluation contracts. Material
+contradiction includes incompatible behavior/evaluation identities,
+contradictory pass and failure classifications for the same authoritative
+obligation result, unresolved references required for claim support, or other
+cross-record conflicts that prevent the completion predicate from being
+evaluated. Reviewer disagreement alone is not automatically a record
+inconsistency; it is handled through the applicable review or owner-disposition
+process.
+
+### Completion Eligibility Determination Record
+
+The completion determination `D` evaluates the exact frozen package `P` and the
+other bound completion-basis components. `D` must identify or reference:
+
+- its own stable determination identity;
+- every component of its exact bound completion basis;
+- the exact frozen package `P` identity or revision evaluated;
+- the exact proposed bounded completion claim identity evaluated;
+- the exact package-level engineering conformance and claim-support attestations
+  over `P` and the claim-bearing artifacts, including the exact subject
+  revisions those attestations inspected;
+- the evidence supporting every completion predicate conjunct;
+- the determining evaluation or governance actor/mechanism;
+- `ELIGIBLE` or `INELIGIBLE` as the determination result;
+- every unresolved blocker or limitation material to eligibility;
+- any earlier completion determination it explicitly supersedes.
+
+The conjunct-by-conjunct eligibility result is part of `D`. It is not required
+content of `P` and must not be used by `P` to certify its own completeness.
+
+This section identifies evidence and determination families and their dependency
+direction. It does not define the exact behavior/evaluation configuration-
 record metadata, fingerprints, equivalence rules, comparison algorithm,
-serialization, formal-evidence registry mechanism, scoring representation, or
-scoreability-disposition schema reserved to `EVAL-004`, `EVAL-005`, or any
-required linked evaluation-governance decision.
+serialization, formal-evidence registry mechanism, scoring representation,
+scoreability-disposition schema, or attestation format reserved to `EVAL-004`,
+`EVAL-005`, engineering governance, or any required linked evaluation-
+governance decision.
 
 ## Relationship To EVAL-004 And EVAL-005
 
@@ -726,7 +818,9 @@ enters the accepted formal-evidence universe before owner acceptance. Before an
 `ELIGIBLE` determination is accepted, any material change to an eligibility
 dependency requires re-evaluation or a superseding determination.
 
-At minimum, re-evaluation is required when the project becomes aware that:
+At minimum, re-evaluation is required when a material dependency review,
+formal-evidence-universe comparison, accepted record update, governance update,
+or other qualifying control identifies that:
 
 - new formal evidence attributable to the tested behavior configuration has
   entered the accepted formal-evidence universe;
@@ -755,14 +849,39 @@ cannot be accepted as current eligibility. A corrected or later determination
 may explicitly supersede it.
 
 No fixed time-to-live, scheduler, background monitor, or general governed-clock
-machinery is required by this rule. It is an event-driven basis-validity rule
-applied when a material dependency change is identified before owner
-acceptance.
+machinery is required by this rule. It is an event-driven basis-validity rule.
+The mandatory acceptance-time freshness control below prevents owner acceptance
+from relying only on personal non-awareness of an intervening material change.
+
+### Acceptance-Time Basis Freshness
+
+Every `ACCEPTED` owner disposition requires an inspectable acceptance-time
+basis-freshness check over the exact `ELIGIBLE` determination.
+
+Immediately before acceptance under the applicable acceptance workflow, the
+check must compare the determination's bound evidence cutoff or completeness
+boundary with the current accepted formal-evidence record-authority/completeness
+boundary and inspect the other material eligibility dependencies named in this
+section for intervening changes. The check must record:
+
+- the completion-determination identity reviewed;
+- the current formal-evidence universe/completeness boundary against which the
+  determination cutoff was compared;
+- the material eligibility-dependency bases checked;
+- whether a material delta or unresolved comparison exists;
+- the qualifying actor or mechanism and check order/time.
+
+A statement that the owner, package assembler, or reviewer is personally
+unaware of new evidence is insufficient. If the freshness check identifies a
+material delta or unresolved comparison, the determination becomes
+`REQUIRES_REEVALUATION` for acceptance purposes and cannot receive an
+`ACCEPTED` disposition until re-evaluated or superseded by a currently eligible
+determination.
 
 A `DEFERRED` determination may remain eligible only while its bound eligibility
-basis remains materially valid. A later owner acceptance of a deferred
-determination requires confirmation that no re-evaluation trigger has made the
-earlier eligibility result stale or unresolved.
+basis remains materially valid. Every later attempt to move that determination
+to `ACCEPTED` performs a new acceptance-time basis-freshness check; a prior
+freshness result does not permanently attach to the deferred determination.
 
 ## Completion Authority And Owner Disposition
 
@@ -775,9 +894,10 @@ owner must review the exact completion determination and its bounded evidence
 package and record one of the following dispositions against the determination
 identity:
 
-- `ACCEPTED`: the determination is currently `ELIGIBLE`, the owner accepts the
-  exact pre-reviewed bounded completion claim, and historical milestone
-  completion is established for that determination;
+- `ACCEPTED`: the determination is currently `ELIGIBLE`, the required
+  acceptance-time basis-freshness check is clear, the owner accepts the exact
+  pre-reviewed bounded completion claim, and historical milestone completion is
+  established for that determination;
 - `DEFERRED`: the owner does not yet accept completion. The determination may
   remain `ELIGIBLE` only while its bound basis remains materially valid; the
   milestone is not complete;
@@ -795,6 +915,8 @@ The disposition record must identify:
 - the evaluation-configuration identity;
 - the formal-evidence universe and cutoff/completeness boundary;
 - the exact pre-reviewed bounded completion claim identity;
+- for `ACCEPTED`, the acceptance-time basis-freshness check identity and the
+  current evidence-universe/completeness boundary checked;
 - the owner disposition and attributable basis;
 - the decision time;
 - any prior effective owner disposition it explicitly supersedes.
@@ -809,7 +931,8 @@ effective only by explicitly superseding the prior effective disposition and
 preserving the earlier basis.
 
 A later `ACCEPTED` disposition may supersede `DEFERRED` only if the determination
-is still currently `ELIGIBLE`. If a `REJECTED` disposition asserted objective
+is still currently `ELIGIBLE` and a new acceptance-time basis-freshness check is
+clear. If a `REJECTED` disposition asserted objective
 ineligibility, a later acceptance requires a corrected, re-evaluated, or
 superseding eligible determination before acceptance. If rejection was an
 owner's discretionary refusal despite confirmed eligibility, a later owner
@@ -884,8 +1007,16 @@ include:
 
 The project owner, or a later separately accepted authority explicitly assigned
 to milestone claim standing, must preserve the original acceptance and record a
-superseding claim-standing disposition or re-triage result. The exact status
-labels are not prescribed, but the semantics must distinguish at least:
+superseding claim-standing disposition or re-triage result. Each claim-standing
+disposition must identify the accepted completion determination and exact
+bounded claim to which it applies, the material evidence or governing-basis
+trigger reviewed, the standing-review basis, the determining authority and
+result, its effective order/time, and any prior effective claim-standing
+disposition it explicitly supersedes. A free-floating `claim_current = true`
+or equivalent assertion is insufficient.
+
+The exact status labels are not prescribed, but the semantics must distinguish
+at least:
 
 - the bounded completion claim remains currently supportable;
 - the claim requires re-triage before continued reliance;
@@ -915,9 +1046,9 @@ under the bound evaluation configuration, on the basis of the identified
 eligible completion determination. All five mandatory ADR-005 claim classes
 satisfied their applicable positive obligations across every required package-
 scoped canonical/counterfactual path and mandatory valid formal run, and every
-positive obligation required for the bounded milestone was represented by the
-mandatory claim-class map or explicitly excluded by accepted governing
-authority. The formal evidence universe and declared evidence cutoff satisfied
+applicable positive-obligation ID in the authoritative ADR-005 package-local
+catalogue was represented by the mandatory claim-class map, with no accepted
+selected-slice positive capability obligation left outside that catalogue. The formal evidence universe and declared evidence cutoff satisfied
 the pre-registered run-selection, selection-independence, validity,
 replacement, campaign-integrity, configuration-identity, and configuration-
 history closure rules; no unresolved valid formal hard-invariant failure
@@ -941,6 +1072,7 @@ accepted record contracts:
 - the bound engineering-governance lock/projection and conformance result;
 - the completion evidence package;
 - the exact pre-reviewed bounded claim identity;
+- the acceptance-time basis-freshness check;
 - the effective project-owner acceptance record.
 
 The historical acceptance claim may be stated only while preserving the
@@ -982,17 +1114,21 @@ Project-owner acceptance of this ADR would update `OPEN_QUESTIONS.md` to:
   synthetic `SCN-001` selected-slice workbench milestone;
 - record all five `ADR-005 R2` claim classes as jointly mandatory and non-
   substitutable obligation domains;
-- record mandatory positive-obligation map closure as a prerequisite to
-  conjunctive completion;
+- record package-local positive-obligation catalogue and authoritative claim-
+  class map closure as prerequisites to conjunctive completion;
 - record that `completion_eligible` is an attributable result of an exact
   completion determination over a bound completion basis, not an intrinsic
   status of a behavior configuration or evidence package alone;
 - record the distinction between an eligible completion determination and
   historical `milestone_complete`, with explicit project-owner acceptance
   required only for the latter;
+- record the one-way completion artifact dependency `P -> D -> A`: frozen
+  completion evidence package, completion-eligibility determination, then owner
+  disposition;
 - record that eligibility depends on an inspectable formal-evidence universe,
-  evidence cutoff/completeness boundary, selection-independence closure, and
-  event-driven basis re-evaluation before owner acceptance;
+  evidence cutoff/completeness boundary, selection-independence closure, event-
+  driven basis re-evaluation, and an inspectable acceptance-time basis-freshness
+  check before every `ACCEPTED` disposition;
 - record that historical owner acceptance and current bounded-claim standing
   remain distinct when later adverse evidence or governing-source changes
   require re-triage;
@@ -1029,8 +1165,10 @@ Positive:
   grows further;
 - prevents strong performance in one claim class from hiding failure in a non-
   substitutable selected-slice obligation domain;
-- requires the mandatory claim-class map itself to cover every positive
-  obligation required for the bounded milestone;
+- requires the authoritative ADR-005 package-local positive-obligation
+  catalogue and claim-class map to be closed for the bounded milestone and
+  treats a source-required capability obligation missing from that catalogue as
+  fixture/oracle incompleteness;
 - preserves hard-invariant, positive-obligation, invalid-run, campaign-
   integrity, engineering, claim-closure, eligibility-determination, owner-
   acceptance, and post-acceptance claim-standing semantics as distinct
@@ -1046,9 +1184,13 @@ Positive:
   missing contemporaneous SUT state or dependency evidence;
 - makes eligibility an attributable result over an exact bound basis rather
   than a free-floating Boolean or ambiguous property of the SUT revision;
+- enforces the one-way `P -> D -> A` completion-artifact dependency and prevents
+  the evidence package from using its own eligibility result or owner acceptance
+  as self-certifying package evidence;
 - requires material basis changes before owner acceptance to trigger re-
-  evaluation without introducing a general timer or background-maintenance
-  system;
+  evaluation and requires an acceptance-time freshness comparison before every
+  `ACCEPTED` disposition without introducing a general timer or background-
+  maintenance system;
 - preserves historical owner acceptance while allowing later disqualifying
   evidence to invalidate or supersede the current supportability of the
   bounded claim;
@@ -1065,10 +1207,12 @@ Negative:
 - no individual claim class or proper subset can establish milestone
   completion, even though class-level evidence eligibility may be tracked as
   formal progress;
-- one failed mandatory class, orphaned mandatory obligation, missing path,
-  unresolved valid formal hard failure, campaign-integrity defect, selection-
-  independence defect, invalid campaign state, unresolved claim-support
-  control, or unresolved completion gate blocks eligibility;
+- one failed mandatory class, unmapped applicable package-local obligation,
+  source-required positive capability obligation missing from the fixture/oracle
+  catalogue, missing path, unresolved valid formal hard failure, campaign-
+  integrity defect, selection-independence defect, invalid campaign state,
+  unresolved claim-support control, or unresolved completion gate blocks
+  eligibility;
 - final completion determination remains unavailable until `EVAL-004`,
   `EVAL-005`, any required linked evaluation-governance decision, and
   applicable engineering enforcement are ready;
@@ -1076,7 +1220,8 @@ Negative:
   configuration history, material campaign lineage, and evidence cutoff rather
   than only the latest passing campaign;
 - deferred eligibility can require re-evaluation when a material basis change
-  occurs before owner acceptance;
+  occurs before owner acceptance, and every later acceptance attempt must repeat
+  the acceptance-time basis-freshness check;
 - owner-disposition and post-acceptance claim-standing history must preserve
   supersession rather than use silent last-write-wins;
 - the required evidence package is larger than a demonstration, development
@@ -1089,9 +1234,9 @@ Reconsider or supersede this decision if:
 - an accepted change to `ADR-004` or `ADR-005` materially changes formal run
   validity, hard-failure scope, claim classes, required paths, obligations,
   campaign aggregation, run-selection independence, or invalid-run handling;
-- a mandatory class or mandatory positive obligation cannot be evaluated
-  without violating the accepted SUT, fixture, oracle, simulator, state-origin,
-  dependency-contemporaneity, or passive-inspection boundary;
+- a mandatory class or applicable package-local positive obligation cannot be
+  evaluated without violating the accepted SUT, fixture, oracle, simulator,
+  state-origin, dependency-contemporaneity, or passive-inspection boundary;
 - `EVAL-004` or `EVAL-005` cannot define its separate contract without
   contradicting the completion state model or closure obligations in this ADR;
 - no accepted evaluation-record or linked evaluation-governance contract can
@@ -1116,8 +1261,9 @@ Reconsider or supersede this decision if:
 
 This ADR does not decide:
 
-- the exact completion-determination record schema, storage format, status enum,
-  or serialization;
+- the exact completion-evidence-package, completion-determination, owner-
+  disposition, acceptance-time freshness, or claim-standing record schemas,
+  storage formats, status enums, attestation formats, or serialization;
 - the exact `EVAL-004` record schema, metadata, fingerprints, equivalence, or
   comparison rules;
 - the exact `EVAL-005` scoring representation, unresolved-question disposition
@@ -1125,6 +1271,8 @@ This ADR does not decide:
 - whether the formal-evidence universe is represented by a registry, manifest,
   repository index, content-addressed record set, service, or another
   inspectable mechanism;
+- the physical packaging format of any convenience review/archive bundle that
+  carries `P`, `D`, `A`, or claim-standing records;
 - the exact linked evaluation-governance question or authority shape if the
   narrow `EVAL-004` contract cannot establish record-universe completeness;
 - canonical engineering-governance publication or release-activation policy;
