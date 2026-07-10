@@ -18,6 +18,7 @@ content_digest_canonicalization: utf-8-lf
 generated_at:
 canonical_meta_source:
 canonical_meta_commit:
+canonical_meta_worktree_state: clean | dirty | unavailable
 
 standard:
   path:

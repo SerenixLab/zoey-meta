@@ -1,6 +1,6 @@
 # SCN-001 Selected-Slice Engineering Profile
 
-Profile version: `V0.3.0`
+Profile version: `V0.3.1`
 
 Status: `Draft`
 
@@ -499,10 +499,11 @@ Review question: does the harness transport the SUT-selected output or choose fo
 
 ### ENG-CONF-RUN-001 - Independent Run Isolation
 
-Rule revision: `R2`
+Rule revision: `R3`
 
 Governing sources:
 
+- `ADR-003 R2`
 - `ADR-004 R3`
 - `ADR-008 R2`
 

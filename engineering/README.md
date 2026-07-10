@@ -15,5 +15,6 @@ Templates and publication:
 - `templates/GOVERNANCE_LOCK_TEMPLATE.md`: implementation-repo governance lock contract.
 - `publication/GOVERNANCE_PROJECTION.md`: minimal process for projecting canonical governance into implementation repos.
 - `integrations/codex/AGENTS_*_TEMPLATE.md`: starting `AGENTS.md` guidance for governed Codex work.
+- `tools/zoey_governance.py`: dependency-free governance projector and portable checker.
 
 Canonical governance lives in this meta repository. Implementation repositories consume pinned projections with local conformance evidence; they do not edit canonical snapshots by hand.

@@ -49,11 +49,27 @@ governance/
         OPEN_QUESTIONS.md
         ADR-*.md
     ZOEY_GOVERNANCE.lock
+    zoey_governance.py             portable projection-integrity checker
     CONFORMANCE.md
     EXCEPTIONS.md                  if an exception is active
 ```
 
 Projection initializes missing root or nested `AGENTS.md` files from templates. It records the seed template ID/version in the instantiated file and never overwrites later repo-owned guidance during routine synchronization.
+
+The canonical meta repository provides the first projector as:
+
+```text
+python3 engineering/tools/zoey_governance.py project \
+  --target <implementation-repo> \
+  --profile engineering/profiles/SCN001_SELECTED_SLICE.md \
+  --integration engineering/integrations/codex/CODEX_INTEGRATION.md
+```
+
+Projection copies its portable checker into `governance/zoey_governance.py`. A consuming repository verifies its snapshot without a sibling meta checkout:
+
+```text
+python3 governance/zoey_governance.py check --target . --conformance
+```
 
 ## Projection Integrity Check
 
