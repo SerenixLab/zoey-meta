@@ -158,9 +158,12 @@ Do not include:
 
 Current milestone: continue governed implementation of the first synthetic
 `SCN-001` selected-slice workbench under the accepted `ADR-009 R4` completion
-contract. The next bounded implementation increment remains candidate-bound
-proposal and activation behavior under the accepted SUT, trial/time, fixture,
-state, dependency, and internal-boundary contracts.
+contract. The next unimplemented accepted semantic chain begins with candidate-
+bound proposal and activation responsibilities under the accepted SUT,
+trial/time, fixture, state, dependency, and internal-boundary contracts. This
+does not require proposal or activation to be the next repository mutation when
+the existing implementation first needs conformance or semantic stabilization
+against those accepted contracts.
 
 Active questions:
 
@@ -387,7 +390,7 @@ Resolved Against / Scope: first `SCN-001` milestone uses a minimum selected-slic
 
 Supersedes / Split From: none.
 
-Future Trigger: material change to selected-slice state/evidence semantics, inability of `DEP-001`, `SLICE-003`, `SLICE-005`, `EVAL-004`, or `EVAL-005` to preserve the accepted state/projection boundary, or a later milestone claiming broader persistence, production memory, durable adaptation, retrieval/context assembly, or full `SCN-001` evidence than `ADR-006` permits.
+Future Trigger: material change to selected-slice state/evidence semantics, inability of `DEP-001`, `SLICE-003`, the `SLICE-005` resolution in `ADR-009 R4`, `EVAL-004`, or `EVAL-005` to preserve the accepted state/projection boundary, or a later milestone claiming broader persistence, production memory, durable adaptation, retrieval/context assembly, or full `SCN-001` evidence than `ADR-006` permits.
 
 Date: 2026-07-09
 
@@ -403,7 +406,7 @@ Resolved Against / Scope: first `SCN-001` selected-slice milestone uses a two-do
 
 Supersedes / Split From: none.
 
-Future Trigger: material change to selected-slice internal-boundary semantics, inability of `SLICE-005`, `EVAL-004`, or `EVAL-005` to preserve the accepted SUT/evaluation separation, implementation needing evaluator semantic promotion into SUT inputs, harness arbitration among competing SUT outputs, general retrieval/context assembly, private-internal inspection as score evidence, production services, production memory, model/runtime trust-boundary architecture, runtime maintenance semantics under `DEP-003`, or broader `SCN-001` evidence than `ADR-008` permits.
+Future Trigger: material change to selected-slice internal-boundary semantics, inability of the `SLICE-005` resolution in `ADR-009 R4`, `EVAL-004`, or `EVAL-005` to preserve the accepted SUT/evaluation separation, implementation needing evaluator semantic promotion into SUT inputs, harness arbitration among competing SUT outputs, general retrieval/context assembly, private-internal inspection as score evidence, production services, production memory, model/runtime trust-boundary architecture, runtime maintenance semantics under `DEP-003`, or broader `SCN-001` evidence than `ADR-008` permits.
 
 Date: 2026-07-09
 
@@ -462,7 +465,7 @@ Resolved Against / Scope: first `SCN-001` milestone uses a minimum selected-slic
 
 Supersedes / Split From: none.
 
-Future Trigger: material change to selected-slice dependency identity semantics, inability of `SLICE-003`, `SLICE-005`, `EVAL-004`, or `EVAL-005` to preserve accepted dependency identity evidence, activation of runtime maintenance semantics under `DEP-003`, or a later milestone claiming broader dependency, retrieval, production memory, durable adaptation, or full `SCN-001` evidence than `ADR-007` permits.
+Future Trigger: material change to selected-slice dependency identity semantics, inability of `SLICE-003`, the `SLICE-005` resolution in `ADR-009 R4`, `EVAL-004`, or `EVAL-005` to preserve accepted dependency identity evidence, activation of runtime maintenance semantics under `DEP-003`, or a later milestone claiming broader dependency, retrieval, production memory, durable adaptation, or full `SCN-001` evidence than `ADR-007` permits.
 
 Date: 2026-07-09
 
@@ -478,7 +481,7 @@ Resolved Against / Scope: first `SCN-001` milestone uses a transition-inside sys
 
 Supersedes / Split From: none.
 
-Future Trigger: material change to the accepted first-slice SUT boundary, inability of `EVAL-001`, `EVAL-002`, `GROW-001`, `TIME-002`, or `SLICE-005` to preserve the accepted boundary, or a later milestone claiming broader `SCN-001` evidence than `ADR-002` permits.
+Future Trigger: material change to the accepted first-slice SUT boundary, inability of `EVAL-001`, `EVAL-002`, `GROW-001`, `TIME-002`, or the `SLICE-005` resolution in `ADR-009 R4` to preserve the accepted boundary, or a later milestone claiming broader `SCN-001` evidence than `ADR-002` permits.
 
 Date: 2026-07-07
 
@@ -494,7 +497,7 @@ Resolved Against / Scope: first `SCN-001` milestone supports scoped, reversible 
 
 Supersedes / Split From: none.
 
-Future Trigger: material change to selected-slice trial semantics, a future milestone claiming durable developmental adaptation, broader trial generalization, user-facing durable adaptation, or inability of `EVAL-002`, `SLICE-002`, or `SLICE-005` to preserve `ADR-003` Decision A.
+Future Trigger: material change to selected-slice trial semantics, a future milestone claiming durable developmental adaptation, broader trial generalization, user-facing durable adaptation, or inability of `EVAL-002`, `SLICE-002`, or the `SLICE-005` resolution in `ADR-009 R4` to preserve `ADR-003` Decision A.
 
 Date: 2026-07-07
 
@@ -510,7 +513,7 @@ Resolved Against / Scope: first `SCN-001` milestone uses a selected-slice chrono
 
 Supersedes / Split From: split from `TIME-001`, whose broader governed-clock scope remains deferred.
 
-Future Trigger: material change to the selected-slice staleness rule, need for active-trial age-based expiry or TTL, need for scheduler/reminder/due/expiry semantics, or inability of `EVAL-002`, `SLICE-002`, or `SLICE-005` to preserve `ADR-003` Decision B.
+Future Trigger: material change to the selected-slice staleness rule, need for active-trial age-based expiry or TTL, need for scheduler/reminder/due/expiry semantics, or inability of `EVAL-002`, `SLICE-002`, or the `SLICE-005` resolution in `ADR-009 R4` to preserve `ADR-003` Decision B.
 
 Date: 2026-07-07
 
@@ -526,7 +529,7 @@ Resolved Against / Scope: first `SCN-001` milestone uses harness-curated fixture
 
 Supersedes / Split From: none.
 
-Future Trigger: a later milestone claims retrieval quality, context discovery, relevance selection, sensitivity-aware context assembly, production memory architecture, or inability of `EVAL-002`, `SLICE-002`, or `SLICE-005` to preserve `ADR-004` Decision A.
+Future Trigger: a later milestone claims retrieval quality, context discovery, relevance selection, sensitivity-aware context assembly, production memory architecture, or inability of `EVAL-002`, `SLICE-002`, or the `SLICE-005` resolution in `ADR-009 R4` to preserve `ADR-004` Decision A.
 
 Date: 2026-07-08
 
@@ -542,7 +545,7 @@ Resolved Against / Scope: first `SCN-001` milestone uses formal milestone evalua
 
 Supersedes / Split From: none.
 
-Future Trigger: a later milestone claims full `SCN-001` pass, longitudinal drift handling, production rollout reliability, statistical acceptance, or inability of `EVAL-002` or `SLICE-005` to preserve `ADR-004` Decision B.
+Future Trigger: a later milestone claims full `SCN-001` pass, longitudinal drift handling, production rollout reliability, statistical acceptance, or inability of `EVAL-002` or the `SLICE-005` resolution in `ADR-009 R4` to preserve `ADR-004` Decision B.
 
 Date: 2026-07-08
 
@@ -558,7 +561,7 @@ Resolved Against / Scope: first `SCN-001` milestone uses selected-slice fixture/
 
 Supersedes / Split From: none.
 
-Future Trigger: material change to selected-slice fixture/oracle semantics, inability of `SLICE-002`, `SLICE-005`, `EVAL-004`, or `EVAL-005` to preserve the accepted fixture/oracle boundary, or a later milestone claiming broader `SCN-001` evidence than `ADR-005` permits.
+Future Trigger: material change to selected-slice fixture/oracle semantics, inability of `SLICE-002`, the `SLICE-005` resolution in `ADR-009 R4`, `EVAL-004`, or `EVAL-005` to preserve the accepted fixture/oracle boundary, or a later milestone claiming broader `SCN-001` evidence than `ADR-005` permits.
 
 Date: 2026-07-08
 
@@ -658,10 +661,12 @@ The register is acceptable only if:
 
 Continue governed implementation of the first synthetic `SCN-001`
 selected-slice workbench under accepted `ADR-009 R4`. No active decision
-question currently blocks the implementation frontier. The next bounded
-implementation increment remains the candidate-bound proposal and activation
-segment required by the accepted SUT, trial/time, fixture/oracle, state,
-dependency, and internal-boundary contracts.
+question currently blocks the implementation frontier. The next unimplemented
+accepted semantic chain begins with the candidate-bound proposal and activation
+responsibilities required by the accepted SUT, trial/time, fixture/oracle,
+state, dependency, and internal-boundary contracts. Conformance or semantic
+stabilization of already implemented behavior may precede that semantic
+extension without creating a new open question or changing the accepted chain.
 
 Before preparing the first formal evaluation record, comparison, or
 compatibility claim, activate `EVAL-004`. Before defining final scoring,
@@ -682,4 +687,3 @@ Engineering conformance, development runs, oracle results, partial claim-class
 eligibility, and evidence-package construction remain distinct from milestone
 completion. The accepted `ADR-009 R4` `P -> D -> A` contract governs any future
 completion claim.
-
