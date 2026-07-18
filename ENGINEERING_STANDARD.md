@@ -1,6 +1,6 @@
 # Zoey Engineering Standard
 
-Document version: `V0.6.2`
+Document version: `V0.6.3`
 
 Status: `Draft`
 
@@ -1254,7 +1254,7 @@ Review question: did generation introduce hidden ownership, state, boundary, or 
 
 ### ENG-CLAIM-001 - Claim Domain Separation
 
-Rule revision: `R3`
+Rule revision: `R4`
 
 Governing sources:
 
@@ -1317,7 +1317,7 @@ Review question: which claim domain does this artifact support, and what does it
 
 ### ENG-CLAIM-002 - Formal Evaluation Artifact Reservation
 
-Rule revision: `R3`
+Rule revision: `R4`
 
 Governing sources:
 
@@ -1378,7 +1378,7 @@ Review question: does this artifact imply formal evaluation evidence before the 
 
 ### ENG-CHANGE-001 - Open Question Trigger Discipline
 
-Rule revision: `R3`
+Rule revision: `R4`
 
 Governing sources:
 

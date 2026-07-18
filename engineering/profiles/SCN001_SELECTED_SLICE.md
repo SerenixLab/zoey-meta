@@ -1,12 +1,12 @@
 # SCN-001 Selected-Slice Engineering Profile
 
-Profile version: `V0.4.2`
+Profile version: `V0.4.3`
 
 Status: `Draft`
 
 Date: 2026-07-18
 
-Base standard: `ENGINEERING_STANDARD.md` `V0.6.2`
+Base standard: `ENGINEERING_STANDARD.md` `V0.6.3`
 
 Decision basis:
 
@@ -410,7 +410,7 @@ Rule revision: `R2`
 Governing sources:
 
 - `ADR-008 R2`
-- `ENG-CLAIM-001 R3`
+- `ENG-CLAIM-001 R4`
 
 Scope: tests, traces, demos, and reports that claim selected-slice behavior evidence.
 
@@ -1010,7 +1010,7 @@ Review question: does this reference reveal evaluation context by meaning, not j
 
 ### ENG-CONF-CLAIM-001 - Selected-Slice Claim Boundary
 
-Rule revision: `R3`
+Rule revision: `R4`
 
 Governing sources:
 
@@ -1018,7 +1018,7 @@ Governing sources:
 - `ADR-004 R3`
 - `ADR-005 R2`
 - `ADR-009 R4`
-- `ENG-CLAIM-001 R3`
+- `ENG-CLAIM-001 R4`
 
 Scope: SCN-001 reports, tests, traces, demos, README text, and implementation docs.
 
