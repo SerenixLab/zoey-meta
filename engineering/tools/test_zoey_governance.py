@@ -74,6 +74,38 @@ class GovernanceProjectionTests(unittest.TestCase):
             self.assertIn('"conformance_index"', lock)
             self.assertTrue((target / "AGENTS.md").exists())
 
+    def test_conformance_rejects_stale_revision_and_duplicate_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            target = Path(temporary_directory)
+            arguments = type(
+                "Arguments",
+                (),
+                {
+                    "target": target,
+                    "meta_root": self.meta_root,
+                    "profile": ["engineering/profiles/SCN001_SELECTED_SLICE.md"],
+                    "integration": ["engineering/integrations/codex/CODEX_INTEGRATION.md"],
+                    "canonical_meta_source": "Zoey/meta",
+                },
+            )()
+            GOVERNANCE.project(arguments)
+
+            conformance = target / "governance/CONFORMANCE.md"
+            text = conformance.read_text(encoding="utf-8")
+            row = next(line for line in text.splitlines() if line.startswith("| `ENG-"))
+            stale = row.replace("| `R", "| `R999", 1)
+            conformance.write_text(text.replace(row, stale, 1), encoding="utf-8")
+            self.assertTrue(any(
+                "revision mismatch" in error
+                for error in GOVERNANCE.conformance_errors(target)
+            ))
+
+            conformance.write_text(text.replace(row, row + "\n" + row, 1), encoding="utf-8")
+            self.assertTrue(any(
+                "duplicate" in error
+                for error in GOVERNANCE.conformance_errors(target)
+            ))
+
 
 if __name__ == "__main__":
     unittest.main()
