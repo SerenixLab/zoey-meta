@@ -4,7 +4,7 @@ Status: `Proposed`
 
 Date: 2026-07-20
 
-Record revision: `R2`
+Record revision: `R3`
 
 Decision authority: project owner
 
@@ -22,8 +22,9 @@ Decision-Time Baselines:
 - `decisions/ADR-007-scn001-selected-slice-dependency-identity.md` `R3`
 - `decisions/ADR-009-scn001-first-selected-slice-milestone-completion-gate.md` `R4`
 
-Proposal dependency: `ADR-011 R2` is the separate proposed resolution for
-formal-record authority under `EVAL-007`. This ADR does not absorb that target.
+Companion proposal: `ADR-011 R3` is the separate proposed resolution for formal-
+record authority under `EVAL-007`. This ADR does not absorb that target and may
+be accepted first; `ADR-011` depends on this identity contract, not conversely.
 
 ## Decision
 
@@ -78,9 +79,10 @@ Required envelope fields are:
 - `behavior_fingerprint`;
 - `manifest_hash_domain`: `zoey:behavior-configuration-manifest:v1`;
 - `manifest_artifact_fingerprint`;
-- `created_at` and `created_by` provenance;
+- `created_at` and `created_by` stable creation provenance;
 - optional non-identity annotations;
-- optional `supersedes_manifest_id` for a corrected manifest.
+- `supersedes_manifest_ref`, either null or an exact typed reference to the
+  corrected predecessor.
 
 The identity payload must contain:
 
@@ -93,15 +95,41 @@ The identity payload must contain:
 7. artifact custody references and digests where content is not embedded.
 
 The immutable manifest assertion contains `schema_id`, `schema_revision`,
-`manifest_id`, `identity_payload`, `behavior_fingerprint`, `provenance`, and
-`supersedes_manifest_id`. It excludes creation timestamps, storage locations,
-human annotations, and `manifest_artifact_fingerprint` itself. Its separate
-fingerprint prevents provenance or correction lineage from being silently
-mutated without making repository relocation or annotation edits into behavior
-changes.
+`manifest_id`, `identity_payload`, `behavior_fingerprint`, `provenance`,
+`canonicalization_scheme`, `canonicalization_revision`, `hash_algorithm`,
+`hash_domain`, `manifest_hash_domain`, `created_at`, `created_by`, and
+`supersedes_manifest_ref`. It excludes storage locations, human annotations,
+and `manifest_artifact_fingerprint` itself. Its separate fingerprint prevents
+provenance, creator/time assertions, hash-contract metadata, or correction
+lineage from being silently mutated without making repository relocation or
+annotation edits into behavior changes.
 
-Envelope provenance, human annotations, storage paths, and both fingerprint
-fields are excluded from the behavior identity payload. Moving an identical
+`supersedes_manifest_ref` has this closed V1 shape:
+
+```text
+artifact_id = predecessor manifest_id
+artifact_kind
+schema_id
+schema_revision
+content_fingerprint = manifest_artifact_fingerprint
+behavior_fingerprint
+manifest_artifact_fingerprint
+```
+
+Every field is required when the reference is non-null. An ID-only predecessor
+link is invalid. The corresponding evaluation-manifest reference substitutes
+`evaluation_fingerprint` for `behavior_fingerprint` under `ADR-011 R3`.
+
+`created_at` and `created_by` are immutable artifact provenance, not proof of
+prospective authorization or external ordering. Self-authored creation time
+cannot replace the external anchor required by `ADR-011 R3`. V1 encodes
+`created_at` as an RFC 3339 UTC instant with second precision and `created_by`
+as a stable actor/automation identity from the declared authority namespace;
+display names alone are invalid.
+
+Manifest provenance, stable creator/time assertions, hash-contract metadata,
+human annotations, storage paths, and both fingerprint fields are excluded from
+the behavior identity payload. Moving an identical
 manifest or correcting an annotation therefore does not invent a new behavior
 configuration. Any field capable of changing evaluated behavior belongs in the
 identity payload and cannot be hidden in provenance or an annotation.
@@ -292,7 +320,7 @@ Behavior configurations compare through these outcomes:
 | Outcome | Condition | Formal-evidence consequence |
 | --- | --- | --- |
 | `IDENTICAL` | Same schema/domain and same behavior fingerprint. | Records name the same exact behavior payload. |
-| `METADATA_ONLY_DIFFERENCE` | Behavior fingerprint is equal; only excluded creation metadata, annotation, or storage location differs. | No behavior-configuration split. |
+| `METADATA_ONLY_DIFFERENCE` | Behavior fingerprint is equal; only behavior-payload-excluded provenance, annotation, or storage location differs. | No behavior-configuration split; a provenance change still creates a distinct manifest-artifact fingerprint and cannot retarget an existing campaign. |
 | `BEHAVIOR_CONFIGURATION_CHANGED` | Any identity-bearing field differs under a comparable schema/domain. | New behavior configuration and new campaign identity are required. |
 | `COMPARABILITY_UNRESOLVED` | Missing/unknown identity, unsupported schema/domain comparison, or unresolved artifact custody. | Evidence cannot be transferred, merged, or used for compatibility/completion. |
 
@@ -312,7 +340,8 @@ provenance or evaluation identity unless it changes one of those closed SUT
 inputs.
 
 Purely editorial annotations, creation provenance, and artifact relocation are
-not identity-bearing only because the envelope explicitly excludes them. A
+not behavior-identity-bearing only because the behavior payload explicitly
+excludes them. A
 change described as a refactor or optimization is still behavior-configuration
 change when an identity-bearing source/build field changes.
 
@@ -321,7 +350,8 @@ change when an identity-bearing source/build field changes.
 Manifests are immutable after publication or first formal reference, whichever
 comes first. A malformed or incomplete
 manifest is not edited in place. Correction creates a new manifest with a new
-`manifest_id`, the corrected fingerprints, and a `supersedes_manifest_id` link.
+`manifest_id`, the corrected fingerprints, and an exact
+`supersedes_manifest_ref`.
 
 If the corrected identity payload has the same behavior fingerprint, the
 correction may repair provenance or lineage while producing a new manifest-
@@ -373,6 +403,9 @@ Before acceptance or implementation, reviewers must reject a design that:
 - hashes an envelope containing timestamps, paths, or the fingerprint itself;
 - allows provenance or supersession lineage to mutate without changing the
   manifest-artifact fingerprint;
+- permits creation provenance or hash-contract metadata to mutate without
+  changing the manifest-artifact fingerprint;
+- uses an ID-only manifest correction or supersession reference;
 - uses raw JSON serialization without a pinned canonicalization revision;
 - omits hash-domain separation;
 - treats equal fingerprints as proof of authority or pass status;

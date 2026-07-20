@@ -4,7 +4,7 @@ Status: `Proposed`
 
 Date: 2026-07-20
 
-Record revision: `R2`
+Record revision: `R3`
 
 Decision authority: project owner
 
@@ -22,7 +22,7 @@ Decision-Time Baselines:
 - `decisions/ADR-007-scn001-selected-slice-dependency-identity.md` `R3`
 - `decisions/ADR-009-scn001-first-selected-slice-milestone-completion-gate.md` `R4`
 
-Proposal dependency: `ADR-010 R2` is the proposed behavior-configuration
+Proposal dependency: `ADR-010 R3` is the proposed behavior-configuration
 identity contract. This ADR may be reviewed in parallel and may be accepted only
 in an owner decision set that also accepts, or follows, a compatible `EVAL-004`
 resolution.
@@ -32,7 +32,7 @@ resolution.
 Adopt a prospective, manifest-bound, append-preserving formal-evaluation
 authority contract for the first synthetic `SCN-001` selected-slice milestone.
 
-Use six distinct artifact families:
+Use seven distinct artifact families:
 
 1. immutable evaluation-configuration manifest;
 2. prospective deterministic-qualification plan and immutable qualification-
@@ -40,8 +40,9 @@ Use six distinct artifact families:
 3. prospective campaign-authorization manifest;
 4. immutable run-attempt records and replayable evidence artifacts;
 5. immutable correction, reclassification, run-invalidity, authority-
-   invalidation, and supersession records;
-6. frozen authority-namespace and campaign evidence indexes that establish the
+   invalidation, supersession, result-standing, and claim-invalidation records;
+6. immutable bounded-campaign-result records;
+7. frozen authority-namespace and campaign evidence indexes that establish the
    formal-evidence universe and cutoff.
 
 These artifacts may be stored as package-local files in the governed workbench.
@@ -75,9 +76,10 @@ identifier, evaluation fingerprint, and manifest-artifact fingerprint. Its
 identity payload records:
 
 - a closed evaluator source/build member index or tree digest covering
-  `scn001_eval/**`, material fixture/oracle/checkpoint tests, formal schemas,
-  simulator/capture code, and behavior-affecting shared/generated evaluator
-  inputs;
+  executable formal oracle/checkpoint code, formal schemas, simulator/capture
+  code, formal preflight/sealing checks actually executed by the authoritative
+  pipeline, their generated artifacts, and behavior-affecting shared/generated
+  evaluator inputs;
 - evaluator package/build identity, exact resolved transitive dependency
   closure, and runtime/toolchain identity;
 - fixture/oracle package `SCN001-SSFO-V0.2.0` or accepted successor;
@@ -93,7 +95,12 @@ identity payload records:
 - deterministic-replay qualification policy, deterministic-equivalence profile
   identifier/revision, comparator implementation fingerprint, and closed
   normalization/exclusion rules, or a nondeterministic declaration;
-- planned valid run count per required path inherited from `ADR-004 R3`;
+- the conditional formal-run-count policy inherited from `ADR-004 R3` and
+  instantiated by proposed `ADR-012 R3`: explicitly nondeterministic means three
+  fresh valid runs per path; an eligible `QUALIFIED` result means one; an
+  eligible `NOT_QUALIFIED` or `INCONCLUSIVE` result means three; the one-run
+  branch must predeclare divergence contingency slots or mandatory campaign
+  supersession;
 - governing thesis, scenario, state/control, ADR, register, engineering, and
   fixture/oracle revisions;
 - behavior-relevant evaluator environment and external dependency identity;
@@ -107,9 +114,14 @@ evaluator source, dependency, runtime, governing basis, and policy payload is
 unchanged; an evaluator checkpoint/oracle/test change covered by the closure
 changes evaluation identity without changing behavior identity.
 
+Ordinary development-only regression tests are provenance unless they alter an
+executable formal component, a formal check actually required by the pipeline,
+or an identity-bearing generated artifact. Merely adding a development test
+does not split evaluation identity.
+
 The evaluation manifest uses the same envelope/payload/assertion separation,
 `RFC8785-JCS` canonicalization revision, SHA-256 algorithm, typed applicability
-discipline, provenance treatment, and alias rules as proposed `ADR-010 R2`,
+discipline, provenance treatment, and alias rules as proposed `ADR-010 R3`,
 with behavior-independent hash domains:
 
 ```text
@@ -139,12 +151,14 @@ into themselves.
 
 V1 `decision_kind` is exactly `RUN_INVALIDITY`, `AUTHORITY_INVALIDATION`,
 `RECORD_CORRECTION`, `ORACLE_POLICY_RECLASSIFICATION`,
-`CAMPAIGN_SUPERSESSION`, or `NAMESPACE_RECONCILIATION`. V1 `evidence_kind` is
+`QUALIFICATION_RESULT_CORRECTION`, `CAMPAIGN_SUPERSESSION`,
+`BOUNDED_RESULT_SUPERSESSION`, `BOUNDED_RESULT_STANDING`,
+`CLAIM_INVALIDATION`, or `NAMESPACE_RECONCILIATION`. V1 `evidence_kind` is
 exactly `SUT_INPUT_CAPTURE`, `SUT_OUTPUT_CAPTURE`, `SUT_INSPECTION_CAPTURE`,
 `SIMULATOR_REQUEST_CAPTURE`, `SIMULATOR_REALIZATION_CAPTURE`,
-`EVALUATOR_PRIVATE_CAPTURE`, or `RAW_BINARY_ATTACHMENT`. Adding or changing a
-kind requires the corresponding schema/domain revision; a free-form subtype is
-invalid.
+`EVALUATOR_PRIVATE_CAPTURE`, `ANCHOR_RECEIPT`, or `RAW_BINARY_ATTACHMENT`.
+Adding or changing a kind requires the corresponding schema/domain revision; a
+free-form subtype is invalid.
 
 All V1 identity payloads use `RFC8785-JCS`, canonicalization revision `1`,
 SHA-256, and `sha256:` plus 64 lowercase hexadecimal characters. Each family
@@ -159,7 +173,8 @@ has a separate hash domain:
 | Campaign authorization | `zoey:campaign-authorization:v1` |
 | Formal run-attempt record | `zoey:formal-run-record:v1` |
 | Replayable simulator/capture evidence | `zoey:formal-evidence-artifact:v1` |
-| Invalidity/correction/reclassification/supersession decision | `zoey:evaluation-decision:v1` |
+| Evaluation decision (invalidity/correction/reclassification/supersession/standing/claim invalidation) | `zoey:evaluation-decision:v1` |
+| Bounded campaign result | `zoey:bounded-campaign-result:v1` |
 | Campaign evidence index | `zoey:campaign-evidence-index:v1` |
 | Authority-namespace index | `zoey:authority-namespace-index:v1` |
 
@@ -169,13 +184,26 @@ For each row, compute:
 sha256(utf8(hash_domain + "\n") || RFC8785_JCS(identity_payload))
 ```
 
-The opaque ID and content fingerprint are both required at every cross-artifact
-reference. Behavior/evaluation manifest references additionally carry their
-payload fingerprint and manifest-artifact fingerprint. A matching ID with a
-different artifact fingerprint, a payload fingerprint inconsistent with its
-manifest assertion, or a matching fingerprint under another domain/schema
-revision is a closure failure. Future canonicalization, included-field, or
-hash-construction changes require new schema/domain revisions.
+Every cross-artifact reference uses this closed exact V1 shape:
+
+```text
+artifact_id
+artifact_kind
+schema_revision
+content_fingerprint
+```
+
+Behavior/evaluation manifest references additionally carry their payload
+fingerprint and manifest-artifact fingerprint; for those references the generic
+`content_fingerprint` must equal `manifest_artifact_fingerprint`. Conceptual
+identities such as
+`campaign_id`, `attempt_id`, or `authority_namespace_id` do not replace exact
+references to the authorization, record, or index artifacts that assert them.
+A matching ID with a different artifact fingerprint, a payload fingerprint
+inconsistent with its manifest assertion, an ID-only lineage link, or a
+matching fingerprint under another domain/schema revision is a closure failure.
+Future canonicalization, included-field, or hash-construction changes require
+new schema/domain revisions.
 
 ## Field Authority And Conflict Closure
 
@@ -187,17 +215,20 @@ failure and never `latest wins`.
 | --- | --- | --- |
 | SUT behavior payload | Behavior manifest | Campaign, qualification, run, indexes |
 | Fixture/oracle semantics, required paths, claim/obligation map, validity and deterministic-equivalence policy | Evaluation manifest | Qualification, campaign, run, indexes |
+| Conditional formal-run-count policy and contingency requirements | Evaluation manifest | Qualification, campaign, result |
 | Qualification allocation and comparison basis | Qualification plan | Qualification result, campaign |
 | Qualification observations and result | Qualification result | Campaign, indexes |
-| Planned formal attempt set, contingency slots, selection/replacement rules, and custody plan | Campaign authorization | Run, campaign index |
+| Selected planned valid run count, its derivation, formal attempt set, contingency slots, selection/replacement rules, and custody plan | Campaign authorization | Run, campaign index, bounded result |
 | Actual attempt capture and initial classification | Sealed run record | Decisions, campaign index |
 | Post-seal correction, authority invalidation, or reclassification | Effective evaluation decision record | Run history, indexes, completion package |
-| Scoreability aggregation | Accepted `ADR-012` implementation over the frozen closure | Campaign-result/completion artifacts |
+| Scoreability aggregation and bounded result payload | Bounded-campaign-result record under accepted `ADR-012` | Result standing, indexes, completion package |
 
 For this selected-slice claim campaign, campaign authorization must repeat the
 evaluation manifest's complete required path/claim set and may not narrow,
-weaken, or replace fixture/oracle semantics, validity criteria, run counts, or
-replacement limits. A run cannot introduce an undeclared path, slot, policy,
+weaken, or replace fixture/oracle semantics, validity criteria, run-count
+policy, or replacement limits. Its selected run count must be the deterministic
+output of that policy and its exact qualification basis. A run cannot introduce
+an undeclared path, slot, policy,
 or claim. A stricter prospective campaign stop condition is allowed only when
 the evaluation manifest explicitly declares that extension point and the
 campaign still cannot obtain a pass with less evidence than the manifest
@@ -210,7 +241,8 @@ its executions are not formal SUT evidence. It uses two immutable subtypes.
 
 Before any qualification output is observed, a qualification plan fixes:
 
-- behavior and evaluation manifest IDs and both payload/artifact fingerprints;
+- exact behavior/evaluation manifest references with both payload/artifact
+  fingerprints;
 - every required path and the exact qualification execution slots;
 - initial-state, isolation, capture, and simulator policy;
 - deterministic-equivalence profile/revision and comparator implementation
@@ -226,21 +258,32 @@ and require the cumulative namespace index to include the plan.
 
 The sealed qualification-result record contains:
 
-- plan ID/fingerprint and behavior/evaluation identity closure;
+- exact qualification-plan reference and behavior/evaluation identity closure;
 - every planned execution ID, path, capture, and evidence digest;
 - normalized oracle-material projections and comparator inputs;
 - equivalence result, mismatch class, and divergence details for every pair or
   declared all-member comparison;
 - `QUALIFIED`, `NOT_QUALIFIED`, or `INCONCLUSIVE` result;
 - producer and distinct validator identity and validation result;
-- result fingerprint and any supersession link.
+- exact qualification-plan anchor-receipt and fresh-start capture references;
+- result fingerprint and an exact nullable supersession reference.
 
-All qualification plans/results appear in the authority namespace and in the
-support closure of any campaign that uses one formal run per path. A campaign
-authorization may reference only a prospectively anchored, sealed `QUALIFIED`
-record for the same exact behavior/evaluation fingerprints. No campaign ID is
-included in the qualification result, avoiding a circular authorization
-dependency; the later campaign references the already sealed result.
+All qualification plans/results appear in the authority namespace. The plan is
+prospectively anchored before its executions; the result necessarily is not. A
+result becomes eligible as campaign-authorization support only when it is
+sealed, independently validated, and included by exact reference in the same or
+an earlier externally published cumulative namespace revision that includes the
+campaign authorization. The authorization anchor therefore makes the selected
+qualification result immutable before any formal attempt starts.
+
+A campaign using the one-run branch references an eligible `QUALIFIED` result.
+A campaign using the three-run branch after attempted qualification references
+the eligible `NOT_QUALIFIED` or `INCONCLUSIVE` result. Only a configuration
+whose evaluation manifest declares the three-run policy without qualification
+may omit qualification references and use an explicit nondeterministic-policy
+declaration. No campaign ID is included in the qualification result, avoiding a
+circular authorization dependency; the later campaign references the already
+sealed result.
 
 The first anchored qualification plan for an exact behavior/evaluation pair is
 the sole plan eligible to establish the one-run rule. `NOT_QUALIFIED` or
@@ -260,20 +303,20 @@ have an immutable authorization manifest containing:
 
 - campaign identifier;
 - authority namespace identifier;
-- behavior manifest identifier and behavior fingerprint;
-- behavior manifest-artifact fingerprint;
-- evaluation manifest identifier, evaluation fingerprint, and manifest-
-  artifact fingerprint;
+- exact behavior- and evaluation-manifest references, including their payload
+  and manifest-artifact fingerprints;
 - scenario, fixture/oracle package, claim classes, required paths, and mandatory
   obligation-map identity;
-- deterministic/nondeterministic classification and its evidence basis;
-- deterministic-qualification plan/result references when the one-run rule is
-  used, otherwise the explicit nondeterministic declaration;
+- selected run-count-policy branch and its exact evidence basis;
+- exact deterministic-qualification plan/result references whenever
+  qualification was attempted, otherwise the explicit evaluation-manifest
+  nondeterministic-policy declaration;
 - planned attempt slots or the deterministic rule that allocates them before
   their material outputs are observed;
 - prospectively allocated deterministic-divergence contingency slots or the
   rule that campaign supersession is mandatory if qualification later fails;
-- planned valid run count per path;
+- selected planned valid run count per path and a mechanically verifiable
+  derivation from the evaluation-manifest policy plus qualification result;
 - outcome-independent selection/seed rule and disposition of known exploratory
   outcomes, seeds, replay handles, cached realizations, or candidate pools;
 - inherited invalidity, replacement, stop, suspension, and correction rules;
@@ -281,6 +324,8 @@ have an immutable authorization manifest containing:
 - campaign authority identity, authorization time, and authorization result;
 - prospective anchor profile, target authority ref/custody, and required anchor
   evidence shape;
+- required anchor-receipt profile, digest algorithm, custody target, and
+  resolvability policy;
 - authorization manifest fingerprint.
 
 The campaign authority is the project owner unless an accepted governance
@@ -302,6 +347,17 @@ includes it must be committed and published through one declared anchor profile:
 
 Every attempt records the anchor profile, repository/authority ref, exact commit
 SHA, external gate/event or attestation identity, and observed predecessor.
+
+The platform receipt or independent attestation is captured as an
+`ANCHOR_RECEIPT` evidence artifact with the exact raw bytes or canonical
+attestation payload, byte digest, media/encoding data, external identity,
+custody reference, and the authorization/index commit it attests. The
+authorization or qualification plan declares the receipt requirement but cannot
+reference the receipt created by publishing its own commit; that would be
+circular. Every attempt, qualification result, and campaign index references
+the resulting receipt exactly, and the next
+cumulative namespace revision includes it. Missing or unresolvable receipt
+evidence fails authority closure.
 
 The anchor must also establish a causal post-anchor execution start; ordering a
 manifest before a claimed timestamp is insufficient if old output can be
@@ -333,8 +389,10 @@ its source, configuration, seed, and output later match an authorized attempt.
 ## Formal Attempt Allocation And Lifecycle
 
 Every formal attempt receives an immutable attempt identifier before its
-material SUT output is observed. Replacement attempts are allocated only under
-the pre-registered replacement rule and keep an explicit `replaces_attempt_id`.
+material SUT output is observed. Replacement attempts are allocated only after
+the invalid predecessor is sealed under the pre-registered replacement rule and
+keep its exact run-record reference plus conceptual attempt ID; an ID-only
+replacement link is invalid.
 
 Attempt lifecycle is distinct from scoring:
 
@@ -372,17 +430,18 @@ Campaign lifecycle is separate:
 Each run-attempt record contains at least:
 
 - record schema/domain revision, record identifier, and content fingerprint;
-- authority namespace, campaign, and attempt identifiers;
+- authority namespace, campaign, and attempt identifiers plus exact campaign-
+  authorization and authorizing namespace-index references;
 - behavior and evaluation manifest IDs, payload fingerprints, and manifest-
   artifact fingerprints;
 - prospective authorization anchor profile, commit, and external gate/event or
-  attestation reference;
+  attestation reference plus exact anchor-receipt artifact reference;
 - causal start-proof profile and fresh challenge/capture binding;
 - path ID, claim classes pressured, attempt slot, actual seed/replay/provider
   handles where applicable, and selection-basis reference;
 - initial snapshot/checkpoint identity and run-isolation evidence;
-- start, evidence-capture, seal, run-invalidity, authority-invalidation, and
-  supersession references;
+- start, evidence-capture, and seal facts; initial run-invalidity reference when
+  known at sealing;
 - delivered bundle IDs and exact ordered delivery/capture references;
 - raw SUT input/output/inspection capture identities and digests;
 - simulator request and replayable-realization evidence references;
@@ -392,8 +451,7 @@ Each run-attempt record contains at least:
 - rule IDs, observed refs, expected/actual classification, and affected claim
   classes for every failure artifact;
 - producer/validator identity and seal result;
-- correction, reclassification, run-invalidity, authority-invalidation,
-  replacement, and supersession links where applicable.
+- replacement/predecessor links knowable at sealing.
 
 The record fingerprint uses its own domain:
 
@@ -402,7 +460,10 @@ zoey:formal-run-record:v1
 ```
 
 Mutable lifecycle state is not edited into a sealed record. Later lifecycle or
-classification changes are separate immutable linked records.
+classification changes are separate immutable linked records that reference the
+sealed run exactly. At initial sealing, later correction, authority-invalidation,
+reclassification, and supersession fields are absent; indexes assemble those
+effective history links without editing the run.
 
 ## Replayable Simulator Evidence
 
@@ -442,6 +503,14 @@ qualification result, campaign authorization, and post-seal decision under its
 control. A campaign is formal only if its prospective authorization appears in
 this index and satisfies the external anchor before execution.
 
+Every effective namespace-index revision, including post-campaign result,
+correction, standing, and reconciliation revisions, must be fast-forward
+published or independently attested under the declared anchor profile. Its
+receipt is captured outside the revision it attests and included by exact
+reference in the next revision, avoiding self-reference. A missing current-
+revision receipt prevents use of that revision as an externally ordered cutoff
+even though the revision's content fingerprint remains valid.
+
 The project owner designates exactly one effective namespace for this milestone
 or accepts an explicit union/supersession rule covering every predecessor. A
 second unmerged namespace, divergent index head, or unresolved index fork makes
@@ -454,14 +523,21 @@ selectively imported after outcomes are known.
 Each immutable namespace-index revision records:
 
 - namespace identity and authority;
-- every deterministic-qualification plan/result ID and fingerprint within the
+- every deterministic-qualification plan/result exact reference within the
   revision's scope;
-- every campaign authorization ID/fingerprint within the revision's scope;
+- every campaign-authorization exact reference within the revision's scope;
+- every frozen campaign-evidence-index exact reference within the revision's
+  scope;
+- every bounded-result, result-standing, and claim-invalidation exact reference
+  within the revision's scope;
 - prospective anchor profile and external evidence for each qualification plan
   and campaign authorization;
+- every available anchor-receipt artifact reference, with the current revision's
+  receipt carried prospectively by its successor or by the bound external
+  custody reference;
 - behavior and evaluation fingerprints bound by each campaign;
 - authorization, suspension, closure, and supersession links;
-- prior index revision/fingerprint where applicable;
+- exact prior index-revision reference where applicable;
 - monotonic revision number and exactly one accepted predecessor, with any fork
   explicitly reconciled rather than selected by favorable outcomes;
 - exact included-entry count and content fingerprint;
@@ -487,21 +563,109 @@ evidence index containing:
 - every run record and raw evidence artifact identity/digest;
 - behavior/evaluation manifest identities;
 - selection-independence evidence;
+- exact authorization/start anchor-receipt references and custody closure;
 - invalidity reasons, replacement links, stop/review decisions, corrections,
   reclassifications, and supersessions;
 - deterministic-qualification plan/result and divergence-contingency links;
 - campaign lifecycle result;
-- exact member count, cutoff, prior index link if any, and index fingerprint.
+- exact member count, cutoff, exact prior-index reference if any, and index
+  fingerprint.
 
 An omitted failed, awkward, off-policy, invalid, abandoned, or unstarted
 authorized attempt is an index defect. A later favorable campaign cannot remove
 an earlier campaign from the namespace index.
 
+### Bounded Campaign Result And Standing
+
+Every frozen campaign evidence index, including one frozen on suspension,
+requires at least one initial immutable bounded-campaign-result assessment.
+Later assessments may exist only through the supersession contract. `ADR-011`
+owns its
+identity, authority, indexing, and history; accepted `ADR-012` owns its scoring
+payload and result semantics.
+
+The V1 result envelope carries its schema/domain revision, `result_id`, and
+content fingerprint under the generic artifact rules. Its identity payload
+contains at least:
+
+- exact behavior/evaluation manifest references, including payload and manifest-
+  artifact fingerprints;
+- exact campaign-authorization and frozen campaign-evidence-index references;
+- the exact prior authority-namespace revision/cutoff and its external receipt;
+- qualification plan/result references or the exact explicit nondeterministic-
+  policy basis;
+- selected run-count branch, planned count, attempt inventory, and derivation
+  closure;
+- complete applicable path/claim result vector, non-pressure
+  `NOT_APPLICABLE` vector, run-validity closure, and hard-invariant closure;
+- accepted scoreability-policy/ADR revision and aggregation implementation
+  fingerprint;
+- unresolved-question register/matrix revision and every unresolved blocker;
+- exactly `BOUNDED_PASS`, `BOUNDED_FAIL`, or `NOT_YET_DETERMINABLE`;
+- the exact bounded claim payload and fingerprint for pass/fail, or the exact
+  indeterminacy statement for `NOT_YET_DETERMINABLE`;
+- producer identity, distinct validator identity/result, creation provenance,
+  and an exact nullable `supersedes_result_ref`.
+
+Compute its identity under `zoey:bounded-campaign-result:v1`. Repeated values
+must close to their sole authorities; the result record cannot redefine run,
+qualification, authorization, fixture/oracle, or manifest facts.
+The distinct validator must independently recompute the aggregation from the
+frozen index and referenced authoritative records rather than accept the
+producer's result vector or normalized summary.
+
+The dependency and indexing order is:
+
+```text
+formal attempts/evidence
+    -> frozen campaign evidence index C
+C -> externally ordered closure namespace revision N includes exact C
+C + N
+    -> sealed bounded-campaign-result assessment R
+later cumulative namespace revision N+1 includes exact R
+    -> R may satisfy result authority
+N+1 + R may enter completion package P
+```
+
+`C` must not include `R`, and `R` must not cite `N+1`; either dependency would
+make the result self-certifying. Before inclusion in `N+1`, `R` is
+`result_authority_pending_index_closure`. A missing result assessment means no
+bounded pass/fail claim is supported and the completion package is incomplete.
+
+An authoritative `BOUNDED_PASS` or `BOUNDED_FAIL` requires an effective prior
+namespace, authoritative campaign/run closure, valid result aggregation,
+distinct validation, exact external receipt closure, and later `N+1` inclusion.
+A sealed `NOT_YET_DETERMINABLE` assessment may accurately enumerate incomplete
+authority or evidence, but it becomes an authoritative statement about the
+bound basis only when its own producer, schema, exact inputs, effective
+namespace, receipt, validation, and `N+1` inclusion close. If the effective
+namespace itself is unresolved, the assessment remains diagnostic and cannot
+use authoritative-result language.
+
+Results are immutable. Mechanical recalculation disagreement, later divergence,
+new attributable evidence, or a material basis change appends a
+`BOUNDED_RESULT_STANDING` decision with exactly `CURRENT`,
+`RESULT_REEVALUATION_REQUIRED`, or `SUPERSEDED`; it never edits the historical
+result. A superseding result uses an exact `supersedes_result_ref`. Any post-
+observation result correction or supersession requires the exact defect and
+basis delta, independent review, and project-owner acceptance. A
+`CLAIM_INVALIDATION` decision records any report or result presentation that
+exceeds the accepted bounded claim without changing underlying run outcomes.
+
+A V1 result-standing decision binds the exact result reference, exact prior
+standing reference or null, standing value, reason code, basis delta/evidence,
+actor/time, independent-review reference where required, owner decision where
+required, and its own content fingerprint. A V1 `CLAIM_INVALIDATION` binds the
+exact offending artifact/claim reference, supported claim ceiling, observed
+overclaim, affected result/campaign, reviewer/owner disposition, and
+supersession history. Neither decision may rewrite the result payload.
+
 ### Completion Evidence Universe
 
 For an `ADR-009 R4` completion determination, the formal-evidence-universe basis
-is a frozen namespace-index revision plus every campaign index and material
-record attributable to the tested behavior fingerprint through its cutoff.
+is a frozen namespace-index revision that includes the required bounded-result
+record plus every campaign index and material record attributable to the tested
+behavior fingerprint through its cutoff.
 Unresolved attribution, a missing campaign index, or an unresolvable artifact
 blocks configuration-history closure.
 
@@ -523,20 +687,26 @@ AND causal fresh-start proof binds execution/capture after that anchor
 AND attempt allocated outcome-independently before material output
 AND behavior/evaluation payload and manifest-artifact fingerprints match authorization
 AND every repeated field closes to its sole authority without conflict
-AND any one-run policy closes to an anchored sealed qualification result
+AND any one-run policy closes to an eligible sealed qualification result
+    included in the authorizing namespace revision
 AND declared initial state and isolation verified
 AND required raw and simulator evidence durably captured
 AND SUT/evaluator privacy boundary preserved
 AND record schema, fingerprint, references, and digests validate
 AND seal completed without an unresolved authority-invalidating defect
 AND attempt and record appear in the frozen campaign evidence index
+AND that campaign index appears in an effective externally ordered
+    closure namespace revision
 ```
 
 Before frozen campaign-index inclusion, a sealed run is an immutable formal-
 attempt artifact with `authority_pending_index_closure`; it must be retained and
-cannot be called authoritative evidence. Inclusion in the frozen index changes
-that authority predicate, not the sealed record or its outcome. A campaign may
-not omit an adverse pending record to avoid making it authoritative.
+cannot be called authoritative evidence. After campaign-index inclusion but
+before closure-namespace inclusion, authority remains
+`authority_pending_namespace_closure`. These later inclusions change the
+authority predicate, not the sealed record or its outcome. A campaign may not
+omit an adverse pending record or favorable-select an index/namespace fork to
+avoid making it authoritative.
 
 Authority does not require `PASS`. An authoritative valid hard failure remains
 formal evidence. An authoritative invalid-attempt record remains formal campaign
@@ -551,15 +721,16 @@ Decision rights are closed as follows:
 | --- | --- |
 | Mechanical validator | Recompute schema, canonicalization, digest, reference, anchor, and index predicates; report or quarantine a defect; never make a discretionary semantic reclassification. |
 | Campaign evaluator | Produce the initial validity, invariant, and obligation classifications strictly under the accepted manifest/rule catalogue; cannot revise its own sealed result. |
-| Independent reviewer | Attest the evidence and outcome-independence of a proposed post-observation authority invalidation, oracle/policy correction, namespace reconciliation, or campaign-authority supersession; cannot alone accept it. |
-| Project owner | Solely make those material post-observation decisions effective and accept campaign supersession or namespace-fork reconciliation. |
+| Independent reviewer | Attest the evidence and outcome-independence of a proposed post-observation authority invalidation, oracle/policy correction, qualification/result correction, bounded-result supersession/standing change, claim invalidation, namespace reconciliation, or campaign-authority supersession; cannot alone accept it. |
+| Project owner | Solely make those material post-observation decisions effective and accept campaign/result supersession or namespace-fork reconciliation. |
 
-A record that fails a closed authority predicate at initial sealing never becomes
-authoritative. A later mechanically detected defect immediately quarantines the
-affected evidence from new aggregation, but permanent authority invalidation or
-material reclassification after output was observed requires an immutable
-proposal, independent review, and project-owner acceptance. The campaign
-producer cannot unilaterally withdraw adverse evidence.
+A sealed record that fails any predicate required at sealing never becomes
+authoritative. Campaign-index inclusion is a separate later predicate and
+remains pending until index freeze. A later mechanically detected defect
+immediately quarantines the affected evidence from new aggregation, but
+permanent authority invalidation or material reclassification after output was
+observed requires an immutable proposal, independent review, and project-owner
+acceptance. The campaign producer cannot unilaterally withdraw adverse evidence.
 
 Run-invalidity reasons and replacement limits are inherited from `ADR-004 R3`
 and `ADR-005 R2` and copied into the campaign authorization. They are not
@@ -608,7 +779,7 @@ new campaign and explicit historical disposition; it is not an implicit
 apples-to-apples comparison.
 
 Different behavior fingerprints remain different configurations under
-proposed `ADR-010 R2`. Unknown or unsupported identity comparison is fail-
+proposed `ADR-010 R3`. Unknown or unsupported identity comparison is fail-
 closed and cannot transfer evidence.
 
 ## Relationship To Completion Artifacts
@@ -617,14 +788,19 @@ This ADR supplies record authority and evidence-universe inputs to `ADR-009 R4`.
 It does not collapse the completion artifact dependency:
 
 ```text
-formal records and indexes -> completion evidence package P
+formal records -> frozen campaign index C
+C -> closure namespace revision N
+C + N -> bounded result R
+later namespace revision indexes R
+R + that later revision -> completion evidence package P
 P -> completion-eligibility determination D
 D -> project-owner disposition A
 ```
 
-The authority index, campaign index, or run record must not cite `D` or `A` as
-proof of its own completeness or validity. Owner acceptance cannot repair
-missing formal evidence.
+The authority index, campaign index, result, or run record must not cite `D` or
+`A` as proof of its own completeness or validity. `C` must not include `R`, and
+`R` must not cite the later namespace revision that indexes it. Owner acceptance
+cannot repair missing formal evidence or a missing bounded-result record.
 
 ## Adversarial Review Requirements
 
@@ -644,9 +820,15 @@ Before acceptance or implementation, reviewers must reject a design that:
   evaluation-only repository changes alter behavior identity;
 - permits repeated manifest/campaign/run fields to conflict or uses latest-wins
   precedence;
+- uses an ID-only lineage/correction reference or a campaign ID where an exact
+  campaign-authorization artifact reference is required;
 - qualifies deterministic execution without an anchored plan, complete planned
   executions, closed comparison profile, or distinct validation;
+- uses a qualification result for run-count selection before that result is
+  sealed, validated, and included in the authorizing namespace revision;
 - stores simulator evidence only in memory or reconstructs it after the run;
+- stores only an external event ID while the anchor receipt bytes/digest/custody
+  are missing or unresolvable;
 - makes evaluator-private evidence SUT-visible;
 - omits invalid, failed, abandoned, replacement, or superseded attempts;
 - uses a timestamp alone as the evidence cutoff;
@@ -655,6 +837,12 @@ Before acceptance or implementation, reviewers must reject a design that:
 - mutates or deletes a sealed record, manifest, index, or historical failure;
 - calls a sealed run authoritative before frozen campaign-index inclusion or
   omits an adverse authority-pending record from that index;
+- calls an indexed run authoritative before the campaign index appears in an
+  externally ordered effective namespace revision;
+- omits the bounded-result record, places it in the campaign index it consumes,
+  or lets it cite the later namespace revision that indexes it;
+- gives an indeterminate diagnostic authoritative-result standing while the
+  authority namespace used to produce it is unresolved;
 - classifies undesirable SUT output as infrastructure invalidity;
 - lets a campaign producer unilaterally invalidate or reclassify observed
   adverse evidence;
@@ -671,6 +859,8 @@ Positive consequences:
 - sole-field authority and conflict closure prevent contradictory locally valid
   artifacts;
 - deterministic qualification is inspectable, non-circular, and indexed;
+- bounded campaign results have an immutable, independently validated, non-
+  circular authority path distinct from completion determination;
 - replayable simulator evidence replaces process-local claims;
 - every attempt and correction remains attributable;
 - a lightweight artifact index satisfies cross-campaign completeness without a
@@ -680,7 +870,8 @@ Positive consequences:
 
 Costs and limitations:
 
-- Phase 7 must implement durable capture, validation, sealing, and indexing;
+- Phase 7 must implement durable capture, validation, sealing, result
+  aggregation, standing, and indexing;
 - the authority namespace requires disciplined prospective registration;
 - formal execution requires a protected remote gate/event or independent pre-
   output attestation outside the result producer's sole control;
@@ -697,9 +888,9 @@ If the project owner accepts this exact revision after a compatible accepted
 - `EVAL-007` becomes `Resolved` with outcome `Decision` for the first synthetic
   selected-slice milestone;
 - `OPEN_QUESTIONS.md` gains a resolved tombstone referencing this ADR;
-- Phase 7 may implement the accepted manifest, capture, record, sealing, and
-  index contracts only after the governance projection and current workbench
-  review gates are satisfied;
+- Phase 7 may implement the accepted manifest, capture, record, sealing,
+  bounded-result, standing, and index contracts only after the governance
+  projection and current workbench review gates are satisfied;
 - `EVAL-005` remains required before a formal campaign intended to support the
   bounded milestone claim is authorized or scored.
 

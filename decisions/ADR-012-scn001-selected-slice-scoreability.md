@@ -4,7 +4,7 @@ Status: `Proposed`
 
 Date: 2026-07-20
 
-Record revision: `R2`
+Record revision: `R3`
 
 Decision authority: project owner
 
@@ -21,7 +21,7 @@ Decision-Time Baselines:
 - `decisions/ADR-005-scn001-selected-slice-fixture-oracle-contract.md` `R2`
 - `decisions/ADR-009-scn001-first-selected-slice-milestone-completion-gate.md` `R4`
 
-Proposal dependencies: `ADR-010 R2` and `ADR-011 R2` are the proposed
+Proposal dependencies: `ADR-010 R3` and `ADR-011 R3` are the proposed
 behavior-identity and formal-record-authority contracts. This ADR may be
 reviewed in parallel and may be accepted only in an owner decision set that also
 accepts, or follows, compatible `EVAL-004` and `EVAL-007` resolutions.
@@ -64,7 +64,8 @@ run validity                  -> can the intended SUT behavior be scored?
 run-global invariant result   -> did a valid run violate a hard invariant?
 per-claim obligation result   -> did each pressured claim class pass?
 campaign lifecycle            -> is the campaign active, suspended, closed...?
-bounded campaign result       -> PASS, FAIL, or not yet determinable
+bounded campaign result       -> BOUNDED_PASS, BOUNDED_FAIL,
+                                 or NOT_YET_DETERMINABLE
 completion determination D    -> are all ADR-009 eligibility conjuncts met?
 owner disposition A           -> does the owner accept eligible D?
 ```
@@ -147,7 +148,7 @@ class's required pressure.
 The current workbench appears deterministic, but a label, fixed seed, or one
 successful replay is insufficient.
 
-Before a campaign uses the one-formal-run rule, an `ADR-011 R2` prospectively
+Before a campaign uses the one-formal-run rule, an `ADR-011 R3` prospectively
 anchored qualification plan allocates at least two clean independent executions
 of every required path under the exact same behavior and evaluation
 fingerprints. Each execution starts from the declared initial state or same-run
@@ -206,10 +207,15 @@ purpose of choosing run count, but their executions remain explicitly
 `development_preflight`, not formal SUT evidence, and may never be promoted into
 the campaign.
 
-If deterministic qualification passes, require one prospectively authorized,
-sealed formal run per required path. If it fails or cannot be established,
-classify the configuration as nondeterministic and require three fresh valid
-formal runs per required path under `ADR-004 R3`.
+The evaluation manifest owns the conditional policy. An eligible `QUALIFIED`
+result selects one prospectively authorized, sealed formal run per required
+path. `NOT_QUALIFIED` or `INCONCLUSIVE` selects three fresh valid formal runs per
+path under `ADR-004 R3`; this means the campaign uses the conservative three-run
+policy, not that the configuration has been proven intrinsically
+nondeterministic. A configuration whose evaluation manifest prospectively
+declares the nondeterministic branch uses three runs without a qualification
+plan. The campaign authorization owns the selected count and slots, but they
+must derive mechanically from this policy and the exact qualification basis.
 
 Any later oracle-material divergence under unchanged fingerprints immediately
 invalidates the qualification and suspends an active one-run campaign. The
@@ -217,15 +223,25 @@ campaign may resume only after accepted investigation and either:
 
 - proof that the observation was not oracle-material divergence under the
   bound profile;
-- reclassification as nondeterministic plus prospective activation of
-  pre-authorized contingency slots sufficient to reach three fresh valid runs
-  per path, counting already completed eligible formal runs; or
+- accepted switch to the conservative three-run policy plus prospective
+  activation of pre-authorized contingency slots sufficient to reach three
+  fresh valid runs per path, counting already completed eligible formal runs;
+  or
 - campaign supersession when such contingency was not prospectively declared.
 
 A valid adverse SUT output cannot be reclassified merely to preserve
-deterministic qualification. A closed campaign, bounded result, or completion
-determination affected by a later attributable divergence becomes
-`REQUIRES_REEVALUATION` under `ADR-009 R4`; historical artifacts remain intact.
+deterministic qualification. Later attributable divergence produces separate
+layered effects:
+
+- an active campaign enters existing lifecycle `suspended` with reason
+  `deterministic_qualification_invalidated`;
+- a historical bounded result receives an immutable
+  `RESULT_REEVALUATION_REQUIRED` standing record under `ADR-011 R3`;
+- any dependent earlier `ELIGIBLE` completion determination becomes
+  `REQUIRES_REEVALUATION` exactly as defined by `ADR-009 R4`.
+
+No lifecycle, result-standing, or completion-determination artifact is edited,
+and those three domains do not share one status enum.
 
 ## Invalid Attempts And Replacement
 
@@ -257,9 +273,11 @@ Consume the accepted configuration identity/authority contracts as follows:
 
 | Change class | Consequence |
 | --- | --- |
-| Envelope-only editorial/provenance change with unchanged content fingerprint | Same configuration identity; no campaign split. |
-| Behavior identity change | New behavior configuration and new campaign; prior evidence stays with the original fingerprint. |
-| Material evaluation identity change | New evaluation configuration and campaign; unchanged behavior is not rehabilitated from a valid prior hard failure. |
+| Annotation/storage-only change excluded from both payload and manifest assertion | No payload or manifest-assertion identity change; storage/envelope representation may differ. |
+| Manifest provenance/lineage correction with unchanged payload fingerprint and changed manifest-artifact fingerprint | Same behavior/evaluation configuration payload, distinct immutable manifest artifact. Existing campaigns remain bound to the original artifact and are never silently retargeted. Review decides whether the original defect was harmless, authority-invalidating, or requires campaign supersession. |
+| Behavior payload fingerprint change | New behavior configuration and campaign; prior evidence stays with the original fingerprint. |
+| Evaluation payload fingerprint change | New evaluation configuration and campaign; unchanged behavior is not rehabilitated from a valid prior hard failure. |
+| Same manifest ID with conflicting manifest-artifact fingerprint | Authority-closure failure; no alias selection or aggregation. |
 | Fixture/oracle semantic or obligation-map change | New evaluation identity and package/ADR re-triage where required; no silent rescoring. |
 | Material runtime/toolchain/environment change | New applicable behavior or evaluation identity according to ownership; unresolved ownership blocks comparison. |
 | Unknown, missing, or unsupported comparison | `COMPARABILITY_UNRESOLVED`; no aggregation, evidence transfer, or compatibility claim. |
@@ -270,25 +288,39 @@ behavior/evaluation fingerprints cannot create a pass.
 
 ## Bounded Campaign Result
 
-A campaign is ready for a bounded result only when:
+A campaign is ready for an authoritative bounded pass/fail only when:
 
 - compatible accepted `EVAL-004` and `EVAL-007` contracts are in force;
 - behavior/evaluation manifests and prospective campaign authorization validate;
 - authority-namespace and campaign evidence indexes close the record universe;
 - run selection, attempt allocation, invalidity, replacement, suspension, and
   supersession history satisfy accepted policy;
-- required path/claim and obligation-map closure is complete;
+- required path/claim and obligation-map closure is complete, except that the
+  explicit early global-hard-failure closure below may disposition never-started
+  remaining slots without pretending their claims were reached;
 - every required artifact is sealed, reference-resolvable, and within cutoff;
 - the unresolved-question matrix below has no undispositioned claim-affecting
   question or undeclared working assumption;
 - the exact bounded claim text and exclusion language are bound to the result.
 
-Then:
+Scoreability is materialized only through the immutable
+`zoey:bounded-campaign-result:v1` artifact governed by `ADR-011 R3`. The result
+consumes a previously frozen campaign index and closure namespace revision; a
+later namespace revision indexes the sealed result. Missing that record means
+no bounded pass/fail claim is supported and completion package `P` is
+incomplete. When one or more readiness conjuncts remain unresolved, the same
+artifact family may instead carry the bounded diagnostic
+`NOT_YET_DETERMINABLE` under the narrower authority rules below.
+
+Apply these result semantics:
 
 ```text
 BOUNDED_PASS =
     every required valid formal run has INVARIANTS_CLEAR
-    AND every mandatory path/claim result is PASS
+    AND every required applicable path/claim result is PASS
+    AND every declared non-pressure combination is exactly NOT_APPLICABLE
+    AND no required combination is NOT_REACHED, NOT_APPLICABLE,
+        OBLIGATION_FAIL, absent, or ambiguous
     AND all five claim classes are evidence-eligible
 
 BOUNDED_FAIL =
@@ -301,6 +333,12 @@ NOT_YET_DETERMINABLE =
     authority, validity, replacement, coverage, comparison, question,
     or evidence-universe closure remains unresolved
 ```
+
+`NOT_YET_DETERMINABLE` may be sealed as an exact diagnostic assessment. It has
+authoritative standing over its bound basis only when its own schema, producer,
+exact input, effective-namespace, external-receipt, validation, and later-index
+closure pass under `ADR-011 R3`. An unresolved authority namespace cannot
+certify its own indeterminate assessment as authoritative.
 
 A campaign may close as bounded failure immediately after an authoritative
 valid hard failure if the pre-registered global-disqualification rule is
@@ -437,13 +475,19 @@ The indeterminate form instead states that any future determination would be
 limited to those same registered paths and exclusions; it must not say that the
 unclosed campaign already established coverage.
 
-Use the exact behavior/evaluation fingerprints, campaign ID, evidence-universe
-index fingerprint, and cutoff in the claim-bearing artifact. A bounded-failure
-artifact must name the decisive hard failure or complete non-passing class/path
-result. An indeterminate artifact names the unresolved closure and must not use
-`failed`, `failure artifact`, or wording that attributes missing authority or
-evidence to SUT behavior. Neither form may imply every class was reached when an
-early global hard failure ended the campaign.
+The bounded-result identity payload binds exact behavior/evaluation manifest
+references with both payload and manifest-artifact fingerprints, the campaign-
+authorization reference, frozen campaign-index reference, pre-result closure
+namespace revision, external receipt, and cutoff; its envelope supplies its own
+result ID/fingerprint without hashing that fingerprint into itself. Any later
+claim-bearing artifact also carries the exact result reference and result-
+indexing namespace revision/receipt. A bounded-
+failure artifact must name the decisive hard failure or complete non-passing
+class/path result. When a global hard failure ends evaluation early, it must say
+that the gate requires all five classes but failed on the decisive invariant; it
+must not imply every class was reached. An indeterminate artifact names the
+unresolved closure and must not use `failed`, `failure artifact`, or wording
+that attributes missing authority or evidence to SUT behavior.
 
 ## Cross-ADR Attack Outcomes
 
@@ -454,11 +498,19 @@ The three proposed contracts must produce these exact dispositions:
 | Evaluation-only combined-repository commit; SUT closure unchanged | Behavior fingerprint unchanged. Evaluation fingerprint changes only when the closed evaluator source/dependency/policy payload changes. A new campaign is required; prior valid behavior hard failure remains attributable. |
 | Behavior-only commit; evaluator closure unchanged | Behavior fingerprint changes, evaluation fingerprint remains unchanged, and a new campaign is required. |
 | Authorization/index created or published after output with backdated timestamps | Not authoritative; the run remains development evidence. |
-| Qualified deterministic preflight followed by oracle-material divergence under unchanged fingerprints | Qualification invalidated and active campaign suspended; prospectively declared three-run contingency or campaign supersession is required. Affected closed determinations require reevaluation. |
+| Qualified deterministic preflight followed by oracle-material divergence under unchanged fingerprints | Qualification invalidated; active campaign becomes `suspended` with the declared reason; prospectively declared three-run contingency or campaign supersession is required; historical result receives `RESULT_REEVALUATION_REQUIRED`; dependent eligible `D` receives `REQUIRES_REEVALUATION`. |
 | Deterministic campaign has an infrastructure-invalid attempt | The attempt remains indexed; the selected-slice two-replacement cap and stop/suspension rules apply without converting invalidity into SUT failure. |
 | All observed runs pass but required simulator/evidence closure is unresolvable | `NOT_YET_DETERMINABLE`, never `BOUNDED_PASS` or `BOUNDED_FAIL`. |
 | Valid behavior hard failure followed by evaluation correction/change | A different evaluation identity alone cannot rehabilitate the behavior. Reclassification requires proof of oracle/policy defect, independent review, project-owner acceptance, and preserved original history. |
 | Two authority-namespace forks | No effective evidence universe until outcome-independent reconciliation includes both complete histories, passes independent review, and receives project-owner acceptance. |
+| Behavior/evaluation payload unchanged but manifest provenance corrected | Same configuration payload, new immutable manifest artifact; existing campaign remains bound to the original. Authority review decides whether the original provenance defect invalidates authority. |
+| Qualification is `NOT_QUALIFIED` but authorization selects one run per path | Authorization-closure failure before execution. |
+| Qualification result is sealed but absent from the authorizing namespace revision | Ineligible run-count basis; authorization rejected before execution. |
+| All run records and campaign index exist but no bounded-result record exists | No bounded pass/fail claim; completion package `P` is incomplete. |
+| Campaign index includes the result that consumes that same index, or result cites its later indexing revision | Self-certifying closure failure. |
+| Same manifest ID has different manifest-artifact fingerprints | Authority-closure failure; no favorable alias selection. |
+| Obligation map declares a combination non-pressure; it is `NOT_APPLICABLE` and all required applicable combinations pass | Eligible for `BOUNDED_PASS` if every other conjunct closes. |
+| Anchor event ID exists but receipt bytes/digest/custody are missing | Authority closure fails; event naming alone is insufficient. |
 
 ## Adversarial Review Requirements
 
@@ -468,6 +520,8 @@ Before acceptance or implementation, reviewers must reject a design that:
   lifecycle;
 - treats `NOT_REACHED`, `NOT_APPLICABLE`, invalidity, suspension, or
   supersession as pass;
+- rejects legitimate `NOT_APPLICABLE` on a declared non-pressure combination or
+  permits it on a required applicable combination;
 - averages, weights, votes, or substitutes among the five mandatory classes;
 - substitutes one counterfactual path for another class's required pressure;
 - claims determinism from a label, fixed seed, or one replay;
@@ -477,10 +531,16 @@ Before acceptance or implementation, reviewers must reject a design that:
 - promotes deterministic preflight artifacts into formal evidence;
 - continues a one-run campaign after material deterministic divergence without
   suspension and prospective three-run contingency or supersession;
+- treats conservative three-run policy selection as proof that the configuration
+  is intrinsically nondeterministic;
 - replaces invalid attempts after inspecting whether the SUT outcome was
   favorable;
 - exceeds accepted invalid replacement limits or silently discards attempts;
 - describes missing authority/evidence closure as bounded SUT failure;
+- emits a bounded pass/fail claim without the sealed and later-indexed bounded-
+  result record;
+- creates a result/index dependency cycle or changes historical result standing
+  in place;
 - closes early after a hard failure while hiding a started attempt behind an
   unused-slot disposition;
 - changes evaluation configuration to reset an unchanged behavior failure;
@@ -498,6 +558,8 @@ Before acceptance or implementation, reviewers must reject a design that:
 Positive consequences:
 
 - the milestone has a deterministic, conjunctive, nonnumeric result;
+- every bounded result has a non-circular immutable authority artifact distinct
+  from completion eligibility and owner acceptance;
 - accepted run semantics remain orthogonal and diagnostically useful;
 - deterministic economy is allowed only after explicit reproducibility proof;
 - every unresolved question has an explicit claim disposition;
@@ -515,7 +577,7 @@ Costs and limitations:
 
 ## Acceptance Effect
 
-Dependency order is `ADR-010 R2` then `ADR-011 R2` then `ADR-012 R2`. The owner
+Dependency order is `ADR-010 R3` then `ADR-011 R3` then `ADR-012 R3`. The owner
 may accept them in one coordinated decision set, but no later contract becomes
 effective unless every earlier compatible dependency is accepted in that
 order.
