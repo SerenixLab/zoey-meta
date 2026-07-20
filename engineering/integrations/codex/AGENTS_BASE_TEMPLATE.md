@@ -2,9 +2,9 @@
 
 Template ID: `ZOEY-CODEX-AGENTS-BASE`
 
-Template version: `V0.3.0`
+Template version: `V0.3.1`
 
-Integration: `CODEX_INTEGRATION.md` `V0.2.0`
+Integration: `CODEX_INTEGRATION.md` `V0.2.2`
 
 Instantiation: starting repo-local guidance. Replace this template metadata on first projection with `Seeded from template: ZOEY-CODEX-AGENTS-BASE V0.3.0`, `Repo-local guidance: yes`, and `Canonical template equality: not claimed`. Local specialization is allowed; active engineering rules must not be weakened.
 

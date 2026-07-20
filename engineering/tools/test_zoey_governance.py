@@ -44,6 +44,9 @@ class GovernanceProjectionTests(unittest.TestCase):
                 "ADR-007",
                 "ADR-008",
                 "ADR-009",
+                "ADR-010",
+                "ADR-011",
+                "ADR-012",
             },
         )
 

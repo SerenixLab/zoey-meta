@@ -2,9 +2,9 @@
 
 Template ID: `ZOEY-CODEX-AGENTS-SUT`
 
-Template version: `V0.3.0`
+Template version: `V0.3.1`
 
-Integration: `CODEX_INTEGRATION.md` `V0.2.0`
+Integration: `CODEX_INTEGRATION.md` `V0.2.2`
 
 Instantiation: starting nested SUT guidance. Replace this template metadata on first projection with its seed template ID/version and `Canonical template equality: not claimed`. Local specialization is allowed; inherited active rules must not be weakened.
 

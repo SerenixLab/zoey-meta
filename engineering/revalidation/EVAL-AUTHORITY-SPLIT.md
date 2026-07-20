@@ -78,5 +78,6 @@ Post-acceptance disposition (2026-07-20): the project owner accepted
 and `OPEN_QUESTIONS.md V0.2.23` records the resulting closure. The decisions are
 now governing sources. Their engineering-rule/profile consequences still
 require a new source-bound re-triage and projection before Phase 7
-implementation; this historical split revalidation does not perform that
-projection.
+implementation. That re-triage is recorded separately in
+`engineering/revalidation/ADR-010-012-R3.md`; this historical split
+revalidation does not perform that projection.
