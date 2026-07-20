@@ -2,9 +2,9 @@
 
 Status: `Proposed`
 
-Date: 2026-07-18
+Date: 2026-07-20
 
-Record revision: `R1`
+Record revision: `R2`
 
 Decision authority: project owner
 
@@ -21,7 +21,7 @@ Decision-Time Baselines:
 - `decisions/ADR-005-scn001-selected-slice-fixture-oracle-contract.md` `R2`
 - `decisions/ADR-009-scn001-first-selected-slice-milestone-completion-gate.md` `R4`
 
-Proposal dependencies: `ADR-010 R1` and `ADR-011 R1` are the proposed
+Proposal dependencies: `ADR-010 R2` and `ADR-011 R2` are the proposed
 behavior-identity and formal-record-authority contracts. This ADR may be
 reviewed in parallel and may be accepted only in an owner decision set that also
 accepts, or follows, compatible `EVAL-004` and `EVAL-007` resolutions.
@@ -147,11 +147,43 @@ class's required pressure.
 The current workbench appears deterministic, but a label, fixed seed, or one
 successful replay is insufficient.
 
-Before a campaign uses the one-formal-run rule, preflight must perform at least
-two clean independent executions of every required path under the exact same
-behavior and evaluation fingerprints. Each execution starts from the declared
-initial state or same-run branch prefix and uses the planned capture/simulator
-pipeline.
+Before a campaign uses the one-formal-run rule, an `ADR-011 R2` prospectively
+anchored qualification plan allocates at least two clean independent executions
+of every required path under the exact same behavior and evaluation
+fingerprints. Each execution starts from the declared initial state or same-run
+branch prefix and uses the planned capture/simulator pipeline. Every planned
+execution and artifact remains in the sealed qualification result; an invalid,
+missing, or divergent execution cannot be discarded or retried into a
+qualification. `INCONCLUSIVE` and `NOT_QUALIFIED` both select the three-run
+formal policy without implying SUT failure.
+
+The evaluation configuration and qualification plan bind versioned profile
+`DEQ-SCN001-V1` or an accepted successor. V1 defines:
+
+- input closure: all required run, checkpoint, capture, simulator, retained-
+  state, relation, transition, obligation, and explanation-support material;
+- run-local reference normalization: replace opaque allocation IDs with
+  canonical labels derived from semantic family, declared path/checkpoint,
+  typed ancestry/relations, material creation order, and ordinal; ambiguous or
+  non-unique mapping is a comparison failure, not benign variance;
+- exact fields: reachability, validity/invariant/obligation domains, semantic
+  family multiplicity, typed relations, transition ordering and envelopes,
+  simulator meaning/fidelity, grammar classification, and support closure;
+- the closed excluded-envelope list: UUID spelling, timestamps not used by an
+  oracle, storage/custody locations, transport trace IDs, and other explicitly
+  non-semantic provenance fields;
+- natural-language handling: preserve the raw bytes/digest but compare only the
+  exact accepted grammar classification, limitations, prohibited-claim result,
+  and typed support unless the fixture declares byte-exact text material;
+- raw/binary handling: compare exact byte digests for material declared byte-
+  stable; otherwise retain the raw digest and compare the profile-declared
+  canonical semantic projection without re-encoding the source artifact;
+- mismatch classes: `VALUE_MISMATCH`, `MISSING_MEMBER`, `EXTRA_MEMBER`,
+  `ORDER_MISMATCH`, `RELATION_MISMATCH`, `AMBIGUOUS_NORMALIZATION`,
+  `RAW_DIGEST_MISMATCH`, and `COMPARATOR_ERROR`;
+- comparator implementation fingerprint and a requirement that the distinct
+  validator recompute the result from sealed raw captures rather than accept
+  the producer's normalized projection.
 
 The two executions must produce equivalent oracle-material state and evidence:
 
@@ -163,12 +195,15 @@ The two executions must produce equivalent oracle-material state and evidence:
 - same simulator request/realization meaning and fidelity classification;
 - same explanation grammar classification and support closure.
 
-Exact UUIDs, timestamps, storage refs, and other declared run-local identities
-need not be byte-equal. Natural wording may vary only within accepted bounded
-variance and must not alter oracle-material classification.
+Exact UUIDs, excluded timestamps, storage refs, and other profile-declared run-
+local envelope identities need not be byte-equal. No implementation may add an
+excluded field without a new profile/evaluation identity. Natural wording may
+vary only within accepted bounded variance and must not alter oracle-material
+classification.
 
-Preflight artifacts are integrity-sealed for review but remain explicitly
-`development_preflight`, not formal evidence, and may never be promoted into
+Qualification artifacts are integrity-sealed and authority-indexed for the sole
+purpose of choosing run count, but their executions remain explicitly
+`development_preflight`, not formal SUT evidence, and may never be promoted into
 the campaign.
 
 If deterministic qualification passes, require one prospectively authorized,
@@ -176,16 +211,34 @@ sealed formal run per required path. If it fails or cannot be established,
 classify the configuration as nondeterministic and require three fresh valid
 formal runs per required path under `ADR-004 R3`.
 
-Any later oracle-material divergence under unchanged fingerprints invalidates
-the deterministic qualification for future use and triggers campaign review.
+Any later oracle-material divergence under unchanged fingerprints immediately
+invalidates the qualification and suspends an active one-run campaign. The
+campaign may resume only after accepted investigation and either:
+
+- proof that the observation was not oracle-material divergence under the
+  bound profile;
+- reclassification as nondeterministic plus prospective activation of
+  pre-authorized contingency slots sufficient to reach three fresh valid runs
+  per path, counting already completed eligible formal runs; or
+- campaign supersession when such contingency was not prospectively declared.
+
+A valid adverse SUT output cannot be reclassified merely to preserve
+deterministic qualification. A closed campaign, bounded result, or completion
+determination affected by a later attributable divergence becomes
+`REQUIRES_REEVALUATION` under `ADR-009 R4`; historical artifacts remain intact.
 
 ## Invalid Attempts And Replacement
 
-The campaign authorization copies the accepted `ADR-005 R2` replacement policy
-without alteration:
+The campaign authorization preserves every accepted `ADR-005 R2` replacement
+constraint and adds one stricter selected-slice rule. `ADR-005 R2` expressly
+places the two-replacement-per-path cap on nondeterministic campaigns; this ADR
+extends that same cap to deterministic campaigns so infrastructure invalidity
+cannot create unlimited retries under the one-run policy. This is an
+`EVAL-005` milestone instantiation, not an unaltered quotation:
 
 - every invalid attempt remains in formal history;
-- at most two invalid replacements per fixture path before campaign review;
+- at most two invalid replacements per fixture path before campaign review,
+  for deterministic and nondeterministic campaigns;
 - two invalid attempts with the same root cause in one path require stop and
   review before more formal runs;
 - three total invalid attempts across the campaign require suspension or an
@@ -251,8 +304,18 @@ NOT_YET_DETERMINABLE =
 
 A campaign may close as bounded failure immediately after an authoritative
 valid hard failure if the pre-registered global-disqualification rule is
-applied and every unused attempt is explicitly dispositioned. Otherwise, the
-planned attempt set must reach accepted closure; optional stopping is forbidden.
+applied and every unused attempt is explicitly dispositioned. The only unused-
+slot disposition that supports that early scoreable closure is
+`CANCELLED_NOT_STARTED_GLOBAL_HARD_FAILURE`. It records the slot, campaign,
+decisive run/decision reference, actor, and time and is valid only when the slot
+never started and produced no material SUT output.
+
+`NOT_STARTED_CAMPAIGN_SUPERSEDED` and
+`ALLOCATION_AUTHORITY_INVALIDATED_BEFORE_START` may explain other unused slots,
+but they do not support an early bounded-failure closure. A started attempt is
+always indexed by its actual lifecycle/evidence and can never be represented as
+unused. Otherwise, the planned attempt set must reach accepted closure;
+optional stopping is forbidden.
 
 These names define semantic outcomes, not a required single status field.
 Campaign lifecycle remains separate.
@@ -326,14 +389,42 @@ new regression and campaign consequences.
 
 ## Maximum Bounded Claim
 
-Only claim language of this form may close the campaign result:
+Only the form matching the actual campaign meaning may appear in the campaign-
+status artifact.
+
+For `BOUNDED_PASS`:
 
 ```text
 Under synthetic SCN-001 selected-slice fixture/oracle package
 SCN001-SSFO-V0.2.0, the exact declared behavior and evaluation configuration,
 and the authoritative formal campaign and evidence cutoff, the tested behavior
-configuration [passed|failed] the conjunctive gate across the five mandatory
-selected-slice claim classes.
+configuration passed the conjunctive gate across the five mandatory selected-
+slice claim classes.
+```
+
+For `BOUNDED_FAIL`:
+
+```text
+Under synthetic SCN-001 selected-slice fixture/oracle package
+SCN001-SSFO-V0.2.0, the exact declared behavior and evaluation configuration,
+and the authoritative formal campaign and evidence cutoff, the tested behavior
+configuration failed the conjunctive gate across the five mandatory selected-
+slice claim classes because [decisive authoritative hard failure or complete
+non-passing class/path result].
+```
+
+For `NOT_YET_DETERMINABLE`:
+
+```text
+No bounded pass/fail determination is supported for the exact declared behavior
+and evaluation configuration because [authority, validity, replacement,
+coverage, comparison, question, or evidence-universe closure] remains
+unresolved. This is campaign indeterminacy, not a SUT failure or pass.
+```
+
+The pass/fail forms append this mandatory ceiling:
+
+```text
 The result covers curated-context temporal handling, evidence-responsive trial
 formation, scoped trial use, intervention-conditioned outcome semantics, and
 bounded explanation provenance on the registered paths. It does not establish
@@ -342,13 +433,32 @@ production memory, durable adaptation, real voice behavior, Japanese teaching
 quality, statistical reliability, production readiness, or real continuity.
 ```
 
+The indeterminate form instead states that any future determination would be
+limited to those same registered paths and exclusions; it must not say that the
+unclosed campaign already established coverage.
+
 Use the exact behavior/evaluation fingerprints, campaign ID, evidence-universe
-index fingerprint, and cutoff in the claim-bearing artifact. Replace
-`[passed|failed]` with the actual result of the conjunctive gate across the five
-mandatory claim classes. A failure artifact must also name the decisive hard
-failure, non-passing class/path result, or unresolved closure; it must not imply
-that every class was reached when an early global hard failure ended the
-campaign.
+index fingerprint, and cutoff in the claim-bearing artifact. A bounded-failure
+artifact must name the decisive hard failure or complete non-passing class/path
+result. An indeterminate artifact names the unresolved closure and must not use
+`failed`, `failure artifact`, or wording that attributes missing authority or
+evidence to SUT behavior. Neither form may imply every class was reached when an
+early global hard failure ended the campaign.
+
+## Cross-ADR Attack Outcomes
+
+The three proposed contracts must produce these exact dispositions:
+
+| Attack | Required disposition |
+| --- | --- |
+| Evaluation-only combined-repository commit; SUT closure unchanged | Behavior fingerprint unchanged. Evaluation fingerprint changes only when the closed evaluator source/dependency/policy payload changes. A new campaign is required; prior valid behavior hard failure remains attributable. |
+| Behavior-only commit; evaluator closure unchanged | Behavior fingerprint changes, evaluation fingerprint remains unchanged, and a new campaign is required. |
+| Authorization/index created or published after output with backdated timestamps | Not authoritative; the run remains development evidence. |
+| Qualified deterministic preflight followed by oracle-material divergence under unchanged fingerprints | Qualification invalidated and active campaign suspended; prospectively declared three-run contingency or campaign supersession is required. Affected closed determinations require reevaluation. |
+| Deterministic campaign has an infrastructure-invalid attempt | The attempt remains indexed; the selected-slice two-replacement cap and stop/suspension rules apply without converting invalidity into SUT failure. |
+| All observed runs pass but required simulator/evidence closure is unresolvable | `NOT_YET_DETERMINABLE`, never `BOUNDED_PASS` or `BOUNDED_FAIL`. |
+| Valid behavior hard failure followed by evaluation correction/change | A different evaluation identity alone cannot rehabilitate the behavior. Reclassification requires proof of oracle/policy defect, independent review, project-owner acceptance, and preserved original history. |
+| Two authority-namespace forks | No effective evidence universe until outcome-independent reconciliation includes both complete histories, passes independent review, and receives project-owner acceptance. |
 
 ## Adversarial Review Requirements
 
@@ -361,10 +471,18 @@ Before acceptance or implementation, reviewers must reject a design that:
 - averages, weights, votes, or substitutes among the five mandatory classes;
 - substitutes one counterfactual path for another class's required pressure;
 - claims determinism from a label, fixed seed, or one replay;
+- normalizes run-local references through counts, suffixes, insertion order, or
+  another undeclared comparator instead of the bound equivalence profile;
+- retries or selectively omits qualification executions until two agree;
 - promotes deterministic preflight artifacts into formal evidence;
+- continues a one-run campaign after material deterministic divergence without
+  suspension and prospective three-run contingency or supersession;
 - replaces invalid attempts after inspecting whether the SUT outcome was
   favorable;
 - exceeds accepted invalid replacement limits or silently discards attempts;
+- describes missing authority/evidence closure as bounded SUT failure;
+- closes early after a hard failure while hiding a started attempt behind an
+  unused-slot disposition;
 - changes evaluation configuration to reset an unchanged behavior failure;
 - treats configuration fingerprints as semantic continuity or replacement
   evidence under `GROW-003`/`GROW-004`;
@@ -396,6 +514,11 @@ Costs and limitations:
   scenario acceptance.
 
 ## Acceptance Effect
+
+Dependency order is `ADR-010 R2` then `ADR-011 R2` then `ADR-012 R2`. The owner
+may accept them in one coordinated decision set, but no later contract becomes
+effective unless every earlier compatible dependency is accepted in that
+order.
 
 If the project owner accepts this exact revision after compatible accepted
 `EVAL-004` and `EVAL-007` decisions:
