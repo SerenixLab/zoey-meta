@@ -569,7 +569,9 @@ Positive consequences:
 Costs and limitations:
 
 - deterministic preflight requires at least eight non-formal path executions;
-- all four required paths and five claim classes must close;
+- all four required paths and five claim classes must either complete their
+  required evaluation closure or receive the sole permitted never-started
+  disposition after an authoritative global hard failure;
 - unresolved record authority, missing evidence, or exhausted invalidity budget
   prevents a result rather than producing a convenient fail/pass;
 - the result is not statistical reliability, production readiness, or full

@@ -66,6 +66,7 @@ manifest assertion.
 
 Required envelope fields are:
 
+- `artifact_kind`: `BEHAVIOR_CONFIGURATION_MANIFEST`;
 - `schema_id`: `zoey.behavior-configuration-manifest`;
 - `schema_revision`: `1`;
 - `manifest_id`: an opaque stable identifier unique within the formal-evidence
@@ -84,6 +85,11 @@ Required envelope fields are:
 - `supersedes_manifest_ref`, either null or an exact typed reference to the
   corrected predecessor.
 
+The exact V1 `artifact_kind` for this artifact is
+`BEHAVIOR_CONFIGURATION_MANIFEST`. Its `schema_id` is
+`zoey.behavior-configuration-manifest`. The artifact-kind/schema mapping is
+closed and must validate in both the manifest and every exact reference.
+
 The identity payload must contain:
 
 1. the closed SUT source/build identity;
@@ -94,15 +100,16 @@ The identity payload must contain:
 6. typed model, prompt, tool, provider, and randomness applicability;
 7. artifact custody references and digests where content is not embedded.
 
-The immutable manifest assertion contains `schema_id`, `schema_revision`,
-`manifest_id`, `identity_payload`, `behavior_fingerprint`, `provenance`,
-`canonicalization_scheme`, `canonicalization_revision`, `hash_algorithm`,
-`hash_domain`, `manifest_hash_domain`, `created_at`, `created_by`, and
-`supersedes_manifest_ref`. It excludes storage locations, human annotations,
-and `manifest_artifact_fingerprint` itself. Its separate fingerprint prevents
-provenance, creator/time assertions, hash-contract metadata, or correction
-lineage from being silently mutated without making repository relocation or
-annotation edits into behavior changes.
+The immutable manifest assertion contains `artifact_kind`, `schema_id`,
+`schema_revision`, `manifest_id`, `identity_payload`, `behavior_fingerprint`,
+`provenance`, `canonicalization_scheme`, `canonicalization_revision`,
+`hash_algorithm`, `hash_domain`, `manifest_hash_domain`, `created_at`,
+`created_by`, and `supersedes_manifest_ref`. It excludes storage locations,
+human annotations, and `manifest_artifact_fingerprint` itself. Its separate
+fingerprint prevents artifact-kind/schema identity, provenance, creator/time
+assertions, hash-contract metadata, or correction lineage from being silently
+mutated without making repository relocation or annotation edits into behavior
+changes.
 
 `supersedes_manifest_ref` has this closed V1 shape:
 
@@ -400,7 +407,10 @@ Before acceptance or implementation, reviewers must reject a design that:
 - accepts `unknown`, missing, or unfingerprinted behavior-affecting material in
   a formal manifest;
 - embeds secrets or sensitive prompts merely to make a manifest self-contained;
-- hashes an envelope containing timestamps, paths, or the fingerprint itself;
+- hashes the mutable storage envelope, storage paths, human annotations, or the
+  fingerprint field itself; stable `created_at` and `created_by` are hashed
+  only because this ADR explicitly places them in the immutable manifest
+  assertion, and they remain non-authoritative for prospective order;
 - allows provenance or supersession lineage to mutate without changing the
   manifest-artifact fingerprint;
 - permits creation provenance or hash-contract metadata to mutate without

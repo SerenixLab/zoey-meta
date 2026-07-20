@@ -149,6 +149,25 @@ Grouped families additionally require `decision_kind` or `evidence_kind` from a
 closed catalogue. The fingerprint field and storage location are never hashed
 into themselves.
 
+The V1 artifact-kind/schema mapping is closed:
+
+| `artifact_kind` | `schema_id` |
+| --- | --- |
+| `EVALUATION_CONFIGURATION_MANIFEST` | `zoey.evaluation-configuration-manifest` |
+| `DETERMINISTIC_QUALIFICATION_PLAN` | `zoey.deterministic-qualification-plan` |
+| `DETERMINISTIC_QUALIFICATION_RESULT` | `zoey.deterministic-qualification-result` |
+| `CAMPAIGN_AUTHORIZATION` | `zoey.campaign-authorization` |
+| `FORMAL_RUN_RECORD` | `zoey.formal-run-record` |
+| `FORMAL_EVIDENCE_ARTIFACT` | `zoey.formal-evidence-artifact` |
+| `EVALUATION_DECISION` | `zoey.evaluation-decision` |
+| `BOUNDED_CAMPAIGN_RESULT` | `zoey.bounded-campaign-result` |
+| `CAMPAIGN_EVIDENCE_INDEX` | `zoey.campaign-evidence-index` |
+| `AUTHORITY_NAMESPACE_INDEX` | `zoey.authority-namespace-index` |
+
+Every artifact and exact reference must validate this mapping. An unknown kind,
+unknown schema, or mismatched pair is invalid. The behavior-configuration
+manifest mapping is defined by `ADR-010 R3`.
+
 V1 `decision_kind` is exactly `RUN_INVALIDITY`, `AUTHORITY_INVALIDATION`,
 `RECORD_CORRECTION`, `ORACLE_POLICY_RECLASSIFICATION`,
 `QUALIFICATION_RESULT_CORRECTION`, `CAMPAIGN_SUPERSESSION`,
@@ -189,6 +208,7 @@ Every cross-artifact reference uses this closed exact V1 shape:
 ```text
 artifact_id
 artifact_kind
+schema_id
 schema_revision
 content_fingerprint
 ```
