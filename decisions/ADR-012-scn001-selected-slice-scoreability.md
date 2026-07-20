@@ -1,14 +1,16 @@
 # ADR-012: SCN-001 Selected-Slice Scoreability
 
-Status: `Proposed`
+Status: `Accepted`
 
 Date: 2026-07-20
+
+Accepted: 2026-07-20
 
 Record revision: `R3`
 
 Decision authority: project owner
 
-Target question IDs: `EVAL-005`, `GROW-002`
+Resolved question IDs: `EVAL-005`, `GROW-002`
 
 Decision-Time Baselines:
 
@@ -21,10 +23,13 @@ Decision-Time Baselines:
 - `decisions/ADR-005-scn001-selected-slice-fixture-oracle-contract.md` `R2`
 - `decisions/ADR-009-scn001-first-selected-slice-milestone-completion-gate.md` `R4`
 
-Proposal dependencies: `ADR-010 R3` and `ADR-011 R3` are the proposed
-behavior-identity and formal-record-authority contracts. This ADR may be
-reviewed in parallel and may be accepted only in an owner decision set that also
-accepts, or follows, compatible `EVAL-004` and `EVAL-007` resolutions.
+Decision dependencies: accepted `ADR-010 R3` and `ADR-011 R3` define the
+compatible behavior-identity and formal-record-authority contracts required by
+this ADR.
+
+Post-decision register state: `OPEN_QUESTIONS.md V0.2.23` records `EVAL-005`
+as resolved by this ADR, `GROW-002` as resolved by its milestone-bounded
+exclusion, and no accepted `ASM-*` entry.
 
 ## Decision
 
@@ -491,7 +496,7 @@ that attributes missing authority or evidence to SUT behavior.
 
 ## Cross-ADR Attack Outcomes
 
-The three proposed contracts must produce these exact dispositions:
+The three accepted contracts produce these exact dispositions:
 
 | Attack | Required disposition |
 | --- | --- |
@@ -580,20 +585,19 @@ Costs and limitations:
 ## Acceptance Effect
 
 Dependency order is `ADR-010 R3` then `ADR-011 R3` then `ADR-012 R3`. The owner
-may accept them in one coordinated decision set, but no later contract becomes
-effective unless every earlier compatible dependency is accepted in that
-order.
+accepted them in one coordinated decision set on 2026-07-20. Each contract
+became effective only after its earlier compatible dependencies in that order.
 
-If the project owner accepts this exact revision after compatible accepted
-`EVAL-004` and `EVAL-007` decisions:
+The project owner accepted this exact revision on 2026-07-20 after accepting the
+compatible `EVAL-004` and `EVAL-007` decisions. Therefore:
 
-- `EVAL-005` becomes `Resolved` with outcome `Decision` for the first synthetic
+- `EVAL-005` is `Resolved` with outcome `Decision` for the first synthetic
   selected-slice milestone;
-- `GROW-002` becomes `Resolved` with outcome `Bounded exclusion` for
+- `GROW-002` is `Resolved` with outcome `Bounded exclusion` for
   `SCN001-SSFO-V0.2.0`, with a future linked-question trigger;
 - no `ASM-*` entry is created;
-- `OPEN_QUESTIONS.md` gains both resolved tombstones and re-triages dependent
-  questions/claims;
+- `OPEN_QUESTIONS.md V0.2.23` records both resolved tombstones and the dependent
+  question/claim re-triage;
 - engineering standard/profile sources must be re-triaged and projected;
 - Phase 7 may implement the accepted formal campaign/scoreability contract only
   after current workbench review and governance promotion controls are
@@ -602,9 +606,6 @@ If the project owner accepts this exact revision after compatible accepted
 Acceptance does not itself declare the workbench behavior compatible, authorize
 or run a campaign, create formal evidence, produce completion package `P`,
 determine `D`, record owner disposition `A`, or complete the milestone.
-
-Until acceptance, this document is a proposal and authorizes none of those
-actions.
 
 ## Reconsideration Triggers
 

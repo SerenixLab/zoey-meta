@@ -70,5 +70,13 @@ Exactly these materially affected claim/trigger rules bind the split:
 - `ENG-CHANGE-001 R4`;
 - `ENG-CONF-CLAIM-001 R4`.
 
-Proposed ADR-010 through ADR-012 are not governing sources unless and until the
-project owner accepts their exact revisions and the register is re-triaged.
+At the time of this 2026-07-18 revalidation, proposed ADR-010 through ADR-012
+were not governing sources pending owner acceptance and register re-triage.
+
+Post-acceptance disposition (2026-07-20): the project owner accepted
+`ADR-010 R3`, `ADR-011 R3`, and `ADR-012 R3` as one compatible decision set,
+and `OPEN_QUESTIONS.md V0.2.23` records the resulting closure. The decisions are
+now governing sources. Their engineering-rule/profile consequences still
+require a new source-bound re-triage and projection before Phase 7
+implementation; this historical split revalidation does not perform that
+projection.

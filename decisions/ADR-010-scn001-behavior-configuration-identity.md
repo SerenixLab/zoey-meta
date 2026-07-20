@@ -1,14 +1,16 @@
 # ADR-010: SCN-001 Behavior-Configuration Identity
 
-Status: `Proposed`
+Status: `Accepted`
 
 Date: 2026-07-20
+
+Accepted: 2026-07-20
 
 Record revision: `R3`
 
 Decision authority: project owner
 
-Target question IDs: `EVAL-004`
+Resolved question IDs: `EVAL-004`
 
 Decision-Time Baselines:
 
@@ -22,9 +24,13 @@ Decision-Time Baselines:
 - `decisions/ADR-007-scn001-selected-slice-dependency-identity.md` `R3`
 - `decisions/ADR-009-scn001-first-selected-slice-milestone-completion-gate.md` `R4`
 
-Companion proposal: `ADR-011 R3` is the separate proposed resolution for formal-
-record authority under `EVAL-007`. This ADR does not absorb that target and may
-be accepted first; `ADR-011` depends on this identity contract, not conversely.
+Companion decision: accepted `ADR-011 R3` separately resolves formal-record
+authority under `EVAL-007`. This ADR does not absorb that target; `ADR-011`
+depends on this identity contract, not conversely.
+
+Post-decision register state: `OPEN_QUESTIONS.md V0.2.23` records `EVAL-004`
+as resolved by this ADR in the coordinated acceptance set with `ADR-011 R3`
+and `ADR-012 R3`.
 
 ## Decision
 
@@ -449,20 +455,20 @@ Costs and limitations:
 
 ## Acceptance Effect
 
-If the project owner accepts this exact revision:
+The project owner accepted this exact revision on 2026-07-20. Therefore:
 
-- `EVAL-004` becomes `Resolved` with outcome `Decision` for the first synthetic
+- `EVAL-004` is `Resolved` with outcome `Decision` for the first synthetic
   selected-slice milestone;
-- `OPEN_QUESTIONS.md` gains a resolved tombstone referencing this ADR;
-- `EVAL-007` remains responsible for formal-record authority and evidence-
-  universe completeness;
-- `EVAL-005` remains responsible for scoreability and unresolved-question
-  treatment;
+- `OPEN_QUESTIONS.md V0.2.23` records the resolved tombstone for this ADR;
+- formal-record authority and evidence-universe completeness remain separately
+  governed by accepted `ADR-011 R3`;
+- scoreability and unresolved-question treatment remain separately governed by
+  accepted `ADR-012 R3`;
 - engineering standard/profile sources must be re-triaged and projected before
   Phase 7 implementation.
 
-Until acceptance, this document is a proposal and authorizes no formal record,
-campaign, comparison, compatibility claim, or implementation.
+Acceptance alone authorizes no formal record, campaign, comparison,
+compatibility claim, or implementation outside those downstream controls.
 
 ## Reconsideration Triggers
 

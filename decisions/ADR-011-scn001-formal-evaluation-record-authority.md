@@ -1,14 +1,16 @@
 # ADR-011: SCN-001 Formal Evaluation Record Authority
 
-Status: `Proposed`
+Status: `Accepted`
 
 Date: 2026-07-20
+
+Accepted: 2026-07-20
 
 Record revision: `R3`
 
 Decision authority: project owner
 
-Target question IDs: `EVAL-007`
+Resolved question IDs: `EVAL-007`
 
 Decision-Time Baselines:
 
@@ -22,10 +24,12 @@ Decision-Time Baselines:
 - `decisions/ADR-007-scn001-selected-slice-dependency-identity.md` `R3`
 - `decisions/ADR-009-scn001-first-selected-slice-milestone-completion-gate.md` `R4`
 
-Proposal dependency: `ADR-010 R3` is the proposed behavior-configuration
-identity contract. This ADR may be reviewed in parallel and may be accepted only
-in an owner decision set that also accepts, or follows, a compatible `EVAL-004`
-resolution.
+Decision dependency: accepted `ADR-010 R3` defines the compatible behavior-
+configuration identity contract required by this ADR.
+
+Post-decision register state: `OPEN_QUESTIONS.md V0.2.23` records `EVAL-007`
+as resolved by this ADR in the coordinated acceptance set with `ADR-010 R3`
+and `ADR-012 R3`.
 
 ## Decision
 
@@ -96,7 +100,7 @@ identity payload records:
   identifier/revision, comparator implementation fingerprint, and closed
   normalization/exclusion rules, or a nondeterministic declaration;
 - the conditional formal-run-count policy inherited from `ADR-004 R3` and
-  instantiated by proposed `ADR-012 R3`: explicitly nondeterministic means three
+  instantiated by accepted `ADR-012 R3`: explicitly nondeterministic means three
   fresh valid runs per path; an eligible `QUALIFIED` result means one; an
   eligible `NOT_QUALIFIED` or `INCONCLUSIVE` result means three; the one-run
   branch must predeclare divergence contingency slots or mandatory campaign
@@ -121,7 +125,7 @@ does not split evaluation identity.
 
 The evaluation manifest uses the same envelope/payload/assertion separation,
 `RFC8785-JCS` canonicalization revision, SHA-256 algorithm, typed applicability
-discipline, provenance treatment, and alias rules as proposed `ADR-010 R3`,
+discipline, provenance treatment, and alias rules as accepted `ADR-010 R3`,
 with behavior-independent hash domains:
 
 ```text
@@ -799,7 +803,7 @@ new campaign and explicit historical disposition; it is not an implicit
 apples-to-apples comparison.
 
 Different behavior fingerprints remain different configurations under
-proposed `ADR-010 R3`. Unknown or unsupported identity comparison is fail-
+accepted `ADR-010 R3`. Unknown or unsupported identity comparison is fail-
 closed and cannot transfer evidence.
 
 ## Relationship To Completion Artifacts
@@ -902,20 +906,20 @@ Costs and limitations:
 
 ## Acceptance Effect
 
-If the project owner accepts this exact revision after a compatible accepted
-`EVAL-004` resolution:
+The project owner accepted this exact revision on 2026-07-20 after accepting the
+compatible `EVAL-004` resolution in `ADR-010 R3`. Therefore:
 
-- `EVAL-007` becomes `Resolved` with outcome `Decision` for the first synthetic
+- `EVAL-007` is `Resolved` with outcome `Decision` for the first synthetic
   selected-slice milestone;
-- `OPEN_QUESTIONS.md` gains a resolved tombstone referencing this ADR;
+- `OPEN_QUESTIONS.md V0.2.23` records the resolved tombstone for this ADR;
 - Phase 7 may implement the accepted manifest, capture, record, sealing,
   bounded-result, standing, and index contracts only after the governance
   projection and current workbench review gates are satisfied;
-- `EVAL-005` remains required before a formal campaign intended to support the
-  bounded milestone claim is authorized or scored.
+- a formal campaign intended to support the bounded milestone claim must also
+  satisfy the accepted scoreability contract in `ADR-012 R3`.
 
-Until acceptance, this document is a proposal and authorizes no campaign,
-formal record, evidence promotion, compatibility claim, or implementation.
+Acceptance alone authorizes no campaign, formal record, evidence promotion,
+compatibility claim, or implementation outside those downstream controls.
 
 ## Reconsideration Triggers
 
